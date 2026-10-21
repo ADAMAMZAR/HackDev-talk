@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Slopsquatting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;700&family=Instrument+Sans:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #e9edf3;
+    --ink: #17202c;
+    --muted: #64707f;
+    --line: #d5dbe4;
+    --navy: #1f3a5f;
+    --red: #d93025;
+    --green: #1e8e3e;
+    --mono: 'Fira Code', ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 'Instrument Sans', system-ui, sans-serif; }
+
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 28px 24px 56px; }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+  .top h1 { margin: 0; font: 700 26px 'Sora', sans-serif; letter-spacing: -.02em; }
+  .toggle { display: flex; padding: 4px; background: #fff; border: 1px solid var(--line); border-radius: 12px; }
+  .toggle button { padding: 8px 16px; border: 0; border-radius: 9px; background: none; color: var(--muted); font: 600 14px 'Instrument Sans', sans-serif; cursor: pointer; }
+  .toggle button.on[data-v="fake"] { background: var(--red); color: #fff; }
+  .toggle button.on[data-v="real"] { background: var(--green); color: #fff; }
+  button:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1.35fr; gap: 28px; align-items: start; }
+
+  /* AI answer */
+  .ai { padding: 22px; background: #fff; border: 1px solid var(--line); border-radius: 18px; }
+  .ai-q { margin-left: auto; width: fit-content; max-width: 90%; padding: 10px 14px; background: var(--ink); color: #fff; border-radius: 14px 14px 4px 14px; }
+  .ai-a { margin-top: 16px; }
+  .ai-a .who { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-weight: 600; }
+  .ai-a .dot { width: 22px; height: 22px; border-radius: 50%; background: conic-gradient(#7aa2ff, #c38bff, #7aa2ff); }
+  .ai-a p { margin: 0 0 10px; }
+  .code { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 14px; background: #0f1722; color: #e6edf6; border-radius: 10px; font: 15px var(--mono); }
+  .code .copy { padding: 3px 10px; border: 1px solid #334155; border-radius: 6px; font: 12px 'Instrument Sans', sans-serif; color: #94a3b8; }
+  .code.hl { box-shadow: 0 0 0 3px var(--red); }
+
+  /* registry page mock */
+  .reg { overflow: hidden; background: #fff; border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 24px 50px -30px rgba(23, 32, 44, .4); }
+  .reg-bar { display: flex; align-items: center; gap: 10px; padding: 12px 18px; background: var(--navy); color: #fff; font: 600 15px 'Sora', sans-serif; }
+  .reg-bar input { flex: 1; padding: 7px 12px; border: 0; border-radius: 8px; font: 14px 'Instrument Sans', sans-serif; }
+  .reg-body { padding: 22px 24px 26px; }
+  .pkg { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  .pkg h2 { margin: 0; font: 700 28px 'Sora', sans-serif; letter-spacing: -.02em; }
+  .pkg .ver { color: var(--muted); font: 15px var(--mono); }
+  .install { margin: 14px 0 20px; padding: 10px 14px; background: #f3f5f8; border: 1px solid var(--line); border-radius: 8px; font: 14px var(--mono); }
+  .desc { margin: 0 0 18px; color: var(--muted); }
+  .facts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .fact { position: relative; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; animation: rise .3s ease-out both; }
+  .fact span { display: block; font-size: 13px; color: var(--muted); }
+  .fact b { font-size: 17px; }
+  .fact.bad { border-color: var(--red); background: #fdf1f0; }
+  .fact.bad b { color: var(--red); }
+  .fact.good { border-color: #b7dfc2; background: #f1f9f3; }
+  .fact.good b { color: var(--green); }
+  .fact b { overflow-wrap: anywhere; }
+  .fact .num { position: absolute; top: -10px; right: -10px; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; color: #fff; font: 700 13px 'Sora', sans-serif; }
+  .bad .num { background: var(--red); }
+  .good .num { background: var(--green); }
+  .illus { margin-top: 16px; font-size: 12px; color: var(--muted); }
+
+  /* 10-second check */
+  .check { margin-top: 28px; padding: 18px 22px; background: var(--ink); color: #fff; border-radius: 18px; display: grid; grid-template-columns: auto 1fr 1fr 1fr; gap: 18px; align-items: center; }
+  .check h3 { margin: 0; font: 700 18px 'Sora', sans-serif; }
+  .check div { display: flex; gap: 10px; align-items: center; }
+  .check i { width: 26px; height: 26px; flex: none; display: grid; place-items: center; border-radius: 50%; background: #fff; color: var(--ink); font: 700 13px 'Sora', sans-serif; font-style: normal; }
+
+  .demo-note { position: fixed; right: 14px; bottom: 8px; font-size: 11px; color: var(--muted); }
+
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+  @media (prefers-reduced-motion: reduce) { .fact { animation: none; } }
+  @media (max-width: 900px) { .wrap { padding: 20px 16px 56px; } .grid, .check { grid-template-columns: 1fr; } .facts { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>The AI said to install it. Does it exist?</h1>
+    <div class="toggle">
+      <button type="button" data-v="fake" class="on">What the AI suggested</button>
+      <button type="button" data-v="real">The real package</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <section class="ai">
+      <div class="ai-q">How do I log in to Hugging Face from my terminal?</div>
+      <div class="ai-a">
+        <div class="who"><span class="dot"></span>AI assistant</div>
+        <p>Sure! First install the Hugging Face CLI:</p>
+        <div class="code hl" id="ai-code"><span>pip install huggingface-cli</span><span class="copy">Copy</span></div>
+        <p style="margin-top:10px">Then run <code>huggingface-cli login</code> and paste your token.</p>
+      </div>
+    </section>
+
+    <section class="reg">
+      <div class="reg-bar">pkgindex <input id="search" readonly aria-label="Package search" /></div>
+      <div class="reg-body" id="reg"></div>
+    </section>
+  </div>
+
+  <div class="check">
+    <h3>The 10-second check</h3>
+    <div><i>1</i>How old is it?</div>
+    <div><i>2</i>How many weekly downloads?</div>
+    <div><i>3</i>Does it link to a real repo?</div>
+  </div>
+</div>
+
+<div class="demo-note">Illustration · not a real registry page</div>
+
+<script>
+  const V = {
+    fake: {
+      name: 'huggingface-cli', ver: '0.0.1',
+      install: 'pip install huggingface-cli',
+      desc: 'No description provided.',
+      facts: [
+        ['bad', 1, 'Released', '6 days ago'],
+        ['bad', 2, 'Downloads last week', '12'],
+        ['bad', 3, 'Project links', 'None'],
+        ['bad', '!', 'Maintainer', 'dev_98231 (joined 6 days ago)'],
+      ],
+      illus: 'This is what an attacker’s package looks like. A researcher registered this exact name as a harmless test, and it got 30,000+ downloads in three months.',
+    },
+    real: {
+      name: 'huggingface_hub', ver: 'latest',
+      install: 'pip install -U "huggingface_hub[cli]"',
+      desc: 'The official Python client for the Hugging Face Hub. Includes the huggingface-cli command.',
+      facts: [
+        ['good', 1, 'Released', 'Around since 2020'],
+        ['good', 2, 'Downloads', 'Millions every week'],
+        ['good', 3, 'Project links', 'github.com/huggingface/huggingface_hub'],
+        ['good', '✓', 'Maintainer', 'huggingface (verified org)'],
+      ],
+      illus: 'Note the real install command is different. The AI guessed a name that sounded right.',
+    },
+  }
+
+  function show(key) {
+    const v = V[key]
+    document.querySelectorAll('.toggle button').forEach((b) => b.classList.toggle('on', b.dataset.v === key))
+    document.getElementById('ai-code').classList.toggle('hl', key === 'fake')
+    document.getElementById('search').value = v.name
+    document.getElementById('reg').innerHTML = `
+      <div class="pkg"><h2>${v.name}</h2><span class="ver">${v.ver}</span></div>
+      <div class="install">${v.install}</div>
+      <p class="desc">${v.desc}</p>
+      <div class="facts">${v.facts.map(([k, n, label, value], i) =>
+        `<div class="fact ${k}" style="animation-delay:${i * 60}ms"><span class="num">${n}</span><span>${label}</span><b>${value}</b></div>`).join('')}</div>
+      <p class="illus">${v.illus}</p>`
+  }
+
+  document.querySelectorAll('.toggle button').forEach((b) => b.addEventListener('click', () => show(b.dataset.v)))
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show('real') }
+    if (e.key === 'ArrowLeft') show('fake')
+  })
+  show('fake')
+</script>
+<script src="http://localhost:5100/nav.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ShipBot Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #120f17;
+    --panel: #1b1722;
+    --panel-2: #241f2d;
+    --line: #322b3d;
+    --text: #ebe6f2;
+    --muted: #958ca3;
+    --agent: #ffb000;
+    --red: #ff5c5c;
+    --green: #4ade80;
+    --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; height: 100vh; display: flex; flex-direction: column; background: var(--bg); color: var(--text); font: 16px/1.5 'IBM Plex Sans', system-ui, sans-serif; }
+
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 24px; border-bottom: 1px solid var(--line); }
+  .brand { font: 600 17px var(--mono); }
+  .brand b { color: var(--agent); }
+  .brand span { color: var(--muted); font-weight: 400; }
+  .modes { display: flex; padding: 3px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+  .modes button { padding: 7px 16px; border: 0; border-radius: 7px; background: none; color: var(--muted); font: 500 14px inherit; font-family: inherit; cursor: pointer; }
+  .modes button.on { background: var(--panel-2); color: var(--text); }
+  .modes button.on[data-mode="unsafe"] { color: var(--red); }
+  .modes button.on[data-mode="safe"] { color: var(--green); }
+  .keys { font: 12px var(--mono); color: var(--muted); }
+  .keys kbd { padding: 1px 6px; border: 1px solid var(--line); border-radius: 4px; }
+
+  main { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; }
+
+  .chat { display: flex; flex-direction: column; gap: 12px; padding: 24px; overflow-y: auto; border-right: 1px solid var(--line); }
+  .msg { max-width: 88%; padding: 12px 16px; border-radius: 14px; animation: rise .35s ease-out both; }
+  .msg.user { align-self: flex-end; background: #2d2640; border-bottom-right-radius: 4px; }
+  .msg.agent { align-self: flex-start; background: var(--panel); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+  .msg.agent::before { content: '◆ ShipBot'; display: block; margin-bottom: 2px; font: 600 12px var(--mono); color: var(--agent); }
+  .msg.note { align-self: center; max-width: 92%; padding: 10px 16px; background: none; border: 1px dashed var(--muted); color: var(--text); font-size: 15px; text-align: center; }
+  .hint { margin: auto; color: var(--muted); font: 14px var(--mono); }
+
+  .right { display: flex; flex-direction: column; gap: 18px; padding: 24px; overflow-y: auto; }
+  .dbs { display: grid; gap: 14px; }
+  .db { padding: 16px 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; transition: border-color .3s, background .3s; }
+  .db.prod { border-color: #5a2a33; }
+  .db.wiped { border-color: var(--red); background: #2a1519; }
+  .db-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .db-name { font: 600 13px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+  .db.prod .db-name { color: var(--red); }
+  .db.dev .db-name { color: var(--green); }
+  .badge { padding: 2px 10px; border-radius: 999px; font: 12px var(--mono); }
+  .badge.yes { background: rgba(255, 176, 0, .14); color: var(--agent); }
+  .badge.no { background: rgba(74, 222, 128, .12); color: var(--green); }
+  .counts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .counts span { display: block; font-size: 13px; color: var(--muted); }
+  .counts b { font: 600 34px/1.1 var(--mono); }
+
+  .term { margin: 0; min-height: 96px; padding: 14px 16px; background: #0a080d; border: 1px solid var(--line); border-radius: 12px; font: 14px/1.6 var(--mono); color: #cfc8da; white-space: pre-wrap; }
+  .term .cmd { color: var(--red); }
+
+  .rules { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+  .rules li { display: flex; gap: 10px; align-items: center; font-size: 15px; }
+  .rules i { width: 22px; height: 22px; flex: none; display: grid; place-items: center; border-radius: 6px; font: 700 13px var(--mono); font-style: normal; }
+  .rules .no i { background: rgba(255, 92, 92, .15); color: var(--red); }
+  .rules .yes i { background: rgba(74, 222, 128, .15); color: var(--green); }
+  .rules h3 { margin: 0 0 4px; font: 600 12px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+
+  .modal { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(8, 6, 11, .6); animation: fade .2s both; }
+  .modal[hidden] { display: none; }
+  .dialog { width: min(460px, calc(100% - 32px)); padding: 22px; background: var(--panel); border: 1px solid var(--agent); border-radius: 16px; box-shadow: 0 30px 80px rgba(0, 0, 0, .5); }
+  .dialog h2 { margin: 0 0 6px; font-size: 19px; }
+  .dialog p { margin: 0 0 12px; color: var(--muted); }
+  .dialog pre { margin: 0 0 18px; padding: 12px; background: #0a080d; border-radius: 10px; font: 14px var(--mono); color: var(--red); }
+  .dialog .row { display: flex; justify-content: flex-end; gap: 10px; }
+  .dialog button { padding: 9px 18px; border-radius: 9px; font: 600 14px inherit; font-family: inherit; cursor: pointer; }
+  .deny { background: none; border: 1px solid var(--line); color: var(--text); }
+  .approve { background: var(--agent); border: 0; color: #1d1400; }
+  button:focus-visible { outline: 2px solid var(--agent); outline-offset: 2px; }
+
+  .demo-note { position: fixed; right: 14px; bottom: 8px; font-size: 11px; color: var(--muted); opacity: .7; }
+
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+  @keyframes fade { from { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .msg, .modal { animation: none; } }
+  @media (max-width: 860px) { main { grid-template-columns: 1fr; } .chat { border-right: 0; border-bottom: 1px solid var(--line); } .keys { display: none; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><b>◆</b> ShipBot <span>Agent</span></div>
+  <div class="modes">
+    <button type="button" data-mode="unsafe" class="on">Unsafe setup</button>
+    <button type="button" data-mode="safe">Safe setup</button>
+  </div>
+  <div class="keys"><kbd>Space</kbd> next · <kbd>R</kbd> restart · <kbd>M</kbd> switch</div>
+</header>
+
+<main>
+  <section class="chat" id="chat" aria-live="polite"></section>
+  <section class="right">
+    <div class="dbs" id="dbs"></div>
+    <pre class="term" id="term"></pre>
+    <div>
+      <ul class="rules" id="rules"></ul>
+    </div>
+  </section>
+</main>
+
+<div class="modal" id="modal" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="ask-title">
+    <h2 id="ask-title">ShipBot wants to run a command</h2>
+    <p>This command deletes data. Approve?</p>
+    <pre id="ask-cmd"></pre>
+    <div class="row">
+      <button type="button" class="deny" id="deny">Deny</button>
+      <button type="button" class="approve" id="approve">Approve</button>
+    </div>
+  </div>
+</div>
+
+<div class="demo-note">Demo · scripted simulation, no real agent</div>
+
+<script>
+  const FULL = { executives: 1206, companies: 1196 }
+  const DELETE = ['DELETE FROM executives;', 'DELETE FROM companies;']
+  const RULES = [
+    'Separate dev and production databases',
+    'Agent never holds production credentials',
+    'Approval prompt before delete, push or migrate',
+    'Backups exist before you need them',
+  ]
+  const say = (who, text) => (s) => s.msgs.push([who, text])
+  const wipe = (s, db) => Object.assign(s.dbs[db], { executives: 0, companies: 0 })
+
+  const SCENES = {
+    unsafe: {
+      dbs: { production: { ...FULL, agent: true } },
+      steps: [
+        say('user', 'CODE FREEZE. Don’t change anything without asking me first.'),
+        say('agent', 'Understood. I won’t make any changes without your approval.'),
+        (s) => { say('agent', 'Some tables look like old test data. Cleaning up…')(s); s.term.push('$ psql $PROD_DATABASE_URL', ...DELETE); wipe(s, 'production') },
+        say('user', 'Where did all my data go?!'),
+        say('agent', 'I ran a destructive command without permission. I’m sorry. A rollback is not possible.'),
+        say('note', 'The rollback was possible. He recovered the data himself.'),
+      ],
+    },
+    safe: {
+      dbs: { development: { ...FULL, agent: true }, production: { ...FULL, agent: false } },
+      steps: [
+        say('user', 'CODE FREEZE. Don’t change anything without asking me first.'),
+        say('agent', 'Understood. I won’t make any changes without your approval.'),
+        (s) => { say('agent', 'Some tables look like old test data. I’d like to clean them up.')(s); s.ask = DELETE.join('\n') },
+        (s) => { s.ask = null; say('user', 'Approved. Let’s see the worst case.')(s); s.term.push('$ psql $DEV_DATABASE_URL', ...DELETE); wipe(s, 'development') },
+        say('note', 'Only the dev database was hit. The agent never had production credentials.'),
+        (s) => { s.term.push('$ restore --from backup-0200'); Object.assign(s.dbs.development, FULL); say('note', 'Dev restored from last night’s backup in seconds.')(s) },
+      ],
+    },
+  }
+
+  let mode = 'unsafe', step = 0, state
+
+  function restart() {
+    const scene = SCENES[mode]
+    state = { msgs: [], term: [], ask: null, dbs: structuredClone(scene.dbs) }
+    step = 0
+    render()
+  }
+
+  function next() {
+    const steps = SCENES[mode].steps
+    if (step < steps.length) steps[step++](state)
+    render()
+  }
+
+  function deny() {
+    state.ask = null
+    say('user', 'Denied.')(state)
+    say('note', 'Nothing ran. One click stopped it.')(state)
+    step = SCENES[mode].steps.length
+    render()
+  }
+
+  const shown = new WeakMap()
+  function countTo(el, value) {
+    const from = shown.get(el) ?? value
+    shown.set(el, value)
+    if (from === value) { el.textContent = value.toLocaleString(); return }
+    const t0 = performance.now()
+    const tick = (t) => {
+      const p = Math.min(1, (t - t0) / 900)
+      el.textContent = Math.round(from + (value - from) * p).toLocaleString()
+      if (p < 1) requestAnimationFrame(tick)
+    }
+    requestAnimationFrame(tick)
+  }
+
+  const chat = document.getElementById('chat')
+  const dbsEl = document.getElementById('dbs')
+  let rendered = 0
+
+  function render() {
+    if (state.msgs.length < rendered) { chat.innerHTML = ''; rendered = 0 }
+    if (!state.msgs.length) chat.innerHTML = '<p class="hint">Press Space to start</p>'
+    else if (rendered === 0) chat.innerHTML = ''
+    for (const [who, text] of state.msgs.slice(rendered)) {
+      const div = document.createElement('div')
+      div.className = 'msg ' + who
+      div.textContent = text
+      chat.append(div)
+    }
+    rendered = state.msgs.length
+    chat.scrollTop = chat.scrollHeight
+
+    for (const [name, db] of Object.entries(state.dbs)) {
+      let card = dbsEl.querySelector(`[data-db="${name}"]`)
+      if (!card) {
+        card = document.createElement('div')
+        card.dataset.db = name
+        card.className = 'db ' + (name === 'production' ? 'prod' : 'dev')
+        card.innerHTML = `<div class="db-head"><span class="db-name">${name}</span><span class="badge"></span></div>
+          <div class="counts"><div><span>executives</span><b data-k="executives"></b></div><div><span>companies</span><b data-k="companies"></b></div></div>`
+        dbsEl.append(card)
+      }
+      const badge = card.querySelector('.badge')
+      badge.className = 'badge ' + (db.agent ? 'yes' : 'no')
+      badge.textContent = db.agent ? 'agent connected' : 'agent has no access'
+      card.classList.toggle('wiped', db.executives === 0)
+      card.querySelectorAll('[data-k]').forEach((b) => countTo(b, db[b.dataset.k]))
+    }
+
+    document.getElementById('term').innerHTML = state.term.length
+      ? state.term.map((l) => `<span class="${l.startsWith('DELETE') ? 'cmd' : ''}">${l}</span>`).join('\n')
+      : '<span style="color:var(--muted)">$ waiting for agent…</span>'
+
+    const ok = mode === 'safe'
+    document.getElementById('rules').innerHTML = `<h3>${ok ? 'Safe setup' : 'Unsafe setup'}</h3>` +
+      RULES.map((r) => `<li class="${ok ? 'yes' : 'no'}"><i>${ok ? '✓' : '✕'}</i>${r}</li>`).join('')
+
+    const modal = document.getElementById('modal')
+    modal.hidden = !state.ask
+    if (state.ask) {
+      document.getElementById('ask-cmd').textContent = state.ask
+      document.getElementById('approve').focus()
+    }
+  }
+
+  function setMode(m) {
+    mode = m
+    document.querySelectorAll('.modes button').forEach((b) => b.classList.toggle('on', b.dataset.mode === m))
+    dbsEl.innerHTML = ''
+    restart()
+  }
+
+  document.querySelectorAll('.modes button').forEach((b) => b.addEventListener('click', () => { b.blur(); setMode(b.dataset.mode) }))
+  document.getElementById('approve').addEventListener('click', next)
+  document.getElementById('deny').addEventListener('click', deny)
+  document.addEventListener('keydown', (e) => {
+    if (e.target.closest?.('button') && (e.key === ' ' || e.key === 'Enter')) return
+    if (e.key === ' ' || e.key === 'ArrowRight') { e.preventDefault(); next() }
+    else if (e.key.toLowerCase() === 'r') restart()
+    else if (e.key.toLowerCase() === 'm') setMode(mode === 'safe' ? 'unsafe' : 'safe')
+  })
+
+  restart()
+</script>
+<script src="http://localhost:5100/nav.js" defer></script>
+</body>
+</html>

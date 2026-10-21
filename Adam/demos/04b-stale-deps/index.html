@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KedaiKita</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/demo-panel.css" />
+  </head>
+  <body>
+    <header>
+      <div class="logo">KedaiKita<span>.</span></div>
+      <p>Pre-loved campus stuff, from students to students.</p>
+    </header>
+    <main>
+      <div class="bar">
+        <h1>Fresh listings</h1>
+        <label>Sort
+          <select id="sort">
+            <option value="price">Price: low to high</option>
+            <option value="name">Name</option>
+          </select>
+        </label>
+      </div>
+      <ul id="grid" class="grid"></ul>
+    </main>
+    <div class="demo-note">Demo app · fake listings</div>
+    <script type="module" src="/main.js"></script>
+    <script type="module" src="/demo-panel.js"></script>
+    <script src="http://localhost:5100/nav.js" defer></script>
+  </body>
+</html>

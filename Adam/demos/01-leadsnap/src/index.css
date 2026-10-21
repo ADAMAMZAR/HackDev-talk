@@ -1,0 +1,84 @@
+:root {
+  --bg: #f3f2ee;
+  --panel: #ffffff;
+  --ink: #0f0f0e;
+  --muted: #6b6a63;
+  --line: #e2e0d8;
+  --lime: #c8f03c;
+  --lime-ink: #1d2405;
+}
+
+* { box-sizing: border-box; }
+
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 'Geist', system-ui, sans-serif; }
+
+button { font: inherit; cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+.app { display: grid; grid-template-columns: 248px 1fr; min-height: 100vh; }
+
+/* ---------- sidebar ---------- */
+
+.side { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 28px; padding: 26px 18px; background: var(--ink); color: #f3f2ee; }
+.logo { font: 700 22px 'Unbounded', sans-serif; letter-spacing: -.03em; }
+.logo span { color: var(--lime); }
+
+.side nav { display: flex; flex-direction: column; gap: 2px; }
+.side nav a { padding: 9px 12px; border-radius: 8px; color: #a9a89f; }
+.side nav a.active { background: #232320; color: #fff; }
+
+.plan-card { margin-top: auto; padding: 16px; border: 1px solid #2c2c28; border-radius: 14px; background: #191917; }
+.plan-name { font: 500 12px 'Geist Mono', monospace; text-transform: uppercase; letter-spacing: .1em; color: var(--lime); }
+.plan-card p { margin: 6px 0 14px; font-size: 13px; color: #b9b8ae; }
+.plan-card .soon { margin: 10px 0 0; color: var(--lime); }
+
+.btn-lime { width: 100%; padding: 10px; border: 0; border-radius: 10px; background: var(--lime); color: var(--lime-ink); font-weight: 600; }
+.btn-lime:hover { filter: brightness(1.05); }
+
+/* ---------- main ---------- */
+
+.main { padding: 32px 40px 64px; min-width: 0; }
+
+.head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.head h1 { margin: 0; font: 700 34px 'Unbounded', sans-serif; letter-spacing: -.04em; }
+.sub { margin: 4px 0 0; color: var(--muted); }
+
+.btn-dark { padding: 10px 18px; border: 0; border-radius: 10px; background: var(--ink); color: #fff; font-weight: 500; }
+.btn-dark:disabled { background: #d9d7cf; color: #8a897f; cursor: not-allowed; }
+
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 26px 0 20px; }
+.stats div { padding: 16px 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; }
+.stats span { display: block; font-size: 13px; color: var(--muted); }
+.stats b { font: 700 26px 'Unbounded', sans-serif; letter-spacing: -.03em; }
+.stats div:first-child { background: var(--lime); border-color: var(--lime); color: var(--lime-ink); }
+.stats div:first-child span { color: var(--lime-ink); opacity: .7; }
+
+.search { width: 100%; margin-bottom: 14px; padding: 12px 16px; font: inherit; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+
+.leads { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.leads th { padding: 12px 14px; text-align: left; font: 500 11px 'Geist Mono', monospace; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); border-bottom: 1px solid var(--line); }
+.leads td { padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.leads tr:last-child td { border-bottom: 0; }
+.leads tbody tr:hover { background: #fafaf6; }
+.leads small { display: block; color: var(--muted); font-size: 12.5px; }
+.leads .num { text-align: right; font-family: 'Geist Mono', monospace; white-space: nowrap; }
+.leads .phone { white-space: nowrap; }
+
+/* "Pro only": blurred on screen */
+.locked { filter: blur(5px); user-select: none; }
+
+.insight { display: block; max-width: 360px; margin-top: 6px; padding: 6px 10px; background: #f4fbdc; border-left: 3px solid var(--lime); border-radius: 0 6px 6px 0; font-style: normal; font-size: 13px; }
+
+.btn-ghost { padding: 6px 12px; white-space: nowrap; background: none; border: 1px solid var(--line); border-radius: 999px; }
+.btn-ghost:hover { border-color: var(--ink); }
+
+.demo-note { position: fixed; right: 14px; bottom: 8px; font-size: 11px; color: var(--muted); opacity: .7; }
+
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; }
+  .side { position: static; height: auto; flex-direction: row; align-items: center; padding: 14px 16px; }
+  .side nav, .plan-card p { display: none; }
+  .plan-card { margin: 0 0 0 auto; padding: 8px; }
+  .main { padding: 24px 16px; overflow-x: auto; }
+  .stats { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "kedaikita",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "axios": "0.21.1",
+    "lodash": "4.17.15"
+  },
+  "devDependencies": {
+    "vite": "^8.3.4"
+  }
+}

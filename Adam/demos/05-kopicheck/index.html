@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KopiCheck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Gloock&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --cream: #f6efe6;
+    --paper: #fffaf3;
+    --coffee: #3b2418;
+    --muted: #8a7263;
+    --caramel: #c8823a;
+    --line: #e6d8c6;
+    --red: #c2412d;
+    --amber: #b7791f;
+    --green: #3f7d4e;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--cream); color: var(--coffee); font: 16px/1.5 'Figtree', system-ui, sans-serif; }
+
+  header { max-width: 1180px; margin: 0 auto; padding: 28px 24px 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .logo { font: 400 30px 'Gloock', Georgia, serif; }
+  .logo span { color: var(--caramel); }
+  .toggle { display: flex; padding: 4px; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; }
+  .toggle button { padding: 9px 20px; border: 0; border-radius: 999px; background: none; color: var(--muted); font: 600 15px 'Figtree', sans-serif; cursor: pointer; }
+  .toggle button.on { background: var(--coffee); color: var(--cream); }
+  button:focus-visible { outline: 2px solid var(--caramel); outline-offset: 2px; }
+
+  main { max-width: 1180px; margin: 0 auto; padding: 20px 24px 40px; display: grid; grid-template-columns: 400px 1fr; gap: 48px; align-items: start; }
+
+  /* phone with the sign-up form */
+  .phone { padding: 14px; background: var(--coffee); border-radius: 40px; box-shadow: 0 30px 60px -30px rgba(59, 36, 24, .6); }
+  .screen { padding: 22px 22px 20px; background: var(--paper); border-radius: 28px; min-height: 600px; }
+  .screen h1 { margin: 0; font: 400 26px/1.15 'Gloock', Georgia, serif; }
+  .screen > p { margin: 4px 0 14px; font-size: 14px; color: var(--muted); }
+  .field { margin-bottom: 8px; animation: rise .35s ease-out both; }
+  .field-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 3px; }
+  .field label { font-size: 13px; font-weight: 600; }
+  .input { padding: 7px 12px; background: #fff; border: 1px solid var(--line); border-radius: 10px; font-size: 14px; color: var(--muted); }
+  .input.upload { display: flex; gap: 10px; align-items: center; border-style: dashed; }
+  .verdict { padding: 2px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+  .v-no { background: #f8e1dc; color: var(--red); }
+  .v-yes { background: #dfeee2; color: var(--green); }
+  .v-tmp { background: #f6e8cf; color: var(--amber); }
+  .submit { margin-top: 10px; padding: 11px; border-radius: 12px; background: var(--caramel); color: #fff; font-weight: 700; text-align: center; }
+
+  /* right side */
+  .eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .side h2 { margin: 6px 0 18px; font: 400 clamp(30px, 3.4vw, 44px)/1.1 'Gloock', Georgia, serif; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+  .stats div { padding: 14px 16px; background: var(--paper); border: 1px solid var(--line); border-radius: 14px; }
+  .stats b { display: block; font: 400 30px/1.1 'Gloock', Georgia, serif; }
+  .stats span { font-size: 13px; color: var(--muted); }
+
+  .bucket { padding: 18px; background: var(--paper); border: 1px solid var(--line); border-radius: 18px; }
+  .bucket-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+  .bucket-name { font: 600 14px ui-monospace, monospace; }
+  .access { padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; }
+  .access.public { background: var(--red); color: #fff; }
+  .access.private { background: var(--green); color: #fff; }
+  .files { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .file { position: relative; overflow: hidden; border-radius: 10px; background: #e9ddcd; aspect-ratio: 3 / 4; display: flex; flex-direction: column; justify-content: flex-end; }
+  .file svg { position: absolute; inset: 14% 18% auto; width: 64%; color: #cdbba6; }
+  .file.id { aspect-ratio: auto; }
+  .file .stamp { position: absolute; top: 40%; left: -10%; right: -10%; padding: 2px 0; transform: rotate(-14deg); background: rgba(194, 65, 45, .85); color: #fff; font-size: 9px; font-weight: 700; letter-spacing: .08em; text-align: center; }
+  .file small { position: relative; padding: 4px 6px; background: rgba(59, 36, 24, .78); color: var(--cream); font: 10px ui-monospace, monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .empty-bucket { padding: 34px 16px; text-align: center; border: 1.5px dashed var(--line); border-radius: 12px; color: var(--green); font-weight: 600; }
+  .empty-bucket span { display: block; margin-top: 4px; color: var(--muted); font-weight: 400; font-size: 14px; }
+
+  .promise { margin-top: 16px; display: grid; gap: 6px; font-size: 15px; }
+  .promise s { color: var(--muted); }
+  .promise b { color: var(--red); }
+  .promise.good b { color: var(--green); }
+
+  .pdpa { margin-top: 22px; padding: 16px 18px; border-left: 4px solid var(--caramel); background: #f1e5d4; border-radius: 0 12px 12px 0; font-size: 15px; }
+  .pdpa strong { display: block; margin-bottom: 2px; }
+
+  .demo-note { position: fixed; right: 14px; bottom: 8px; font-size: 11px; color: var(--muted); opacity: .8; }
+
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+  @media (prefers-reduced-motion: reduce) { .field { animation: none; } }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; padding: 24px 16px 56px; } header { padding: 20px 16px 0; } .files { grid-template-columns: repeat(2, 1fr); } }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Kopi<span>Check</span> ☕</div>
+  <div class="toggle" role="tablist" aria-label="Version">
+    <button type="button" data-v="before" class="on">Before: collect everything</button>
+    <button type="button" data-v="after">After: collect less</button>
+  </div>
+</header>
+
+<main>
+  <div class="phone">
+    <div class="screen">
+      <h1>Join KopiCheck</h1>
+      <p>Spill the kopi before the first date. Verify you're real to join.</p>
+      <div id="fields"></div>
+      <div class="submit">Create account</div>
+    </div>
+  </div>
+
+  <section class="side">
+    <div class="eyebrow" id="eyebrow"></div>
+    <h2 id="headline"></h2>
+    <div class="stats" id="stats"></div>
+    <div class="bucket">
+      <div class="bucket-head">
+        <span class="bucket-name">storage / kopicheck-uploads</span>
+        <span class="access" id="access"></span>
+      </div>
+      <div id="files"></div>
+    </div>
+    <div class="promise" id="promise"></div>
+    <div class="pdpa">
+      <strong>Malaysia's PDPA applies to student apps too</strong>
+      Since 2025, breaking its principles can mean a fine of up to RM1 million, and serious breaches must be reported to the Commissioner.
+    </div>
+  </section>
+</main>
+
+<div class="demo-note">Demo app · sample images, no real IDs</div>
+
+<script>
+  const V = {
+    before: {
+      eyebrow: 'Before · how Tea worked',
+      headline: 'Every field is a liability.',
+      fields: [
+        ['Full name (as in IC)', 'Aina Sofea binti Rahman', 'no', 'Not needed'],
+        ['Email', 'aina@campus.example', 'yes', 'Needed'],
+        ['Phone number', '012-345 6789', 'no', 'Not needed'],
+        ['Home address', 'No. 12, Jalan Melur…', 'no', 'Not needed'],
+        ['IC number', '0X0X0X-XX-XXXX', 'no', 'Not needed'],
+        ['Photo of your IC', '📎 Upload front of IC', 'no', 'Not needed', true],
+        ['Selfie', '📷 Take a selfie', 'tmp', 'Needed briefly', true],
+        ['Matric number', 'A22XXXXX', 'no', 'Not needed'],
+      ],
+      stats: [['8', 'fields collected'], ['2', 'photos per user'], ['∞', 'kept forever']],
+      access: ['public', '🔓 Public · anyone with the link'],
+      promise: '<s>“We delete your photos after verification.”</s><b>Reality: every photo is still in the bucket.</b>',
+    },
+    after: {
+      eyebrow: 'After · data minimisation',
+      headline: 'Data you don’t keep can’t leak.',
+      fields: [
+        ['Email', 'aina@campus.example', 'yes', 'Needed'],
+        ['Nickname', 'aina', 'yes', 'Optional'],
+        ['Selfie', '📷 Take a selfie', 'tmp', 'Deleted after check', true],
+      ],
+      stats: [['3', 'fields collected'], ['0', 'ID photos'], ['24h', 'then selfie deleted']],
+      access: ['private', '🔒 Private · auto-delete after 24h'],
+      promise: '<span>“We delete your selfie after verification.”</span><b>And the bucket shows it: nothing is kept.</b>',
+    },
+  }
+
+  const PERSON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="8" r="4.2"/><path d="M3.5 22c.6-4.6 4.1-7.6 8.5-7.6s7.9 3 8.5 7.6z"/></svg>'
+  const FILES = [412, 413, 414, 415].flatMap((n) => [`selfie_00${n}.jpg`, `ic_front_00${n}.jpg`])
+
+  function show(key) {
+    const v = V[key]
+    document.querySelectorAll('.toggle button').forEach((b) => b.classList.toggle('on', b.dataset.v === key))
+    document.getElementById('eyebrow').textContent = v.eyebrow
+    document.getElementById('headline').textContent = v.headline
+    document.getElementById('fields').innerHTML = v.fields.map(([label, value, kind, verdict, upload], i) => `
+      <div class="field" style="animation-delay:${i * 40}ms">
+        <div class="field-top"><label>${label}</label><span class="verdict v-${kind}">${verdict}</span></div>
+        <div class="input${upload ? ' upload' : ''}">${value}</div>
+      </div>`).join('')
+    document.getElementById('stats').innerHTML = v.stats.map(([n, t]) => `<div><b>${n}</b><span>${t}</span></div>`).join('')
+    const access = document.getElementById('access')
+    access.className = 'access ' + v.access[0]
+    access.textContent = v.access[1]
+    document.getElementById('files').innerHTML = key === 'before'
+      ? `<div class="files">${FILES.map((f) => `<div class="file">${PERSON}<span class="stamp">SAMPLE · NOT REAL</span><small>${f}</small></div>`).join('')}</div>`
+      : '<div class="empty-bucket">0 files<span>Selfies are deleted once verification finishes. ID photos are never collected.</span></div>'
+    const promise = document.getElementById('promise')
+    promise.className = 'promise' + (key === 'after' ? ' good' : '')
+    promise.innerHTML = v.promise
+  }
+
+  document.querySelectorAll('.toggle button').forEach((b) => b.addEventListener('click', () => show(b.dataset.v)))
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show('after') }
+    if (e.key === 'ArrowLeft') show('before')
+  })
+  show('before')
+</script>
+<script src="http://localhost:5100/nav.js" defer></script>
+</body>
+</html>

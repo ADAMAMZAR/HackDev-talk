@@ -1,0 +1,8 @@
+[
+  { "name": "Casio fx-570EX calculator", "price": 45, "seller": "Haziq", "place": "Kolej Kinabalu", "emoji": "🧮", "tint": "#e8efe2" },
+  { "name": "Rice cooker, 1L", "price": 30, "seller": "Chloe", "place": "Kolej Za'aba", "emoji": "🍚", "tint": "#f6eadb" },
+  { "name": "Intro to Algorithms (3rd ed.)", "price": 60, "seller": "Arjun", "place": "Faculty of Computing", "emoji": "📘", "tint": "#e1e8f3" },
+  { "name": "Study desk lamp", "price": 18, "seller": "Nadia", "place": "Kolej Tun Fatimah", "emoji": "💡", "tint": "#f7f0d2" },
+  { "name": "Second-hand bicycle", "price": 120, "seller": "Marcus", "place": "Main gate", "emoji": "🚲", "tint": "#f3e1de" },
+  { "name": "Mini fridge", "price": 150, "seller": "Divya", "place": "Kolej Aminuddin Baki", "emoji": "🧊", "tint": "#e0eff0" }
+]

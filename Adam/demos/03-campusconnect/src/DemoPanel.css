@@ -1,0 +1,53 @@
+/* Presenter panel. Deliberately looks like a tool, not part of the app. */
+
+.dp-pill {
+  position: fixed; right: 14px; bottom: 30px; z-index: 50;
+  padding: 6px 14px;
+  background: #16181d; color: #e8e8e3;
+  border: 0; border-radius: 999px;
+  font: 600 12px ui-monospace, monospace; letter-spacing: .06em;
+  cursor: pointer; opacity: .75;
+}
+.dp-pill:hover { opacity: 1; }
+
+.dp {
+  position: fixed; right: 14px; bottom: 14px; z-index: 50;
+  width: min(430px, calc(100vw - 28px)); max-height: calc(100vh - 28px);
+  display: flex; flex-direction: column;
+  background: #16181d; color: #e8e8e3;
+  border: 1px solid #2c2f37; border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .35);
+  font: 14px/1.45 system-ui, sans-serif;
+}
+
+.dp-head { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid #2c2f37; }
+.dp-head b { font: 600 13px ui-monospace, monospace; letter-spacing: .04em; }
+.dp-chips { display: flex; gap: 6px; margin-left: auto; }
+.dp-chips span { padding: 2px 8px; border-radius: 999px; background: #262a32; font: 600 11.5px ui-monospace, monospace; }
+.dp-chips .ok { background: rgba(74, 222, 128, .15); color: #4ade80; }
+.dp-chips .bad { background: rgba(255, 92, 92, .16); color: #ff7a7a; }
+.dp-x { padding: 0 4px; background: none; border: 0; color: #8b8f99; font-size: 22px; line-height: 1; cursor: pointer; }
+
+.dp-body { overflow-y: auto; padding: 4px 14px; }
+.dp-step { padding: 12px 0; border-bottom: 1px solid #23262d; }
+.dp-step:last-of-type { border-bottom: 0; }
+.dp-title { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-weight: 600; }
+.dp-title i { width: 20px; height: 20px; display: grid; place-items: center; border-radius: 50%; background: #e8e8e3; color: #16181d; font: 700 11px ui-monospace, monospace; font-style: normal; }
+.dp pre { margin: 0 0 8px; padding: 8px 10px; background: #0d0e11; border-radius: 8px; font: 12.5px/1.5 ui-monospace, monospace; color: #c9d1d9; white-space: pre-wrap; }
+
+.dp-row, .dp-foot { display: flex; gap: 8px; }
+.dp-foot { padding: 12px 14px; border-top: 1px solid #2c2f37; }
+.dp-run { padding: 7px 14px; background: #e8e8e3; color: #16181d; border: 0; border-radius: 8px; font: 600 13px system-ui, sans-serif; cursor: pointer; }
+.dp-run.danger { background: #ff5c5c; color: #fff; }
+.dp-run.ghost { background: none; color: #e8e8e3; border: 1px solid #3a3e48; }
+.dp-run:disabled { opacity: .5; cursor: progress; }
+.dp-run:focus-visible, .dp-pill:focus-visible, .dp-x:focus-visible { outline: 2px solid #ffb000; outline-offset: 2px; }
+
+.dp-result { margin-top: 10px; padding: 10px; background: #0d0e11; border-radius: 8px; font: 12px ui-monospace, monospace; }
+.dp-count { margin-bottom: 4px; color: #ff7a7a; font-weight: 700; font-size: 13px; }
+.dp-result table { width: 100%; border-collapse: collapse; }
+.dp-result td { padding: 2px 6px 2px 0; color: #c9d1d9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
+.dp-more { margin-top: 4px; color: #8b8f99; }
+.dp-result code { color: #4ade80; font-size: 13px; }
+
+.dp-error { margin: 8px 0; color: #ff7a7a; font-size: 13px; }

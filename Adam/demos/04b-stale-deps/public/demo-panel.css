@@ -1,0 +1,44 @@
+/* Presenter terminal. Deliberately looks like a tool, not part of the shop. */
+
+.dp-pill {
+  position: fixed; right: 14px; bottom: 30px; z-index: 50;
+  padding: 6px 14px;
+  background: #16181d; color: #e8e8e3;
+  border: 0; border-radius: 999px;
+  font: 600 12px ui-monospace, monospace; letter-spacing: .06em;
+  cursor: pointer; opacity: .75;
+}
+.dp-pill:hover { opacity: 1; }
+.dp-pill[hidden], .dt[hidden] { display: none; }
+
+.dt {
+  position: fixed; left: 14px; right: 14px; bottom: 14px; z-index: 50;
+  height: min(62vh, 560px);
+  display: flex; flex-direction: column;
+  background: #0f1014; color: #d7dae0;
+  border: 1px solid #2c2f37; border-radius: 14px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .45);
+}
+
+.dt header { max-width: none; margin: 0; display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: #181a20; border-bottom: 1px solid #2c2f37; border-radius: 14px 14px 0 0; flex-wrap: wrap; }
+.dt-dots { display: flex; gap: 6px; }
+.dt-dots i { width: 11px; height: 11px; border-radius: 50%; background: #ff5f57; }
+.dt-dots i:nth-child(2) { background: #febc2e; }
+.dt-dots i:nth-child(3) { background: #28c840; }
+.dt header b { font: 600 13px ui-monospace, monospace; }
+.dt-vers { font: 13px ui-monospace, monospace; color: #febc2e; }
+.dt-btns { display: flex; gap: 8px; margin-left: auto; }
+.dt-btns button { padding: 6px 14px; background: #e8e8e3; color: #16181d; border: 0; border-radius: 8px; font: 600 13px system-ui, sans-serif; cursor: pointer; }
+.dt-btns button.ghost { background: none; color: #e8e8e3; border: 1px solid #3a3e48; }
+.dt-btns button:disabled { opacity: .45; cursor: progress; }
+.dt-x { padding: 0 4px; background: none; border: 0; color: #8b8f99; font-size: 22px; line-height: 1; cursor: pointer; }
+.dt button:focus-visible, .dp-pill:focus-visible { outline: 2px solid #febc2e; outline-offset: 2px; }
+
+.dt-out { flex: 1; margin: 0; padding: 14px 16px; overflow: auto; font: 14px/1.55 ui-monospace, 'Cascadia Mono', Consolas, monospace; white-space: pre-wrap; }
+.dt-out .prompt { color: #7ee787; font-weight: 600; }
+.dt-out .bad { color: #ff6b6b; font-weight: 700; }
+.dt-out .adv { color: #f0a3a3; }
+.dt-out .good { color: #7ee787; font-weight: 700; }
+.dt-out .dim { color: #6b7080; }
+.dt-cursor { animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
