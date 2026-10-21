@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Initiate Your 1st Project</title>
+<style>
+  :root {
+    --bg: #05090b;
+    --panel: #0a1315;
+    --fg: #f2f6f6;
+    --dim: #7f9594;
+    --accent: #19e3c1;
+    --line: rgba(25, 227, 193, .35);
+    --warn: #ffb454;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --sans: "Helvetica Neue", Arial, system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--bg); color: var(--fg); overflow: hidden; }
+  body { font-family: var(--sans); display: grid; place-items: center; }
+
+  #stage {
+    width: 1280px; height: 720px; position: relative; flex: none;
+    transform-origin: center center;
+    background:
+      radial-gradient(900px 500px at 70% 110%, rgba(25,227,193,.10), transparent 60%),
+      var(--bg);
+    border: 1px solid var(--line);
+  }
+  /* poster-style corner brackets */
+  #stage::before, #stage::after {
+    content: ""; position: absolute; width: 36px; height: 36px; pointer-events: none;
+    border: 2px solid var(--accent);
+  }
+  #stage::before { top: 10px; left: 10px; border-right: 0; border-bottom: 0; }
+  #stage::after { bottom: 10px; right: 10px; border-left: 0; border-top: 0; }
+
+  .hdr {
+    position: absolute; top: 26px; left: 56px; right: 56px;
+    display: flex; justify-content: space-between;
+    font: 500 15px var(--mono); letter-spacing: .18em; color: var(--dim);
+  }
+  .hdr b { color: var(--accent); font-weight: 600; }
+  .slide {
+    position: absolute; inset: 78px 56px 56px 56px;
+    display: grid; gap: 28px; align-content: start;
+  }
+  .slide.split { grid-template-columns: 1fr 1fr; align-content: stretch; }
+  h1 {
+    font: 800 64px/1.02 var(--sans); letter-spacing: .06em; text-transform: uppercase;
+  }
+  h1 .a { color: var(--accent); }
+  h2 {
+    font: 800 44px/1.08 var(--sans); letter-spacing: .05em; text-transform: uppercase;
+  }
+  h2 .a { color: var(--accent); }
+  .kicker { font: 600 16px var(--mono); letter-spacing: .22em; color: var(--accent); text-transform: uppercase; }
+  p, li { font-size: 25px; line-height: 1.38; color: #d9e4e3; }
+  p.big { font-size: 30px; }
+  p.dim, li.dim { color: var(--dim); }
+  ul { list-style: none; display: grid; gap: 14px; }
+  ul li::before { content: "//"; color: var(--accent); font-family: var(--mono); margin-right: 14px; }
+  code { font-family: var(--mono); color: var(--accent); background: rgba(25,227,193,.08); padding: 1px 8px; border-radius: 4px; font-size: .9em; }
+
+  .blocks { display: grid; gap: 0; border-top: 1px solid var(--line); }
+  .blk {
+    display: grid; grid-template-columns: 90px 1fr; gap: 22px; align-items: baseline;
+    padding: 16px 0; border-bottom: 1px solid var(--line);
+  }
+  .blk .n { font: 800 44px var(--sans); color: #fff; letter-spacing: .04em; }
+  .blk .t { font-size: 26px; }
+  .blk .t small { display: block; font-size: 19px; color: var(--dim); margin-top: 4px; }
+
+  .blk[data-goto] { grid-template-columns: 90px 1fr auto; cursor: pointer; }
+  .blk[data-goto]:hover { background: rgba(25,227,193,.07); }
+  .blk .go { font: 600 14px var(--mono); letter-spacing: .14em; color: var(--accent); }
+  .backbtn { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); font: 600 13px var(--mono); letter-spacing: .14em; border: 1px solid var(--accent); color: var(--accent); padding: 5px 14px; border-radius: 3px; cursor: pointer; background: var(--bg); }
+  .check { display: grid; gap: 12px; }
+  .check label {
+    display: grid; grid-template-columns: 34px 1fr; gap: 14px; align-items: start;
+    font-size: 24px; line-height: 1.35; cursor: pointer; padding: 8px 12px;
+    border: 1px solid transparent; border-radius: 6px;
+  }
+  .check label:hover { border-color: var(--line); }
+  .check input { width: 22px; height: 22px; margin-top: 5px; accent-color: var(--accent); }
+  .check input:checked + span { color: var(--dim); text-decoration: line-through; text-decoration-color: var(--accent); }
+
+  .idea { display: flex; gap: 14px; align-items: center; margin-top: 8px; }
+  .idea input {
+    flex: 1; background: var(--panel); color: var(--fg); border: 1px solid var(--accent);
+    border-radius: 6px; padding: 14px 16px; font: 500 26px var(--mono); outline: none;
+  }
+  .tag {
+    display: inline-block; font: 600 15px var(--mono); letter-spacing: .15em;
+    border: 1px solid var(--accent); color: var(--accent); padding: 4px 12px; border-radius: 3px;
+  }
+  .steal { border: 1px dashed var(--accent); padding: 4px 16px; border-radius: 6px; }
+  .gate { position: absolute; right: 0; top: 0; width: 430px; height: 540px; filter: drop-shadow(0 0 16px rgba(25,227,193,.45)); }
+
+  /* terminal pane */
+  .term {
+    background: #020506; border: 1px solid var(--line); border-radius: 8px;
+    display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-height: 0; overflow: hidden;
+  }
+  .term .bar {
+    display: flex; justify-content: space-between; padding: 10px 14px;
+    border-bottom: 1px solid var(--line); font: 600 13px var(--mono); letter-spacing: .12em; color: var(--dim);
+  }
+  .term .bar span.s { color: var(--warn); }
+  .term pre {
+    font: 500 16px/1.35 var(--mono); position: relative; overflow: hidden; min-height: 0;
+    color: #dfe9e8;
+  }
+  .term pre .in { position: absolute; left: 16px; right: 16px; bottom: 12px; white-space: pre-wrap; overflow-wrap: break-word; }
+  .term pre .p { color: var(--accent); }
+  .term pre .v { color: #7ee787; }
+  .term pre .o { color: #aebdbc; }
+  .term .ft { padding: 8px 14px; border-top: 1px solid var(--line); font: 500 14px var(--mono); color: var(--dim); }
+  .cursor { display: inline-block; width: 10px; height: 19px; background: var(--accent); vertical-align: -3px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  ul.rules { gap: 10px; }
+  ul.rules li { font-size: 22px; line-height: 1.3; }
+  .vars { display: grid; gap: 8px; }
+  .vars p { font-size: 20px; display: grid; grid-template-columns: 150px 1fr; gap: 10px; align-items: baseline; }
+  .vars p b { color: var(--fg); }
+  .vars p.dim { display: block; font-size: 18px; margin-top: 4px; }
+  .flowwrap { position: relative; padding-bottom: 44px; }
+  .loop { position: absolute; left: 79px; right: 71px; bottom: 8px; height: 36px; border: 2px solid var(--accent); border-top: 0; border-radius: 0 0 10px 10px; opacity: .75; }
+  .loop::before { content: ""; position: absolute; left: -8px; top: -2px; border-left: 7px solid transparent; border-right: 7px solid transparent; border-bottom: 11px solid var(--accent); }
+  .loop span { position: absolute; left: 50%; bottom: -11px; transform: translateX(-50%); background: var(--bg); padding: 0 12px; font: 600 13px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); white-space: nowrap; }
+  .recap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .recap p { font-size: 19px; line-height: 1.35; color: var(--dim); }
+  .recap b { display: block; color: var(--fg); font: 700 15px var(--mono); letter-spacing: .14em; text-transform: uppercase; margin-bottom: 4px; }
+  .flow { display: flex; align-items: center; gap: 0; }
+  .flow i { flex: 1; height: 2px; background: var(--line); min-width: 14px; }
+  .chip { text-align: center; padding: 14px 18px; border: 1px solid var(--line); border-radius: 6px; min-width: 120px; }
+  .chip span { display: block; font: 800 24px var(--sans); letter-spacing: .08em; text-transform: uppercase; }
+  .chip small { display: block; font: 600 12px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--dim); margin-top: 6px; }
+  .chip.done { opacity: .55; }
+  .chip.done small::before { content: "done  "; color: var(--accent); }
+  .chip.here { border: 2px solid var(--accent); box-shadow: 0 0 22px rgba(25,227,193,.35); }
+  .chip.here small { color: var(--accent); }
+  .slide.dual { grid-template-columns: 1fr 1fr; grid-template-rows: auto minmax(0, 1fr); align-content: stretch; }
+  .slide.dual .dtop { grid-column: 1 / 3; display: grid; gap: 10px; }
+  .term pre .g { color: var(--dim); }
+  .term pre .t { color: #f2f6f6; }
+
+  .ftr { position: absolute; left: 56px; right: 56px; bottom: 22px; display: flex; justify-content: space-between; font: 500 13px var(--mono); color: var(--dim); letter-spacing: .08em; }
+  .prog { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--accent); transition: width .2s; }
+  #hint { opacity: .85; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="hdr"><span>HACKDEV // <b>INITIATE_YOUR_1ST_PROJECT</b></span><span id="meta"></span></div>
+  <div id="view"></div>
+  <div class="ftr"><span id="hint"></span><span>HACK. DEVELOP. DEFEND.</span></div>
+  <div class="prog" id="prog"></div>
+</div>
+
+<script>
+(function () {
+  var state = { i: 0, idea: "habit tracker", checks: {}, step: 0, typing: null, back: null };
+
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function idea() { return esc(state.idea || "habit tracker"); }
+
+  function blocks(items) {
+    return '<div class="blocks">' + items.map(function (it, k) {
+      return '<div class="blk"' + (it[2] ? ' data-goto="' + it[2] + '"' : '') + '><div class="n">0' + (k + 1) + '</div><div class="t">' + it[0] + (it[1] ? '<small>' + it[1] + '</small>' : '') + '</div>' + (it[2] ? '<div class="go">GO TO SLIDE ' + it[2] + ' &gt;</div>' : '') + '</div>';
+    }).join("") + '</div>';
+  }
+  function checklist(id, items) {
+    return '<div class="check">' + items.map(function (t, k) {
+      var key = id + k;
+      return '<label><input type="checkbox" data-k="' + key + '"' + (state.checks[key] ? " checked" : "") + '><span>' + t + '</span></label>';
+    }).join("") + '</div>';
+  }
+  function title(a, b) { return '<h2>' + a + (b ? ' <span class="a">' + b + '</span>' : '') + '</h2>'; }
+
+  var TERM = {
+    tree: [
+      { cmd: "tree -a -I .git", out: [
+        ".", "├── .gitignore", "├── docs", "│   └── .gitkeep", "├── pyproject.toml", "├── README.md",
+        "├── src", "│   └── myproject", "│       └── __init__.py", "└── tests", "    └── test_smoke.py"] }
+    ],
+    venv: [
+      { cmd: "python3 -m venv .venv", out: [] },
+      { cmd: "source .venv/bin/activate", out: [], venv: true },
+      { cmd: "which python", out: ["~/myproject/.venv/bin/python"] },
+      { cmd: "cat pyproject.toml", out: ['[project]', 'name = "myproject"', 'version = "0.1.0"', 'requires-python = ">=3.10"', 'dependencies = []'] }
+    ],
+    code: [
+      { cmd: "git diff tests/", out: [
+        "-from myproject import hello", "+from myproject import hello, is_adult",
+        "+    def test_18_is_adult(self):", "+        self.assertTrue(is_adult(18))"] },
+      { cmd: "python -m unittest discover -s tests", out: [
+        "E", "ERROR: test_smoke (unittest.loader._FailedTest)",
+        "ImportError: cannot import name 'is_adult'", "  from 'myproject'", "", "FAILED (errors=1)"] },
+      { cmd: "printf 'def is_adult(age):\\n    return age >= 18\\n' >> src/myproject/__init__.py", out: [] },
+      { cmd: "python -m unittest discover -s tests", out: ["..", "Ran 2 tests in 0.000s", "", "OK"] },
+      { cmd: 'git commit -am "Add is_adult"', out: ["[main 757f347] Add is_adult", " 2 files changed, 6 insertions(+), 1 deletion(-)"] }
+    ],
+    live: [
+      { cmd: "mkdir myproject && cd myproject", out: [] },
+      { cmd: "git init", out: ["Initialized empty Git repository"] },
+      { cmd: "python3 -m venv .venv", out: [] },
+      { cmd: "source .venv/bin/activate", out: [], venv: true },
+      { cmd: "mkdir -p src/myproject tests docs", out: [] },
+      { cmd: "cp -R ../starter/. .", out: [] },
+      { cmd: "tree -a -I '.git|.venv'", out: [
+        ".", "├── .gitignore", "├── docs", "│   └── .gitkeep", "├── pyproject.toml", "├── README.md",
+        "├── src", "│   └── myproject", "│       └── __init__.py", "└── tests", "    └── test_smoke.py"] },
+      { cmd: "python -m unittest discover -s tests -v", out: [
+        "test_hello (test_smoke.SmokeTest.test_hello) ... ok", "",
+        "----------------------------------------", "Ran 1 test in 0.000s", "", "OK"] },
+      { cmd: 'git add . && git commit -m "Initial skeleton"', out: ["[main (root-commit) 3f2a9c1] Initial skeleton", " 6 files changed, 56 insertions(+)"] }
+    ]
+  };
+
+  var GATE = '<svg class="gate" viewBox="0 0 430 520" aria-hidden="true">' +
+    '<defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b1f21"/><stop offset=".7" stop-color="#0f4a45"/><stop offset="1" stop-color="#19e3c1" stop-opacity=".55"/></linearGradient></defs>' +
+    '<rect x="0" y="50" width="70" height="470" fill="#091214" stroke="#19e3c1" stroke-opacity=".3"/>' +
+    '<rect x="360" y="50" width="70" height="470" fill="#091214" stroke="#19e3c1" stroke-opacity=".3"/>' +
+    '<rect x="70" y="50" width="290" height="370" fill="url(#sky)" stroke="#19e3c1" stroke-width="2.5"/>' +
+    '<g fill="#08201f" opacity=".95"><rect x="90" y="330" width="26" height="90"/><rect x="122" y="290" width="22" height="130"/><rect x="150" y="345" width="30" height="75"/><rect x="190" y="250" width="18" height="170"/><rect x="214" y="310" width="28" height="110"/><rect x="250" y="270" width="22" height="150"/><rect x="278" y="335" width="32" height="85"/><rect x="316" y="300" width="24" height="120"/></g>' +
+    '<g stroke="#19e3c1" stroke-opacity=".55" fill="none"><path d="M0 520 L215 420 M90 520 L215 420 M170 520 L215 420 M260 520 L215 420 M340 520 L215 420 M430 520 L215 420"/><path d="M0 440 H430 M0 468 H430 M0 500 H430" stroke-opacity=".3"/></g>' +
+    '</svg>';
+
+  var S = [
+    { sec: "INTRO", html: function () {
+      return '<div class="kicker">HackDev Webinar | 25 Oct 2026</div><h1>Initiate<br><span class="a">Your 1st</span><br>Project</h1><p class="big dim">End-to-end project starter</p>' + GATE; } },
+    { sec: "INTRO", html: function () {
+      return title("Who is", "talking") + blocks([
+        ["Irfan Ali, software engineer at Gamuda", "at work, nothing starts without a ticket and a branch"],
+        ["I start projects for work, for fun and for clients", "the first hour decides more than the last ten"],
+        ["Tonight: how to start, not how to finish", "one engineer's process, so check it against a second source"]]); } },
+    { sec: "INTRO", html: function () {
+      return title("How to", "listen to this") + '<p class="dim">Four questions. One idea of your own.</p>' + blocks([
+        ["What problem are you solving?"], ["Who already solved it?"], ["What changes after you look?"], ["What is the smallest clean thing you can build?"]]); } },
+    { sec: "INTRO", html: function () {
+      return title("Why first projects", "die") + '<ul><li>Start with tools, skip the problem.</li><li>No plan, no structure, no end.</li><li>You just heard vibe-coding hype. This is the part before the prompt.</li></ul>' +
+        '<div class="kicker">Our example idea (type one, press Enter)</div><div class="idea"><input id="ideaIn" value="' + idea() + '" autocomplete="off" spellcheck="false"></div>'; } },
+
+    { sec: "PLAN", html: function () {
+      return title("Problem", "statement") + '<p class="big">Example idea: <code>' + idea() + '</code></p><p>One sentence. <b>Who</b> has the problem, <b>what</b> is it, <b>why</b> does it hurt?</p><p class="dim">If you cannot write it in one sentence, you are not ready to build.</p>'; } },
+    { sec: "PLAN", html: function () {
+      return title("What could", "go wrong") + '<p class="dim">List the risks for <code>' + idea() + '</code> before you build.</p><ul><li>Scope too big.</li><li>Nobody wants it.</li><li>Not enough time.</li><li>A skill you do not have yet.</li></ul><p>Each risk gets one action. No action, no plan.</p>'; } },
+    { sec: "PLAN", html: function () {
+      return title("Break it into", "steps") + '<p class="dim">Sketch the system as boxes on paper: input → what happens → output.</p>' + blocks([
+        ["Smallest useful version", "v1 for " + idea() + ": the one thing it must do"], ["Make it usable", "someone else can try it, one sitting"],
+        ["Make it reliable", "tests and error handling, one sitting"], ["Add the feature you cut", "only if it still matters, one sitting"]]); } },
+    { sec: "PLAN", html: function () {
+      return '<div class="steal"><div class="kicker">Steal this</div>' + title("Planning", "worksheet") + '<p class="dim" style="font-size:16px">File: docs/planning-worksheet.md</p></div>' + checklist("w", [
+        "<b>Problem</b>: who, what, why it hurts (one sentence)", "<b>User</b>: one real person or group, not “everyone”",
+        "<b>Risks</b>: at least three, each with an action", "<b>Steps</b>: v1 plus three, each one sitting",
+        "<b>Done means</b>: one checkable sentence"]); } },
+    { sec: "PLAN", dual: "ai", html: function () {
+      return title("When to put", "AI down") + '<p class="dim">Same idea, two ways to plan it. Press ENTER. AI is fine later, for typing. Not for deciding what to build.</p>'; } },
+
+    { sec: "RESEARCH", html: function () {
+      return title("Who already", "solves this") + '<p class="big">Search for <code>' + idea() + '</code>.</p><ul><li>Find at least three existing solutions.</li><li>Crowded market? Good. Plenty to study.</li><li>No competitor? Check your search words first.</li></ul>'; } },
+    { sec: "RESEARCH", html: function () {
+      return title("The", "gap") + '<ul><li>What do they miss?</li><li>Who do they ignore?</li><li>What do users complain about?</li></ul><p class="big">That is your angle.</p>'; } },
+    { sec: "RESEARCH", html: function () {
+      return '<div class="steal"><div class="kicker">Steal this</div>' + title("Research", "checklist") + '<p class="dim" style="font-size:16px">File: docs/research-checklist.md</p></div>' + checklist("r", [
+        "Who built it, and can they be wrong in public?", "What does it cost? Read the limits.", "What does it do well? Copy that idea, not the code.",
+        "What does it miss? What do users complain about?", "Is the information dated? Check last update.", "Did a second source say the same thing?",
+        "Fact or guess? Keep them apart."]); } },
+
+    { sec: "ITERATE", html: function () {
+      return title("Research changes", "the plan") + '<p>Go back to your worksheet and <b>edit it</b>.</p><ul><li>Smaller scope.</li><li>Different user.</li><li>A dropped feature.</li></ul><p class="dim">If research changed nothing, you probably did not research.</p>'; } },
+    { sec: "ITERATE", html: function () {
+      return title("Exit", "condition") + '<p class="dim">Loop back to step 1 until all four are true:</p>' + checklist("x", [
+        "The problem is one sentence.", "One real person with the problem said <b>yes, that is me</b>.",
+        "I know my riskiest assumption and one cheap way to test it.", "Version 1 fits my time box, for example one weekend."]) +
+        '<p class="big">Then build. Max 3 loops. Still not ready? Pick a smaller idea.</p>' +
+        '<p class="dim" style="font-size:16px">Sources: The Mom Test (Fitzpatrick) | Lean Startup (Ries) | Shape Up appetite (Basecamp) | Premortem (Klein, HBR 2007)</p>'; } },
+
+    { sec: "BUILD", html: function () {
+      function chip(n, cls, tag) { return '<div class="chip ' + cls + '"><span>' + n + '</span>' + (tag ? '<small>' + tag + '</small>' : '') + '</div>'; }
+      return title("SDLC,", "the process") + '<p class="dim">Same loop for every project. You already did the first three tonight.</p>' +
+        '<div class="flowwrap"><div class="flow">' + chip("Plan", "done", "worksheet") + '<i></i>' + chip("Research", "done", "checklist") + '<i></i>' + chip("Iterate", "done", "exit check") + '<i></i>' +
+        chip("Build", "here", "you are here") + '<i></i>' + chip("Test", "", "") + '<i></i>' + chip("Review", "", "") + '</div><div class="loop"><span>repeat in small slices</span></div></div>' +
+        '<div class="recap"><p><b>Plan</b>one-sentence problem, risks with actions, v1 steps</p><p><b>Research</b>what exists, and the gap</p><p><b>Iterate</b>edit the plan until the four checks pass</p></div>' +
+        '<div class="steal"><div class="kicker">Build starts with the setup</div><p>Folder layout &nbsp;&gt;&nbsp; dependencies &nbsp;&gt;&nbsp; safe installs &nbsp;&gt;&nbsp; clean code &nbsp;&gt;&nbsp; live skeleton</p></div>'; } },
+    { sec: "BUILD", term: "tree", html: function () {
+      return title("Folder", "layout") + '<ul><li>One home for each kind of thing: code, tests, docs, config.</li><li>The layout follows the shape of the project.</li><li>Start flat. Split when it hurts.</li></ul>' +
+        '<div class="vars"><div class="kicker">Common shapes</div>' +
+        '<p><b>Single app</b><code>src/ tests/ docs/</code></p>' +
+        '<p><b>Full stack</b><code>frontend/ backend/</code></p>' +
+        '<p><b>Data project</b><code>data/ scripts/ docs/</code></p>' +
+        '<p><b>Monorepo</b><code>apps/ packages/</code></p>' +
+        '<p class="dim">Our starter is the single-app shape. A monorepo suits several apps that share code, which is rare for a first project.</p></div>'; } },
+    { sec: "BUILD", term: "venv", html: function () {
+      return title("Dependencies", "") + '<ul><li>One virtual environment per project.</li><li>One manifest. Pin versions.</li><li>Fewer is safer. Add one with a reason.</li></ul><p class="dim"><code>dependencies = []</code> is empty on purpose: nothing installed, nothing to trust yet. It only declares. It does not install.</p>'; } },
+    { sec: "BUILD", html: function () {
+      return title("Verify before", "you install") + '<p class="big">A plain <code>pip install</code> runs code from strangers.</p>' + blocks([
+        ["Does the package exist?", "AI tools invent names"], ["How old is it?", "born last week = stop"], ["Who maintains it?", "real people, real history"]]) + '<p class="dim">Full story: talk 03, Phantom Dependencies.</p>'; } },
+    { sec: "BUILD", term: "code", html: function () {
+      return title("Clean code,", "seven rules") + '<ul class="rules">' +
+        '<li>One job per function. Needs "and"? Split it.</li>' +
+        '<li>Names say what: <code>is_ready</code>, <code>get_user</code>.</li>' +
+        '<li>No magic numbers: <code>SECONDS_PER_DAY</code>.</li>' +
+        '<li>Comment the why, not the what.</li>' +
+        '<li>Return early. Fewer nested ifs.</li>' +
+        '<li>One test per behaviour. Test first.</li>' +
+        '<li>Make it work, make it right, then fast.</li></ul>'; } },
+    { sec: "BUILD", term: "live", html: function () {
+      return title("Live:", "the skeleton") + '<p class="dim">Empty folder to first passing test.</p><ul><li>folder + git + venv</li><li>make the layout (slide 16)</li><li>fill it with the starter files</li><li>one test, one commit</li></ul><p><span class="tag">ENTER</span> runs the next command</p>'; } },
+
+    { sec: "WRAP", jumps: [8, 12, 14, 20], html: function () {
+      return '<div class="steal"><div class="kicker">Steal this</div>' + title("The whole", "list") + '</div>' + blocks([
+        ["Planning worksheet", "docs/planning-worksheet.md", 8], ["Research checklist", "docs/research-checklist.md", 12], ["Exit condition", "loop until all four are true", 14], ["Starter skeleton", "starter/ and the install checks", 20]]); } },
+    { sec: "WRAP", html: function () {
+      return '<h1>Plan first.<br><span class="a">Tools second.</span></h1><p class="big dim">Next up: Vibe Coding Safely | Adam Amzar</p>' + GATE; } }
+  ];
+
+  var DUALS = {
+    ai: {
+      panes: [
+        { label: "CLAUDE | ask it to plan", kind: "chat", note: "staged example, not a benchmark" },
+        { label: "NVIM | docs/planning-worksheet.md", kind: "edit", note: "-- INSERT --  your own head, no AI" }
+      ],
+      steps: [
+        { pane: 0, cmd: "plan my habit tracker app", out: ["Great idea! Here is a plan:", "1. Auth  2. Streaks  3. Social feed", "4. Push alerts  5. Analytics", "6. Dark mode  7. Mobile apps  8. AI coach"] },
+        { pane: 1, cmd: "Problem: I stop logging habits after day 3,\nso every tracker I try ends up abandoned." },
+        { pane: 0, cmd: "who is the user?", out: ["Busy professionals who want better habits."] },
+        { pane: 1, cmd: "User: me, and anyone who quits apps in a week." },
+        { pane: 0, cmd: "what could go wrong?", out: ["Scope creep. Mitigate with agile sprints."] },
+        { pane: 1, cmd: "Risk: nobody wants another tracker.\n  -> ask 5 friends why they quit theirs." },
+        { pane: 1, cmd: "v1: one habit, one button, one streak number.\nDone means: I use it 7 days in a row." }
+      ]
+    }
+  };
+
+  var view = document.getElementById("view");
+  var stage = document.getElementById("stage");
+
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+
+  function termHtml(key) {
+    return '<div class="term"><div class="bar"><span>TERMINAL</span><span class="s">SCRIPTED PLAYBACK</span></div><pre id="tout"></pre><div class="ft">' + (key === "live" ? "same commands as docs/live-commands.md" : key === "code" ? "trimmed from a real run: test first, red, green, commit" : "scripted output, nothing runs") + '</div></div>';
+  }
+
+  function render() {
+    var s = S[state.i];
+    state.step = 0; state.typing = null;
+    var split = s.term ? " split" : "";
+    var body;
+    if (s.dual) {
+      body = '<div class="slide dual"><div class="dtop">' + s.html() + '</div>' + DUALS[s.dual].panes.map(function (pn, p) {
+        return '<div class="term"><div class="bar"><span>' + pn.label + '</span><span class="s">STAGED</span></div><pre id="tout' + p + '"></pre><div class="ft">' + pn.note + '</div></div>';
+      }).join("") + '</div>';
+    } else {
+      body = '<div class="slide' + split + '"><div style="display:grid;gap:26px;align-content:start">' + s.html() + '</div>' + (s.term ? termHtml(s.term) : "") + '</div>';
+    }
+    var showBack = state.back !== null && state.back !== state.i;
+    view.innerHTML = body + (showBack ? '<div class="backbtn" id="backbtn">B &nbsp;BACK TO SLIDE ' + pad(state.back + 1) + '</div>' : "");
+    document.getElementById("meta").innerHTML = s.sec + ' &nbsp; <b>' + pad(state.i + 1) + ' / ' + S.length + '</b>';
+    document.getElementById("hint").textContent = "← → slides | F fullscreen" + (s.jumps ? " | click an item or press 1-" + s.jumps.length + " to jump" : "") +
+      ((s.term || s.dual) ? " | ENTER run next command | T terminal" : "") + (showBack ? " | B back" : "");
+    document.getElementById("prog").style.width = ((state.i + 1) / S.length * 100) + "%";
+    if (s.term || s.dual) drawTerm(null);
+    var inp = document.getElementById("ideaIn");
+    if (inp) {
+      inp.addEventListener("keydown", function (e) { e.stopPropagation(); if (e.key === "Enter") { state.idea = inp.value.trim() || "habit tracker"; inp.blur(); } });
+      inp.addEventListener("input", function () { state.idea = inp.value.trim() || "habit tracker"; });
+    }
+    Array.prototype.forEach.call(view.querySelectorAll('input[type=checkbox]'), function (c) {
+      c.addEventListener("change", function () { state.checks[c.getAttribute("data-k")] = c.checked; });
+    });
+    Array.prototype.forEach.call(view.querySelectorAll("[data-goto]"), function (b) {
+      b.addEventListener("click", function () { jump(parseInt(b.getAttribute("data-goto"), 10)); });
+    });
+    var bb = document.getElementById("backbtn");
+    if (bb) bb.addEventListener("click", goBack);
+    try { location.hash = String(state.i + 1); } catch (e) {}
+  }
+
+  function currentScript() { var s = S[state.i]; return s.term ? TERM[s.term] : (s.dual ? DUALS[s.dual].steps : null); }
+
+  function drawDual(typingCmd) {
+    var d = DUALS[S[state.i].dual], html = ["", ""], lineNo = [0, 0];
+    function addEdit(p, text) {
+      text.split("\n").forEach(function (ln) { lineNo[p]++; html[p] += '<span class="g">' + (lineNo[p] < 10 ? " " : "") + lineNo[p] + '</span>  <span class="t">' + esc(ln) + "</span>\n"; });
+    }
+    for (var k = 0; k < state.step; k++) {
+      var st = d.steps[k], p = st.pane;
+      if (d.panes[p].kind === "edit") addEdit(p, st.cmd);
+      else {
+        html[p] += '<span class="p">&gt;</span> <span class="t">' + esc(st.cmd) + "</span>\n";
+        (st.out || []).forEach(function (l) { html[p] += '<span class="o">' + esc(l) + "</span>\n"; });
+      }
+    }
+    var next = d.steps[state.step];
+    if (next) {
+      var np = next.pane, t = typingCmd !== null ? typingCmd : "";
+      if (d.panes[np].kind === "edit") {
+        var parts = t.split("\n");
+        parts.forEach(function (ln, idx) { var n = lineNo[np] + idx + 1; html[np] += '<span class="g">' + (n < 10 ? " " : "") + n + '</span>  <span class="t">' + esc(ln) + "</span>" + (idx < parts.length - 1 ? "\n" : ""); });
+      } else {
+        html[np] += '<span class="p">&gt;</span> <span class="t">' + esc(t) + "</span>";
+      }
+      html[np] += '<span class="cursor"></span>';
+    }
+    [0, 1].forEach(function (p) { var o = document.getElementById("tout" + p); if (o) o.innerHTML = '<div class="in">' + html[p] + '</div>'; });
+  }
+
+  function drawTerm(typingCmd) {
+    if (S[state.i].dual) return drawDual(typingCmd);
+    var sc = currentScript(); if (!sc) return;
+    var out = document.getElementById("tout"); if (!out) return;
+    var venv = false, html = "";
+    for (var k = 0; k < state.step; k++) {
+      var st = sc[k];
+      html += '<span class="p">' + (venv ? '<span class="v">(.venv)</span> ' : '') + '$</span> ' + esc(st.cmd) + "\n";
+      if (st.venv) venv = true;
+      st.out.forEach(function (l) { html += '<span class="o">' + esc(l) + "</span>\n"; });
+    }
+    var pre = '<span class="p">' + (venv ? '<span class="v">(.venv)</span> ' : '') + '$</span> ';
+    html += pre + (typingCmd !== null ? esc(typingCmd) : "") + '<span class="cursor"></span>';
+    out.innerHTML = '<div class="in">' + html + '</div>';
+  }
+
+  function runStep() {
+    var sc = currentScript(); if (!sc || state.typing) return;
+    if (state.step >= sc.length) return;
+    var cmd = sc[state.step].cmd, n = 0, myIndex = state.i;
+    state.typing = setInterval(function () {
+      if (state.i !== myIndex) { clearInterval(state.typing); state.typing = null; return; }
+      n++; drawTerm(cmd.slice(0, n));
+      if (n >= cmd.length) { clearInterval(state.typing); state.typing = null; state.step++; drawTerm(null); }
+    }, 18);
+  }
+
+  function go(d) {
+    var n = Math.max(0, Math.min(S.length - 1, state.i + d));
+    if (n !== state.i) { if (state.typing) { clearInterval(state.typing); state.typing = null; } state.i = n; state.back = null; render(); }
+  }
+
+  function jump(n) {
+    if (n < 1 || n > S.length || n - 1 === state.i) return;
+    if (state.typing) { clearInterval(state.typing); state.typing = null; }
+    state.back = state.i; state.i = n - 1; render();
+  }
+
+  function goBack() {
+    if (state.back === null) return;
+    if (state.typing) { clearInterval(state.typing); state.typing = null; }
+    state.i = state.back; state.back = null; render();
+  }
+
+  document.addEventListener("keydown", function (e) {
+    if (e.target && e.target.tagName === "INPUT" && e.target.type === "text") return;
+    var k = e.key;
+    if (k === "ArrowRight" || k === "PageDown") go(1);
+    else if (k === "ArrowLeft" || k === "PageUp") go(-1);
+    else if (k === " ") { if (currentScript()) runStep(); else go(1); }
+    else if (k === "Enter" || k === "ArrowDown") runStep();
+    else if (k === "Backspace" || k === "ArrowUp") { if (state.step > 0 && !state.typing) { state.step--; drawTerm(null); } }
+    else if ((k === "b" || k === "B") && state.back !== null) goBack();
+    else if (S[state.i].jumps && /^[1-9]$/.test(k) && S[state.i].jumps[+k - 1]) jump(S[state.i].jumps[+k - 1]);
+    else if (k === "Home") { state.i = 0; render(); }
+    else if (k === "End") { state.i = S.length - 1; render(); }
+    else if (k === "f" || k === "F") { if (!document.fullscreenElement) { document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); } else { document.exitFullscreen(); } }
+    else if (k === "t" || k === "T") { Array.prototype.forEach.call(view.querySelectorAll(".term"), function (t) { t.style.visibility = t.style.visibility === "hidden" ? "visible" : "hidden"; }); }
+  });
+
+  function fit() {
+    var sc = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+    stage.style.transform = "scale(" + sc + ")";
+  }
+  window.addEventListener("resize", fit);
+  fit();
+
+  var h = parseInt((location.hash || "").replace("#", ""), 10);
+  if (h >= 1 && h <= S.length) state.i = h - 1;
+  render();
+})();
+</script>
+</body>
+</html>
