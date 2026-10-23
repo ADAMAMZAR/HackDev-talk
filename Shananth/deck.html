@@ -18,7 +18,7 @@
     Home / End         first / last slide
     P                  presenter notes in a separate window (never shown on the main screen)
 
-  Pipeline Simulator (slide 10): click a card, a preset, or a gate to toggle it.
+  Pipeline Simulator (slide 14): click a card, a preset, or a gate to toggle it.
   Space runs the selected card, then the next card that has not run yet.
 
   Everything is simulated. Open deck.html#selftest to check the pipeline rules in the console.
@@ -54,16 +54,16 @@
     transform: translate(-50%, -50%); background: var(--bg); overflow: hidden;
   }
 
-  /* section tag: a dashed "phantom" box, bottom left */
+  /* section tag: a dashed "phantom" box above the heading */
   #section {
-    position: absolute; left: 96px; bottom: 30px; font: 700 22px var(--display); letter-spacing: .06em; color: var(--accent);
+    position: absolute; left: 96px; top: 40px; font: 700 22px var(--display); letter-spacing: .06em; color: var(--accent);
     border: 3px dashed var(--accent); border-radius: 8px; padding: 4px 14px 2px;
   }
   #section:empty { display: none; }
   #counter { position: absolute; right: 48px; bottom: 34px; font: 600 22px var(--mono); color: var(--dim); }
 
   .slide {
-    position: absolute; inset: 80px 96px 110px 96px; opacity: 0; visibility: hidden;
+    position: absolute; inset: 110px 96px 90px 96px; opacity: 0; visibility: hidden;
     transition: opacity var(--t) var(--ease), visibility 0s linear var(--t);
   }
   .slide.active { opacity: 1; visibility: visible; transition-delay: 0s; }
@@ -101,6 +101,42 @@
   .speaker { font: 600 38px var(--display); margin-top: 20px; }
   .ghost-box { position: absolute; right: -40px; top: 330px; width: 430px; animation: float 5s ease-in-out infinite; }
   @keyframes float { 50% { transform: translateY(-18px); } }
+
+  .speaker span { font: 500 30px var(--sans); color: var(--dim); margin-left: 16px; }
+
+  /* welcome */
+  .hi-row { display: grid; grid-template-columns: 360px 1fr; gap: 30px; align-items: baseline; padding: 30px 0; border-top: 4px solid var(--edge); }
+  .hi-k { font: 700 26px var(--mono); letter-spacing: .12em; color: var(--accent); }
+  .hi-row p { font-size: 40px; }
+
+  /* this week: PHP2Shell */
+  .s-news .lead { font-size: 38px; max-width: 1500px; }
+  .tl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 44px; margin-top: 54px; }
+  .tl-node { border-top: 8px solid var(--accent); padding-top: 22px; position: relative; }
+  .tl-node::before { content: ""; position: absolute; top: -20px; left: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--accent); }
+  .tl-d { display: block; font: 700 58px var(--display); color: var(--accent); margin-bottom: 8px; }
+  .tl-node p { font-size: 32px; }
+  .src { font: 500 22px var(--mono); color: var(--dim); white-space: nowrap; }
+  .news-foot { display: flex; align-items: center; gap: 36px; margin-top: 56px; }
+  .news-foot .big { font: 700 120px/1 var(--display); font-variation-settings: "wdth" 80; color: var(--accent); }
+
+  /* panic + AI */
+  .panic { display: grid; grid-template-columns: 960px 1fr; gap: 64px; align-items: start; }
+  .panic .ai-code { min-height: 0; font-size: 34px; }
+  .panic .pn { padding: 0 30px 24px; }
+  .panic-pts { display: grid; gap: 40px; padding-top: 20px; }
+  .panic-pts p { font-size: 40px; }
+  .panic-pts .red { color: var(--red); }
+  .panic-pts p.accent { font: 700 46px/1.15 var(--display); }
+
+  /* plan */
+  .plan { list-style: none; }
+  .plan li { display: grid; grid-template-columns: 130px 1fr auto; align-items: baseline; padding: 18px 0; border-top: 4px solid var(--edge); }
+  .plan .n { font: 700 56px/1 var(--display); color: var(--accent); }
+  .plan .t { font: 700 50px var(--display); }
+  .plan .m { font: 600 26px var(--mono); color: var(--dim); }
+  .playalong { margin-top: 40px; border: 4px dashed var(--accent); border-radius: 16px; padding: 22px 30px; font-size: 36px; }
+  .playalong b { color: var(--accent); }
 
   /* 2 · real or phantom */
   .rp-pair { display: grid; grid-template-columns: 1fr 90px 1fr; align-items: center; height: 400px; }
@@ -387,16 +423,31 @@
   .take .n { font: 700 120px/1 var(--display); color: var(--accent); }
   .take p { font: 700 60px/1.12 var(--display); }
 
-  /* 13 · thanks */
-  .s-end h1 { font-size: 150px; }
-  .s-end .q { font: 700 70px var(--display); color: var(--accent); margin: 14px 0 26px; }
-  .sources { margin-top: 44px; display: grid; gap: 8px; }
-  .sources .kicker { font-size: 22px; margin-bottom: 6px; }
-  .sources p { font-size: 23px; line-height: 1.35; color: var(--dim); }
-  .sources code { color: var(--fg); font-size: 21px; }
+  /* sources */
+  .sources { display: grid; gap: 14px; }
+  .sources p { font-size: 28px; line-height: 1.3; color: var(--dim); }
+  .sources code { color: var(--fg); font-size: 24px; }
+
+  /* meme + thank you */
+  .meme { position: relative; height: 100%; display: grid; align-content: center; gap: 40px; }
+  .m-row { display: flex; align-items: center; gap: 30px; }
+  .m-who { font: 700 56px var(--display); }
+  .m-cmd { font: 500 44px var(--mono); background: #08090b; border: 4px solid var(--edge); border-radius: 14px; padding: 14px 26px; }
+  .m-ghost { position: absolute; right: 20px; bottom: 10px; width: 400px; animation: float 5s ease-in-out infinite; }
+  .bubble {
+    position: absolute; right: 30px; bottom: calc(100% + 24px); background: var(--fg); color: var(--ink); font: 700 42px var(--display);
+    padding: 20px 30px; border-radius: 26px; white-space: nowrap;
+  }
+  .bubble::after { content: ""; position: absolute; right: 150px; bottom: -40px; border: 20px solid transparent; border-top: 22px solid var(--fg); }
+  .thanks {
+    position: absolute; inset: -110px -96px -90px -96px; background: rgba(11, 12, 14, .92);
+    display: grid; place-content: center; text-align: center;
+  }
+  .thanks h1 { font-size: 220px; }
+  .thanks .q { font: 700 76px var(--display); color: var(--accent); margin-top: 20px; }
 
   @media (prefers-reduced-motion: reduce) {
-    .station, .station .chk, .token-run, .caret, .ghost-box, .gate.checking, .prod.owned { animation: none; }
+    .station, .station .chk, .token-run, .caret, .ghost-box, .m-ghost, .gate.checking, .prod.owned { animation: none; }
     .station .chk { opacity: 1; }
     .token-run { display: none; }
     .secret { transition-duration: 250ms; }
@@ -409,7 +460,7 @@
 
   <!-- 1 · Title -->
   <section class="slide s-title" data-label="">
-    <div class="kicker">HackDev · Slopsquatting</div>
+    <div class="kicker">HackDev Webinar · 25 Oct 2026</div>
     <h1>Phantom<br>Dependencies</h1>
     <p class="sub">How Attackers Pre-Register Your AI's Imagination</p>
     <p class="lede">Slopsquatting and how your CI/CD pipeline can stop it</p>
@@ -427,8 +478,59 @@
     </svg>
   </section>
 
-  <!-- 2 · Demo 1: Real or Phantom? -->
-  <section class="slide" data-module="realOrPhantom" data-label="DEMO 1 · REAL OR PHANTOM?">
+  <!-- 2 · Welcome -->
+  <section class="slide" data-label="WELCOME">
+    <h2>Hi, I'm Shananth</h2>
+    <div class="hi-row"><span class="hi-k">WHO</span><p>Software engineer at Coexrt AI.</p></div>
+    <div class="hi-row"><span class="hi-k">TONIGHT</span><p>The package names AI tools make up, and the people waiting to claim them.</p></div>
+    <div class="hi-row"><span class="hi-k">NO CODE NEEDED</span><p>I explain every term. Every demo is a simulation; nothing real gets installed.</p></div>
+  </section>
+
+  <!-- 3 · This week: PHP2Shell -->
+  <section class="slide s-news" data-label="THIS WEEK">
+    <h2>This week: PHP2Shell</h2>
+    <p class="lead">Two critical bugs in PHP let attackers run their own code on a web server. <b>No login needed.</b></p>
+    <div class="tl">
+      <div class="tl-node" data-step="1"><span class="tl-d">Oct 17</span><p>Attackers were already trying it, four days before the fix. <span class="src">AWS</span></p></div>
+      <div class="tl-node" data-step="2"><span class="tl-d">Oct 21</span><p>PHP ships an emergency fix. Upgrading PHP is the only safe option.</p></div>
+      <div class="tl-node" data-step="3"><span class="tl-d">That night</span><p>Millions of attack attempts. <span class="src">Cloudflare</span></p></div>
+    </div>
+    <div class="news-foot" data-step="4"><span class="big">~70%</span><p>of the web runs on PHP <span class="src">Wiz</span><br>AI tools helped researchers find these bugs.</p></div>
+  </section>
+
+  <!-- 4 · Panic + AI -->
+  <section class="slide" data-label="THIS WEEK">
+    <h2>Panic + AI = a slopsquatting window</h2>
+    <div class="panic">
+      <div class="chat">
+        <div class="chat-bar"><span>AI assistant</span><span class="note">ILLUSTRATIVE</span></div>
+        <div class="msg-user">How do I patch PHP2Shell in my Laravel app? Quick!</div>
+        <div class="msg-ai"><div class="ai-intro">Install the patch package:</div><pre class="ai-code">composer require <span class="ph hit">php2shell/patch</span></pre></div>
+        <p class="note pn">php2shell/patch is made up for this talk.</p>
+      </div>
+      <div class="panic-pts">
+        <p data-step="1">The real fix is <b>upgrading PHP</b>. There is no package to install.</p>
+        <p data-step="2">So any package an AI names here is <b class="red">invented</b>.</p>
+        <p data-step="3" class="accent">An attacker can register that name in minutes, while everyone rushes to patch.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · Tonight's plan -->
+  <section class="slide" data-label="TONIGHT'S PLAN">
+    <h2>Tonight's plan</h2>
+    <ol class="plan">
+      <li><span class="n">01</span><span class="t">Real or phantom?</span><span class="m">3 MIN</span></li>
+      <li><span class="n">02</span><span class="t">How the attack works</span><span class="m">5 MIN</span></li>
+      <li><span class="n">03</span><span class="t">Watch an attacker do it</span><span class="m">5 MIN</span></li>
+      <li><span class="n">04</span><span class="t">How your pipeline stops it</span><span class="m">7 MIN</span></li>
+      <li><span class="n">05</span><span class="t">What to do on Monday</span><span class="m">2 MIN</span></li>
+    </ol>
+    <p class="playalong">Play along: when two package names appear, type <b>REAL</b> or <b>PHANTOM</b> in the chat.</p>
+  </section>
+
+  <!-- 6 · Demo 1: Real or Phantom? -->
+  <section class="slide" data-module="realOrPhantom" data-label="01 · REAL OR PHANTOM? · DEMO 1">
     <h2>Real or phantom?</h2>
     <div class="rp-pair">
       <div class="rp-card"><span class="eco"></span><code class="name"></code><span class="badge">✓ REAL</span><span class="stamp"></span></div>
@@ -443,7 +545,7 @@
   </section>
 
   <!-- 3 · What is slopsquatting? -->
-  <section class="slide s-def" data-label="THE ATTACK">
+  <section class="slide s-def" data-label="02 · HOW THE ATTACK WORKS">
     <h2>What is slopsquatting?</h2>
     <div class="vs2">
       <div class="col">
@@ -463,7 +565,7 @@
   </section>
 
   <!-- 4 · Demo 2: Hallucination Roulette -->
-  <section class="slide" data-module="roulette" data-label="DEMO 2 · HALLUCINATION ROULETTE">
+  <section class="slide" data-module="roulette" data-label="02 · HOW THE ATTACK WORKS · DEMO 2">
     <div class="rl">
       <div class="chat">
         <div class="chat-bar"><span>AI assistant</span><span class="note">SIMULATED · NO REAL AI</span></div>
@@ -481,7 +583,7 @@
   </section>
 
   <!-- 5 · The numbers -->
-  <section class="slide" data-label="THE NUMBERS">
+  <section class="slide" data-label="02 · HOW THE ATTACK WORKS">
     <h2>The numbers</h2>
     <div class="stats">
       <div class="stat" data-step="1">
@@ -506,7 +608,7 @@
   </section>
 
   <!-- 6 · Demo 3: The Attacker's View -->
-  <section class="slide" data-module="attacker" data-label="DEMO 3 · THE ATTACKER'S VIEW">
+  <section class="slide" data-module="attacker" data-label="03 · WATCH AN ATTACKER · DEMO 3">
     <div class="at">
       <div class="browser">
         <div class="b-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">https://registry.example/search</span></div>
@@ -528,7 +630,7 @@
   </section>
 
   <!-- 7 · It already happened -->
-  <section class="slide s-inc" data-label="IT ALREADY HAPPENED">
+  <section class="slide s-inc" data-label="03 · WATCH AN ATTACKER">
     <h2>It already happened</h2>
     <div class="inc" data-step="1">
       <div class="h"><code>huggingface-cli</code><span>2024</span></div>
@@ -549,7 +651,7 @@
   </section>
 
   <!-- 8 · Why AI agents make it worse -->
-  <section class="slide" data-label="AGENTS">
+  <section class="slide" data-label="03 · WATCH AN ATTACKER">
     <h2>Why AI agents make it worse</h2>
     <div class="lane">
       <div class="who">You + AI chat</div>
@@ -566,7 +668,7 @@
   </section>
 
   <!-- 9 · What is a CI/CD pipeline? -->
-  <section class="slide s-cicd" data-label="FOR THE NON-DEVELOPERS">
+  <section class="slide s-cicd" data-label="04 · YOUR PIPELINE">
     <h2>What is a CI/CD pipeline?</h2>
     <p class="lead">An assembly line for code. Every change passes automatic quality checks on its way to users.</p>
     <div class="cicd">
@@ -583,7 +685,7 @@
   </section>
 
   <!-- 10 · Demo 4: Pipeline Simulator -->
-  <section class="slide" data-module="pipeline" data-label="DEMO 4 · PIPELINE SIMULATOR">
+  <section class="slide" data-module="pipeline" data-label="04 · YOUR PIPELINE · DEMO 4">
     <div class="sim">
       <div class="sim-top">
         <h2>Pipeline simulator</h2>
@@ -610,7 +712,7 @@
   </section>
 
   <!-- 11 · What doesn't save you -->
-  <section class="slide" data-label="FALSE COMFORT">
+  <section class="slide" data-label="04 · YOUR PIPELINE">
     <h2>What doesn't save you</h2>
     <div class="nope" data-step="1">
       <span class="x">✗</span><div class="t">CVE scanners, such as <code>pip-audit</code></div>
@@ -627,26 +729,53 @@
   </section>
 
   <!-- 12 · Takeaways -->
-  <section class="slide" data-label="TAKEAWAYS">
+  <section class="slide" data-label="05 · WHAT TO DO ON MONDAY">
     <h2>Three things to keep</h2>
     <div class="take" data-step="1"><span class="n">1</span><p>Treat AI-suggested package names as untrusted input.</p></div>
     <div class="take" data-step="2"><span class="n">2</span><p>Pin dependencies with hashes, so unknown names fail by default.</p></div>
     <div class="take" data-step="3"><span class="n">3</span><p>Never let agents or scanners install packages where real credentials live.</p></div>
   </section>
 
-  <!-- 13 · Thank you / Q&A -->
-  <section class="slide s-end" data-label="">
-    <h1>Thank you</h1>
-    <p class="q">Questions?</p>
-    <p class="speaker" id="speaker-end"></p>
+  <!-- 17 · Sources -->
+  <section class="slide" data-label="SOURCES">
+    <h2>Sources</h2>
     <div class="sources">
-      <div class="kicker">Sources</div>
       <p>Spracklen et al., "We Have a Package for You!", USENIX Security 2025 · <code>arxiv.org/abs/2406.10279</code></p>
       <p>Lasso Security, AI package hallucinations · <code>lasso.security/blog/ai-package-hallucinations</code></p>
       <p>Aikido, slopsquatting cases · <code>aikido.dev/blog/slopsquatting-ai-package-hallucination-attacks</code></p>
       <p>Help Net Security, Anthropic evaluation incidents (July 2026) · <code>helpnetsecurity.com/2026/07/31/anthropic-claude-cybersecurity-incidents</code></p>
       <p>Slopsquatting and Python defenses (2026 data) · <code>pasqualepillitteri.it/en/news/9586/slopsquatting-pypi-ai-hallucinated-packages</code></p>
+      <p>PHP2Shell overview · <code>en.wikipedia.org/wiki/PHP2Shell</code></p>
+      <p>Fortune, "AI helped discover the PHP vulnerability…" (21 Oct 2026) · <code>fortune.com/2026/10/21</code></p>
+      <p>AWS Security Blog, PHP2Shell exploitation before disclosure · <code>aws.amazon.com/blogs/security</code></p>
     </div>
+  </section>
+
+  <!-- 18 · Meme, then thank you -->
+  <section class="slide" data-label="">
+    <div class="meme">
+      <div class="m-row"><span class="m-who dim">Nobody:</span></div>
+      <div class="m-row"><span class="m-who">The AI at 3am:</span><code class="m-cmd">npm install <span class="ph hit">react-codeshift</span></code></div>
+      <div class="m-row"><span class="m-who">The attacker, 2 days earlier:</span></div>
+      <div class="m-ghost">
+        <div class="bubble">I've been expecting you.</div>
+        <svg viewBox="0 0 400 460" aria-hidden="true">
+          <g fill="none" stroke="#ffbf3c" stroke-width="7" stroke-dasharray="20 14" stroke-linejoin="round">
+            <path d="M200 30 L370 120 L200 210 L30 120 Z"/>
+            <path d="M30 120 V300 L200 390 V210"/>
+            <path d="M370 120 V300 L200 390"/>
+          </g>
+          <g stroke="#ffbf3c" stroke-width="6">
+            <rect x="96" y="232" width="92" height="52" rx="16" fill="#050607"/>
+            <rect x="212" y="232" width="92" height="52" rx="16" fill="#050607"/>
+            <path d="M188 250 H212" fill="none"/>
+          </g>
+          <path d="M150 330 Q200 352 250 330" fill="none" stroke="#ffbf3c" stroke-width="7" stroke-linecap="round"/>
+          <ellipse cx="200" cy="440" rx="150" ry="14" fill="rgba(255,191,60,.12)"/>
+        </svg>
+      </div>
+    </div>
+    <div class="thanks" data-step="1"><h1>Thank you</h1><p class="q">Questions?</p></div>
   </section>
 
   <div id="counter"></div>
@@ -658,22 +787,28 @@
 /* ===================== Content (edit here) ===================== */
 
 const SPEAKER = "Shananth";
+const SPEAKER_ROLE = "Software engineer, Coexrt AI";
 
-// Speaker notes, one per slide, shown only in the P window.
+// Speaker notes: short points per slide, shown only in the P window. Full script: docs/presenter-script.md
 const NOTES = [
-  "Welcome. Today is about package names that AI coding tools make up, and the people who register those names before you install them.",
-  "Space shows a pair, Space again reveals, Space again for the next pair. Ask the audience to pick before the reveal.",
-  "Typosquatting waits for a human typo. Slopsquatting waits for the AI's confident mistake. Term coined by Seth Larson (PSF).",
-  "Press Space or click Ask again. Five prepared answers; four of them include react-codeshift. Watch the counter.",
-  "One stat per Space. 19.7% across 576,000 samples from 16 models (USENIX Security 2025). 205,474 unique fake names. 43% came back in all 10 re-runs: predictable means plannable. 2026: newer models hallucinate less (about 4.6–6.1%), but 127 names were invented identically by all five.",
-  "Space 1: search. Space 2: publish. Space 3: installs start; AI agents are highlighted. Cost to the attacker: one free account and a few minutes.",
-  "One story per Space. huggingface-cli (2024), react-codeshift (2026), unused-imports, and the July 2026 Anthropic evaluation incident.",
-  "With an agent, no human reads the name before the install runs. Install scripts execute immediately, before any import.",
-  "For non-developers: an assembly line with quality checks. Space reveals the line about gates asking the right question.",
-  "Start in Unprotected and run cards with Space. Then Typical: only the malware scan, so react-codeshift and the trick card get through. Then Hardened: everything bad stops at gate 1. Optional: turn gate 1 off and show the later gates still catch them.",
-  "CVE scanners need an advisory that doesn't exist yet. Attestations prove who built it, not that you wanted it. Download counts are easy to fake.",
-  "Three takeaways, one per Space.",
-  "Thank you. Questions. Sources are on screen.",
+  ["Welcome, thanks for joining.", "Tonight: fake package names that AI tools invent, and the attackers who claim them first.", "About 25 minutes, then questions."],
+  ["I'm Shananth, software engineer at Coexrt AI.", "You don't need to code. I'll explain every term as we go.", "Every demo is a simulation. Nothing real gets installed."],
+  ["Space reveals each point.", "This week PHP fixed two critical bugs that let attackers run code on a web server, no login needed.", "Attackers tried it 4 days before the fix. Millions of attempts the night it came out.", "About 70% of the web runs on PHP. AI helped find these bugs."],
+  ["Space reveals each point.", "Picture a developer in a rush, asking an AI how to patch.", "The real fix is upgrading PHP. There's no package to install.", "So any package the AI suggests is made up. This one is made up for the talk.", "Attackers register those made-up names. That's slopsquatting."],
+  ["Five parts, about 22 minutes.", "Ask the chat to play along: type REAL or PHANTOM when two names appear."],
+  ["Space: show a pair. Read both names. Give the chat 5 seconds.", "Space: reveal. Read the one-line reason.", "Space: next pair. After 3 pairs, Space shows the summary.", "Point: the fakes sound right. That's the whole attack."],
+  ["Typosquatting bets on you mistyping a real name, like 'reqeusts'.", "Space: slopsquatting bets on the AI confidently inventing a name.", "The term comes from Seth Larson, Python Software Foundation."],
+  ["Same question, asked 5 times. Space or click 'Ask again'.", "Watch the counter. The made-up name keeps coming back: 4 out of 5.", "Point: it's not random. It repeats, so attackers can predict it."],
+  ["Space reveals each number.", "19.7%: about 1 in 5 suggested packages didn't exist (576,000 samples, 16 AI models).", "205,474 different made-up names.", "43% came back in every one of 10 retries. Predictable means plannable.", "2026: newer models mess up less, but all five invented the same 127 fake names."],
+  ["Space 1: search the name. Nobody owns it.", "Space 2: publish it. A free account and one command.", "Space 3: installs arrive. Yellow ones are AI agents installing on their own.", "Point: one free account and a few minutes."],
+  ["Space reveals each story.", "huggingface-cli: a researcher claimed a name AI kept suggesting. 30,000+ downloads; Alibaba put it in their instructions.", "react-codeshift: the name from our demo. Spread to 237 projects. AI agents kept installing it.", "unused-imports: a real malicious package, still ~233 downloads a week in early 2026.", "July 2026: a Claude model in a broken test setup registered a fake name on the real Python registry. It ran on 15 real systems."],
+  ["With a chat, a person reads the name before installing.", "Space: with an AI agent, nobody looks. It just installs.", "Space: installing can run code immediately, before anyone uses the package."],
+  ["For non-developers: a CI/CD pipeline is an assembly line for code.", "Every change is built, tested and shipped, with automatic checks on the way.", "Space: the question is whether any check asks the right question."],
+  ["Start on Unprotected. Space runs each card. Bad ones steal the secrets.", "Click Typical: only a malware scan. New fakes still get through. That's the uh-oh moment.", "Click Hardened: everything bad stops at gate 1.", "Gate 1 in plain words: a list of packages a person already approved, with fingerprints.", "Optional: click gate 1 to switch it off. Later gates still catch them."],
+  ["Space reveals each one.", "Scanners only know packages someone already reported.", "A signature proves who built it, not that you wanted it.", "Download counts are easy to fake."],
+  ["Space reveals each one.", "1. Treat package names from AI like a link from a stranger.", "2. Pin your packages with fingerprints, so unknown names fail.", "3. Keep AI agents away from real passwords and keys."],
+  ["Sources are in the deck and in the repo. Move on."],
+  ["Let the meme land for a second.", "Space: Thank you. Open the floor for questions."],
 ];
 
 const PAIRS = [
@@ -1248,8 +1383,7 @@ const sectionEl = document.getElementById("section");
 const counterEl = document.getElementById("counter");
 let cur = -1;
 
-document.getElementById("speaker").textContent = SPEAKER;
-document.getElementById("speaker-end").textContent = SPEAKER;
+document.getElementById("speaker").innerHTML = esc(SPEAKER) + "<span>" + esc(SPEAKER_ROLE) + "</span>";
 
 function go(i, dir) {
   i = Math.max(0, Math.min(slides.length - 1, i));
@@ -1304,7 +1438,7 @@ function broadcast() {
   if (!chan) return;
   const title = s => s.dataset.label || ($(s, "h1, h2") || {}).textContent || "";
   chan.postMessage({
-    type: "state", pos: (cur + 1) + " / " + slides.length, title: title(slides[cur]), notes: NOTES[cur] || "",
+    type: "state", pos: (cur + 1) + " / " + slides.length, title: title(slides[cur]), notes: NOTES[cur] || [],
     next: slides[cur + 1] ? "Next: " + title(slides[cur + 1]).replace(/\n/g, " ") : "Last slide",
   });
 }
@@ -1318,13 +1452,15 @@ const NOTES_HTML = '<!doctype html><html><head><meta charset="utf-8"><title>Pres
   'body{margin:0;padding:28px 32px;background:#111214;color:#eee;font:24px/1.45 "Segoe UI",Arial,sans-serif}' +
   '#pos{font:600 18px Consolas,monospace;color:#ffbf3c;letter-spacing:.1em}' +
   '#title{font:700 34px Bahnschrift,Arial,sans-serif;margin:8px 0 18px}#next{margin-top:28px;color:#999;font-size:18px}' +
+  '#notes{padding-left:26px}#notes li{margin-bottom:12px}' +
   '#help{position:fixed;bottom:14px;left:32px;color:#666;font:14px Consolas,monospace}</style></head><body>' +
-  '<div id="pos"></div><div id="title"></div><div id="notes">Waiting for the deck…</div><div id="next"></div>' +
+  '<div id="pos"></div><div id="title"></div><ul id="notes"><li>Waiting for the deck…</li></ul><div id="next"></div>' +
   '<div id="help">Keys typed here also drive the deck.</div><script>' +
   'var ch=new BroadcastChannel("phantom-notes");' +
   'ch.onmessage=function(e){var d=e.data;if(d.type!=="state")return;' +
   'document.getElementById("pos").textContent=d.pos;document.getElementById("title").textContent=d.title;' +
-  'document.getElementById("notes").textContent=d.notes;document.getElementById("next").textContent=d.next;};' +
+  'var n=document.getElementById("notes");n.innerHTML="";d.notes.forEach(function(t){var li=document.createElement("li");li.textContent=t;n.appendChild(li);});' +
+  'document.getElementById("next").textContent=d.next;};' +
   'ch.postMessage({type:"hello"});' +
   'addEventListener("keydown",function(e){if(e.repeat&&e.key===" ")return;ch.postMessage({type:"key",key:e.key});' +
   'if([" ","ArrowLeft","ArrowRight","PageUp","PageDown"].indexOf(e.key)>=0)e.preventDefault();});' +
