@@ -33,13 +33,14 @@ About 25 minutes plus questions. Anyone can give this talk with this page and th
 |------|--------|---------|
 | Welcome and this week's news | 1–5 | 3 |
 | 01 Real or phantom? | 6 | 3 |
-| 02 How the attack works | 7–9 | 5 |
-| 03 Watch an attacker do it | 10–12 | 5 |
-| 04 How your pipeline stops it | 13–15 | 7 |
-| 05 What to do on Monday | 16 | 2 |
-| Sources, thank you | 17–18 | under 1 |
+| 02 How the attack works | 7–9 | 4 |
+| 03 Watch an attacker do it | 10–12 | 4 |
+| 04 How your pipeline stops it | 13–14 | 6 |
+| 05 How to protect yourself | 15–18 | 5 |
+| Sources, thank you | 19–20 | under 1 |
 
-Running late? Shorten slide 11 (read only the first two stories) and skip the optional gate 1 trick on slide 14.
+Running late? Read only the first two stories on slide 11, skip the optional gate 1 trick on slide 14,
+and on slide 16 point at the code without reading it out.
 
 ## Slide by slide
 
@@ -74,8 +75,8 @@ Running late? Shorten slide 11 (read only the first two stories) and skip the op
 ### 10. Demo 3: The attacker's view (Space 3 times)
 **Say:** "Here's the attacker's side. A registry is the public app store for code packages. Search the name: nobody owns it. Publish it: a free account and one command. Now installs arrive. The yellow ones are AI agents installing it on their own. Cost to the attacker: one free account and a few minutes."
 
-### 11. It already happened (Space 4 times)
-**Say:** "This isn't theory. In 2024 a researcher claimed huggingface-cli, a name AI kept suggesting, and it got over 30,000 downloads. Alibaba even put it in their instructions. react-codeshift, the name from our demo, spread to 237 projects, and AI agents kept trying to install it. unused-imports is a real malicious package still downloaded about 233 times a week this year. And in July, Anthropic disclosed that a Claude model, in a test setup that wrongly had internet access, registered a made-up name on the real Python registry. It ran on 15 real systems in about an hour before it was removed."
+### 11. It already happened (Space 3 times)
+**Say:** "This isn't theory. In 2024 a researcher claimed huggingface-cli, a name AI kept suggesting, and it got over 30,000 downloads. Alibaba even put it in their instructions. react-codeshift, the name from our demo, spread to 237 projects, and AI agents kept trying to install it. And in July, Anthropic disclosed that a Claude model, in a test setup that wrongly had internet access, registered a made-up name on the real Python registry. It ran on 15 real systems in about an hour before it was removed."
 
 ### 12. Why AI agents make it worse (Space twice)
 **Say:** "In a chat, a person reads the name before installing. An AI agent is an AI that runs commands by itself, so nobody looks. And installing a package can run code immediately, before anyone even uses it."
@@ -92,16 +93,22 @@ Running late? Shorten slide 11 (read only the first two stories) and skip the op
 
 **Say for gate 1:** "A lockfile is a list of packages a person already approved, each with a fingerprint called a hash. Anything not on the list fails. The AI's invented name was never approved, so it can't get in."
 
-### 15. What doesn't save you (Space 3 times)
-**Say:** "Three things that feel safe but aren't. Scanners only know packages someone already reported, and a new fake has no report yet. A signature proves who built a package, not that you wanted it. And download counts are easy to fake."
+### 15. Spot a phantom in 10 seconds (Space 6 times)
+**Say:** "So how do you protect yourself? First, anyone can spot a phantom in about 10 seconds. Look the name up on the registry. Red flags: it's brand new, it has only one release, there's no link to its source code, and nobody knows the publisher. Last check: is the name in the tool's official docs? The rule: copy install commands from the official docs, not from the AI."
 
-### 16. Takeaways (Space 3 times)
-**Say:** "Three things for Monday. Treat package names from AI like a link from a stranger. Pin your packages with hashes, so unknown names fail. And keep AI agents away from real passwords and keys."
+### 16. Best practices, in three layers (Space 4 times)
+**Say:** "Then it's three layers. You, using AI: look names up, copy commands from docs, and give your AI tool a written rule to only use packages already in the project. Your project and pipeline: install only what the lockfile approves, that's gate 1. Wait about a week before accepting brand-new releases, that's gate 3. And don't let install scripts run by default, that's gate 4. The commands are on screen and in the checklist. Your AI agents: they ask before installing, they run in a sandbox, and they never sit next to real passwords or keys. And remember, scanners, signatures and download counts help, but none of them is enough alone."
 
-### 17. Sources
+### 17. Already installed one? (Space 4 times)
+**Say:** "And if it already happened: remove it and restore your lockfile. Assume every password and key that machine could reach is stolen, and replace them all. Check what else changed. And report it, so the registry can take it down for everyone."
+
+### 18. Takeaways (Space 3 times)
+**Say:** "Three things to keep. Treat package names from AI like a link from a stranger. Pin your packages with hashes, so unknown names fail. And keep AI agents away from real passwords and keys. The full checklist is at the link on screen."
+
+### 19. Sources
 **Say:** "All sources are here and in the repo." Move on.
 
-### 18. Meme, then thank you (Space once)
+### 20. Meme, then thank you (Space once)
 **Do:** Let the meme sit for a moment, then press Space.
 **Say:** "Thank you. Happy to take questions."
 
@@ -133,7 +140,10 @@ The researcher who found it registered it first, so no attacker got it. Still, d
 No. Check any package name they suggest before installing, and let your lockfile catch the rest.
 
 **What's the quickest fix for my team?**
-Commit your lockfile and install with the command that respects it, such as `npm ci`, or pip with `--require-hashes`.
+Commit your lockfile and install with the command that respects it, such as `npm ci`, `composer install`, or pip with `--require-hashes`. Then add a one-week cooldown for new releases. Both are in `docs/checklist.md`.
+
+**Does a cooldown slow down security fixes?**
+It can. Most tools let you exclude specific packages, and Dependabot's default 3-day wait doesn't apply to security updates.
 
 **How do I check if a package is real?**
 Look it up on the registry yourself. Check who publishes it, how old it is, and whether it links to real source code. Be careful with anything brand new or with only one release.
