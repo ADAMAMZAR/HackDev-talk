@@ -1,0 +1,1375 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phantom Dependencies</title>
+<link rel="icon" href="data:,">
+<!--
+  Phantom Dependencies: How Attackers Pre-Register Your AI's Imagination
+  One file, no network, no install. Open in Chrome or Edge, click once, press F.
+
+  Keys
+    Right / PageDown   next slide
+    Left / PageUp      previous slide
+    Space              next step on this slide; moves on when the slide has no steps left
+    R                  reset the current demo
+    F                  fullscreen
+    Home / End         first / last slide
+    P                  presenter notes in a separate window (never shown on the main screen)
+
+  Pipeline Simulator (slide 10): click a card, a preset, or a gate to toggle it.
+  Space runs the selected card, then the next card that has not run yet.
+
+  Everything is simulated. Open deck.html#selftest to check the pipeline rules in the console.
+-->
+<style>
+  :root {
+    --bg: #0b0c0e;
+    --panel: #15171b;
+    --panel-2: #1f2227;
+    --edge: #343840;
+    --fg: #f2eee6;
+    --dim: #a5a198;
+    --accent: #ffbf3c;
+    --accent-bg: rgba(255, 191, 60, .14);
+    --ink: #17120a;
+    --red: #ff5b4f;
+    --red-bg: rgba(255, 91, 79, .15);
+    --green: #45d483;
+    --green-bg: rgba(69, 212, 131, .14);
+    --display: Bahnschrift, "DIN Alternate", "DIN Condensed", "Arial Narrow", sans-serif;
+    --sans: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --mono: "Cascadia Mono", "Cascadia Code", Consolas, "SF Mono", Menlo, monospace;
+    --t: 450ms;
+    --ease: cubic-bezier(.2, .7, .2, 1);
+  }
+  @media (prefers-reduced-motion: reduce) { :root { --t: 120ms; } }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #000; overflow: hidden; }
+  body { color: var(--fg); font-family: var(--sans); }
+  #stage {
+    position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px;
+    transform: translate(-50%, -50%); background: var(--bg); overflow: hidden;
+  }
+
+  /* section tag: a dashed "phantom" box, bottom left */
+  #section {
+    position: absolute; left: 96px; bottom: 30px; font: 700 22px var(--display); letter-spacing: .06em; color: var(--accent);
+    border: 3px dashed var(--accent); border-radius: 8px; padding: 4px 14px 2px;
+  }
+  #section:empty { display: none; }
+  #counter { position: absolute; right: 48px; bottom: 34px; font: 600 22px var(--mono); color: var(--dim); }
+
+  .slide {
+    position: absolute; inset: 80px 96px 110px 96px; opacity: 0; visibility: hidden;
+    transition: opacity var(--t) var(--ease), visibility 0s linear var(--t);
+  }
+  .slide.active { opacity: 1; visibility: visible; transition-delay: 0s; }
+
+  h1 { font: 700 168px/.92 var(--display); font-variation-settings: "wdth" 80; text-transform: uppercase; letter-spacing: .01em; }
+  h2 { font: 700 80px/1.02 var(--display); letter-spacing: .005em; margin-bottom: 44px; }
+  p { font-size: 34px; line-height: 1.35; }
+  b { font-weight: 700; }
+  .dim { color: var(--dim); }
+  .accent { color: var(--accent); }
+  code { font-family: var(--mono); }
+  .kicker { font: 600 26px var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--accent); }
+  .note { font: 500 22px var(--mono); color: var(--dim); }
+
+  .btn {
+    font: 600 30px var(--sans); padding: 16px 32px; border-radius: 12px; border: 4px solid var(--accent);
+    background: var(--accent); color: var(--ink); cursor: pointer;
+    transition: transform 200ms var(--ease), opacity 200ms, background 200ms, color 200ms;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn.ghost { background: transparent; color: var(--accent); }
+  .btn:disabled { opacity: .35; cursor: default; transform: none; }
+
+  [data-step] { opacity: 0; transform: translateY(24px); transition: opacity var(--t) var(--ease), transform var(--t) var(--ease); }
+  [data-step].shown { opacity: 1; transform: none; }
+
+  /* 1 · title */
+  .s-title { display: grid; align-content: center; gap: 30px; }
+  .s-title .sub { font: 600 56px/1.1 var(--display); color: var(--accent); }
+  .s-title .lede { color: var(--dim); }
+  .cmd { margin-top: 30px; font: 500 40px var(--mono); }
+  .cmd .p { color: var(--accent); }
+  .ghost-name { border: 4px dashed var(--accent); border-radius: 10px; padding: 2px 14px; }
+  .cmd small { display: block; margin-top: 12px; font: 500 24px var(--mono); color: var(--dim); }
+  .speaker { font: 600 38px var(--display); margin-top: 20px; }
+  .ghost-box { position: absolute; right: -40px; top: 330px; width: 430px; animation: float 5s ease-in-out infinite; }
+  @keyframes float { 50% { transform: translateY(-18px); } }
+
+  /* 2 · real or phantom */
+  .rp-pair { display: grid; grid-template-columns: 1fr 90px 1fr; align-items: center; height: 400px; }
+  .rp-vs { text-align: center; font: 700 40px var(--display); color: var(--dim); }
+  .rp-card {
+    position: relative; height: 100%; background: var(--panel); border: 5px solid var(--edge); border-radius: 22px;
+    display: grid; align-content: center; justify-items: center; gap: 22px; padding: 32px; overflow: hidden;
+    opacity: 0; transform: translateY(30px) scale(.97);
+    transition: opacity var(--t) var(--ease), transform var(--t) var(--ease), border-color var(--t), background var(--t);
+  }
+  .rp-card.in { opacity: 1; transform: none; }
+  .rp-card .eco { font: 600 24px var(--mono); letter-spacing: .14em; color: var(--dim); }
+  .rp-card .name { white-space: nowrap; }
+  .rp-card .badge {
+    position: absolute; top: 26px; right: 26px; font: 700 34px var(--display); color: #062010; background: var(--green);
+    padding: 6px 18px; border-radius: 10px; opacity: 0; transition: opacity var(--t);
+  }
+  .rp-card .stamp {
+    position: absolute; left: 50%; top: 74%; font: 700 104px/1 var(--display); font-variation-settings: "wdth" 80;
+    color: var(--red); border: 8px solid var(--red); border-radius: 14px; padding: 10px 30px 4px; background: rgba(11, 12, 14, .82);
+    transform: translate(-50%, -50%) rotate(-9deg) scale(1.8); opacity: 0;
+    transition: transform 420ms cubic-bezier(.3, 1.5, .5, 1), opacity 220ms;
+  }
+  .rp-card.real.revealed { border-color: var(--green); background: var(--green-bg); }
+  .rp-card.real.revealed .badge { opacity: 1; }
+  .rp-card.fake.revealed { border-color: var(--red); }
+  .rp-card.fake.revealed .name { opacity: .45; }
+  .rp-card.fake.revealed .stamp { opacity: 1; transform: translate(-50%, -50%) rotate(-9deg) scale(1); }
+  .rp-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 36px; min-height: 92px; gap: 40px; }
+  .rp-why { opacity: 0; transition: opacity var(--t); }
+  .rp-why.in { opacity: 1; }
+  .rp-why code { color: var(--red); }
+  .rp-progress { font: 600 24px var(--mono); color: var(--dim); white-space: nowrap; }
+  .rp-summary { position: absolute; left: 0; right: 0; bottom: 0; font: 700 60px var(--display); color: var(--accent); }
+  .rp-summary em { font-style: normal; text-decoration: underline; text-decoration-thickness: 6px; text-underline-offset: 10px; }
+
+  /* 3 · what is slopsquatting */
+  .vs2 { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+  .col { background: var(--panel); border-radius: 22px; padding: 44px 48px; border-top: 10px solid var(--edge); display: grid; gap: 22px; align-content: start; min-height: 520px; }
+  .col.slop { border-top-color: var(--accent); }
+  .col-h { font: 700 54px var(--display); }
+  .col .eg { font: 600 48px var(--mono); padding: 10px 0; }
+  .col .eg.typo { color: var(--fg); }
+  .col.slop .eg { color: var(--accent); }
+  .s-def .foot { margin-top: 36px; color: var(--dim); }
+
+  /* 4 · roulette */
+  .rl { display: grid; grid-template-columns: 1160px 1fr; gap: 60px; height: 100%; }
+  .chat { background: var(--panel); border: 4px solid var(--edge); border-radius: 22px; display: flex; flex-direction: column; overflow: hidden; }
+  .chat-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px 30px; border-bottom: 4px solid var(--edge); font: 700 30px var(--display); }
+  .chat-bar .note { font-size: 20px; }
+  .msg-user { align-self: flex-end; margin: 26px 30px 0; max-width: 88%; background: var(--panel-2); padding: 20px 28px; border-radius: 18px 18px 4px 18px; font-size: 32px; line-height: 1.3; }
+  .msg-ai { margin: 22px 30px 26px; }
+  .ai-intro { font-size: 32px; min-height: 44px; margin-bottom: 14px; }
+  .ai-code { font: 400 28px/1.45 var(--mono); background: #08090b; border-radius: 14px; padding: 22px 26px; white-space: pre; min-height: 450px; color: #dcd8cf; }
+  .ph { color: var(--red); border-radius: 6px; transition: background 300ms, text-shadow 300ms; }
+  .ph.hit { background: var(--red-bg); text-shadow: 0 0 16px rgba(255, 91, 79, .95); animation: phHit 700ms ease-out; }
+  @keyframes phHit { from { box-shadow: 0 0 0 0 rgba(255, 91, 79, .8); } to { box-shadow: 0 0 0 20px rgba(255, 91, 79, 0); } }
+  .caret { display: inline-block; width: 14px; height: 30px; background: var(--accent); vertical-align: -5px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .rl-side { display: grid; align-content: start; gap: 26px; padding-top: 10px; }
+  .rl-side h2 { font-size: 64px; margin-bottom: 0; }
+  .rl-label { font: 600 30px var(--mono); }
+  .rl-label code { color: var(--red); }
+  .rl-count { font: 700 150px/1 var(--display); font-variation-settings: "wdth" 80; }
+  .rl-count #rlSeen { color: var(--red); }
+  .rl-count small { font: 600 44px var(--display); color: var(--dim); }
+  .rl-dots { display: flex; gap: 18px; }
+  .rl-dots i { width: 44px; height: 44px; border-radius: 50%; border: 4px solid var(--edge); transition: background var(--t), border-color var(--t); }
+  .rl-dots i.hit { background: var(--red); border-color: var(--red); }
+  .rl-dots i.miss { background: var(--green); border-color: var(--green); }
+  .rl-side .btn { justify-self: start; margin-top: 10px; }
+
+  /* 5 · numbers */
+  .stats { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 32px; height: 740px; }
+  .stat { background: var(--panel); border-radius: 22px; padding: 30px 44px; border-left: 10px solid var(--accent); display: grid; align-content: center; gap: 12px; }
+  .stat .num { font: 700 136px/.95 var(--display); font-variation-settings: "wdth" 80; color: var(--accent); }
+  .stat p { font-size: 32px; line-height: 1.3; }
+  .stat .note { font-size: 22px; }
+  .stat .tag { font: 700 24px var(--mono); letter-spacing: .14em; color: var(--ink); background: var(--accent); padding: 4px 12px; border-radius: 6px; justify-self: start; }
+
+  /* 6 · attacker */
+  .at { display: grid; grid-template-columns: 1000px 1fr; gap: 44px; height: 760px; }
+  .browser { background: #ece8df; color: #16181b; border-radius: 22px; overflow: hidden; display: flex; flex-direction: column; }
+  .b-bar { display: flex; align-items: center; gap: 22px; background: #2a2d33; padding: 18px 24px; }
+  .b-bar .dots { display: flex; gap: 10px; }
+  .b-bar .dots i { width: 18px; height: 18px; border-radius: 50%; background: #5d626b; }
+  .b-bar .url { flex: 1; background: #16181b; color: #d8d4cb; font: 500 24px var(--mono); padding: 10px 20px; border-radius: 10px; }
+  .b-body { padding: 40px 48px; display: grid; gap: 30px; align-content: start; flex: 1; }
+  .reg-brand { display: flex; align-items: baseline; font: 700 46px var(--display); }
+  .reg-brand span { color: #8a5a00; }
+  .reg-brand small { margin-left: 20px; font: 600 20px var(--mono); color: #5a5e66; letter-spacing: .1em; border: 3px solid #5a5e66; border-radius: 6px; padding: 2px 10px; }
+  .search { display: flex; gap: 18px; }
+  .search .box { flex: 1; height: 92px; display: flex; align-items: center; border: 4px solid #16181b; border-radius: 14px; padding: 0 26px; font: 500 40px var(--mono); background: #fff; }
+  .search .box .ph-text { color: #8b8f96; }
+  .search .btn { background: #16181b; border-color: #16181b; color: #fff; }
+  .result { font-size: 34px; min-height: 300px; }
+  .result .nf { font: 700 50px var(--display); color: #b3261e; margin-bottom: 8px; }
+  .result .btn { margin-top: 28px; background: #16181b; border-color: #16181b; color: #fff; }
+  .result .btn.pressed { transform: scale(.95); background: #8a5a00; border-color: #8a5a00; }
+  .pkg h3 { font: 700 54px var(--mono); }
+  .pkg .meta { font-size: 28px; color: #4a4e55; margin: 6px 0 18px; }
+  .pkg .desc { font-size: 32px; }
+  .pkg .dl { margin-top: 26px; display: flex; align-items: baseline; gap: 24px; }
+  .pkg .dl b { font: 700 120px/1 var(--display); font-variation-settings: "wdth" 80; }
+  .pkg .dl span { font: 600 26px var(--mono); color: #4a4e55; }
+  .fade-in { animation: fadeIn var(--t) var(--ease); }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+  .at-right { display: grid; grid-template-rows: 300px 1fr; gap: 26px; min-height: 0; }
+  .term { background: #050607; border: 4px solid var(--edge); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; }
+  .term .t-bar { padding: 12px 20px; border-bottom: 4px solid var(--edge); font: 600 22px var(--mono); color: var(--dim); }
+  .term pre { flex: 1; padding: 16px 22px; font: 500 25px/1.42 var(--mono); white-space: pre-wrap; color: #cfcbc2; }
+  .term .pr { color: var(--accent); }
+  .term .ok { color: var(--green); font-weight: 700; }
+  .feed { background: var(--panel); border-radius: 18px; padding: 18px 22px; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+  .f-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .f-head b { font: 700 32px var(--display); }
+  .f-head .btn { font-size: 24px; padding: 8px 20px; border-width: 3px; }
+  .feed ul { list-style: none; display: grid; gap: 10px; }
+  .feed li { background: var(--panel-2); border-radius: 12px; padding: 10px 18px; border-left: 8px solid var(--edge); animation: popIn 450ms var(--ease); }
+  .feed li .who { font: 700 28px var(--display); }
+  .feed li .who small { font: 500 20px var(--mono); color: var(--dim); margin-left: 12px; }
+  .feed li code { display: block; font-size: 21px; color: var(--dim); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .feed li.ai { background: var(--accent-bg); border-left-color: var(--accent); }
+  .feed li.ai .who { color: var(--accent); }
+  .feed li.ai .who small { color: var(--accent); }
+  @keyframes popIn { from { opacity: 0; transform: translateY(-18px) scale(.98); } to { opacity: 1; transform: none; } }
+  .at-caption { position: absolute; left: 0; right: 0; bottom: -6px; font: 700 50px var(--display); color: var(--accent); opacity: 0; transition: opacity var(--t); }
+  .at-caption.in { opacity: 1; }
+
+  /* 7 · incidents */
+  .inc { display: grid; grid-template-columns: 420px 1fr; gap: 40px; padding: 18px 0; border-top: 4px solid var(--edge); align-items: start; }
+  .inc .h code { display: block; white-space: nowrap; font: 700 34px var(--mono); color: var(--accent); }
+  .inc .h span { font: 600 28px var(--display); color: var(--dim); }
+  .inc p { font-size: 31px; line-height: 1.3; }
+  .s-inc h2 { margin-bottom: 26px; }
+
+  /* 8 · agents */
+  .lane { display: grid; grid-template-columns: 320px 1fr; align-items: center; gap: 30px; margin-bottom: 38px; }
+  .lane .who { font: 700 40px var(--display); }
+  .flow { display: flex; align-items: center; gap: 22px; }
+  .chip { background: var(--panel); border: 4px solid var(--edge); border-radius: 16px; padding: 22px 28px; font-size: 32px; white-space: nowrap; }
+  .chip.gap { border-style: dashed; border-color: var(--red); color: var(--red); background: var(--red-bg); font-weight: 700; }
+  .flow .arr { font: 700 48px var(--display); color: var(--dim); }
+  .script { margin-top: 30px; display: grid; gap: 22px; }
+  .script code { font-size: 36px; background: #08090b; border: 4px solid var(--edge); border-radius: 14px; padding: 18px 26px; justify-self: start; }
+  .script code b { color: var(--red); }
+
+  /* 9 · ci/cd */
+  .s-cicd p.lead { max-width: 1500px; }
+  .cicd { position: relative; margin-top: 70px; height: 330px; }
+  .stations { display: grid; grid-template-columns: repeat(4, 1fr); gap: 60px; }
+  .station {
+    position: relative; height: 220px; background: var(--panel); border: 5px solid var(--edge); border-radius: 22px;
+    display: grid; align-content: center; justify-items: center; gap: 6px; animation: lit 8s linear infinite; animation-delay: var(--d);
+  }
+  .station .n { font: 700 70px/1 var(--display); color: var(--dim); }
+  .station .l { font: 700 40px var(--display); }
+  .station .s { font-size: 26px; color: var(--dim); }
+  .station .chk {
+    position: absolute; top: -24px; right: -24px; width: 60px; height: 60px; border-radius: 50%; background: var(--green);
+    color: #062010; font: 700 36px/60px var(--sans); text-align: center; opacity: 0; animation: chk 8s linear infinite; animation-delay: var(--d);
+  }
+  .track { position: absolute; left: 0; right: 0; top: 270px; height: 12px; border-radius: 6px; background: var(--edge); }
+  .token-run {
+    position: absolute; top: 246px; left: 0; width: 64px; height: 60px; border-radius: 12px; background: var(--accent);
+    color: var(--ink); font: 700 26px/60px var(--mono); text-align: center; animation: travel 8s linear infinite;
+  }
+  @keyframes travel { 0% { transform: translateX(0); opacity: 0; } 3% { opacity: 1; } 80% { transform: translateX(1664px); opacity: 1; } 88%, 100% { transform: translateX(1664px); opacity: 0; } }
+  @keyframes lit { 0%, 100% { border-color: var(--edge); box-shadow: none; } 4%, 12% { border-color: var(--accent); box-shadow: 0 0 40px rgba(255, 191, 60, .35); } 18% { border-color: var(--edge); box-shadow: none; } }
+  @keyframes chk { 0% { opacity: 0; } 6%, 70% { opacity: 1; } 80%, 100% { opacity: 0; } }
+  .s-cicd .quote { font: 700 56px/1.15 var(--display); color: var(--accent); margin-top: 20px; }
+
+  /* 10 · pipeline simulator */
+  .sim { position: relative; height: 100%; display: grid; grid-template-rows: 76px 196px 326px 1fr; gap: 20px; }
+  .sim-top { display: flex; align-items: center; gap: 28px; }
+  .sim-top h2 { font-size: 52px; margin: 0; flex: 1; white-space: nowrap; }
+  .sim-top .note { max-width: 230px; line-height: 1.25; font-size: 20px; }
+  .presets { display: flex; background: var(--panel); border-radius: 14px; padding: 6px; gap: 6px; align-items: center; }
+  .presets button { font: 600 28px var(--sans); padding: 12px 24px; border-radius: 10px; border: 0; background: none; color: var(--dim); cursor: pointer; transition: background 250ms, color 250ms; }
+  .presets button.on { background: var(--accent); color: var(--ink); }
+  .presets .custom { font: 600 20px var(--mono); color: var(--accent); padding: 0 12px; opacity: 0; transition: opacity 250ms; }
+  .presets .custom.in { opacity: 1; }
+  .sim-top .btn { font-size: 28px; padding: 12px 24px; white-space: nowrap; }
+
+  .deck { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; }
+  .pcard {
+    position: relative; background: var(--panel); border: 4px solid var(--edge); border-radius: 16px; padding: 14px 18px;
+    cursor: pointer; display: grid; align-content: start; gap: 4px; transition: border-color 250ms, transform 250ms var(--ease), background 250ms;
+  }
+  .pcard:hover { transform: translateY(-3px); }
+  .pcard.sel { border-color: var(--accent); background: #1c1a14; transform: translateY(-6px); }
+  .pcard .nm { font: 700 28px var(--mono); white-space: nowrap; }
+  .pcard .meta { font: 500 22px var(--mono); color: var(--dim); margin-bottom: 4px; }
+  .pcard .f { font-size: 22px; line-height: 1.3; }
+  .pcard .f.g::before { content: "✓ "; color: var(--green); font-weight: 700; }
+  .pcard .f.b::before { content: "✗ "; color: var(--red); font-weight: 700; }
+  .pcard .ill { position: absolute; top: -14px; left: 14px; font: 700 16px var(--mono); letter-spacing: .1em; background: var(--panel-2); color: var(--accent); padding: 2px 8px; border-radius: 6px; }
+  .pcard .badge { position: absolute; top: -16px; right: 12px; font: 700 20px var(--mono); padding: 3px 10px; border-radius: 6px; opacity: 0; transition: opacity 250ms; }
+  .pcard .badge.prod { opacity: 1; background: var(--green); color: #062010; }
+  .pcard .badge.blocked { opacity: 1; background: var(--bg); color: var(--red); border: 3px solid var(--red); }
+  .pcard .badge.stolen { opacity: 1; background: var(--red); color: #fff; }
+
+  .pipe { position: relative; padding-top: 60px; }
+  .gates { display: grid; grid-template-columns: repeat(6, 1fr); gap: 18px; height: 266px; }
+  .gate {
+    position: relative; background: var(--panel); border: 5px solid var(--accent); border-radius: 18px; padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 6px; cursor: pointer; overflow: hidden;
+    transition: opacity 300ms, border-color 300ms, background 300ms, box-shadow 300ms;
+  }
+  .gate .gn { font: 700 20px var(--mono); letter-spacing: .12em; color: var(--accent); }
+  .gate .gt { font: 700 32px/1.05 var(--display); }
+  .gate .gq { font-size: 22px; line-height: 1.25; color: var(--dim); }
+  .gate .gs { margin-top: auto; font-size: 22px; line-height: 1.25; font-weight: 600; }
+  .gate .gs .pill { font: 700 20px var(--mono); padding: 2px 10px; border-radius: 6px; background: var(--accent); color: var(--ink); }
+  .gate.off { opacity: .42; border-style: dashed; border-color: var(--dim); }
+  .gate.off .gn { color: var(--dim); }
+  .gate.off .gs .pill { background: var(--edge); color: var(--fg); }
+  .gate.checking { animation: checking 700ms ease-in-out infinite; }
+  @keyframes checking { 50% { box-shadow: 0 0 0 10px rgba(255, 191, 60, .3), 0 0 50px rgba(255, 191, 60, .45); } }
+  .gate.pass { border-color: var(--green); background: var(--green-bg); }
+  .gate.pass .gs { color: var(--green); }
+  .gate.blocked { border-color: var(--red); background: var(--red-bg); }
+  .gate.blocked .gs { color: var(--fg); }
+  .gate.skipped .gs { color: var(--dim); font-style: italic; }
+  .gate .stamp {
+    position: absolute; left: 50%; top: 44%; font: 700 50px/1 var(--display); font-variation-settings: "wdth" 80; color: var(--red);
+    border: 6px solid var(--red); border-radius: 10px; padding: 6px 14px 2px; background: rgba(11, 12, 14, .88);
+    transform: translate(-50%, -50%) rotate(-10deg) scale(1.8); opacity: 0; pointer-events: none;
+    transition: transform 380ms cubic-bezier(.3, 1.5, .5, 1), opacity 200ms;
+  }
+  .gate.blocked .stamp { opacity: 1; transform: translate(-50%, -50%) rotate(-10deg) scale(1); }
+  .prod { position: relative; border: 5px solid var(--edge); border-radius: 18px; background: var(--panel); padding: 16px; display: grid; align-content: center; gap: 10px; text-align: center; transition: border-color 300ms, background 300ms; }
+  .prod .gt { font: 700 36px var(--display); }
+  .prod .gq { font-size: 22px; line-height: 1.25; color: var(--dim); }
+  .prod.ok { border-color: var(--green); background: var(--green-bg); }
+  .prod.owned { border-color: var(--red); background: var(--red-bg); animation: owned 500ms ease-in-out 3; }
+  @keyframes owned { 50% { box-shadow: 0 0 60px rgba(255, 91, 79, .7); } }
+
+  .tok {
+    position: absolute; top: 0; left: 0; height: 46px; padding: 0 16px; border-radius: 10px; background: var(--accent); color: var(--ink);
+    font: 700 24px/46px var(--mono); white-space: nowrap; opacity: 0; transition: left 520ms var(--ease), opacity 250ms, background 250ms;
+  }
+  .tok.in { opacity: 1; }
+  .tok.bad { background: var(--red); color: #fff; animation: shake 400ms; }
+  .tok.good { background: var(--green); color: #062010; }
+  .tok.still { transition: opacity 250ms; }
+  @keyframes shake { 25% { translate: -8px 0; } 75% { translate: 8px 0; } }
+
+  .sim-bottom { display: grid; grid-template-columns: 1fr 640px; gap: 20px; min-height: 0; }
+  .log { background: #08090b; border: 4px solid var(--edge); border-radius: 16px; padding: 12px 20px; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+  .log .lh { font: 600 20px var(--mono); color: var(--dim); letter-spacing: .12em; margin-bottom: 6px; }
+  .log ul { list-style: none; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; flex: 1; min-height: 0; }
+  .log li { font: 500 22px/1.38 var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: none; }
+  .log li.head { color: var(--accent); font-weight: 700; }
+  .log li.ok { color: var(--green); }
+  .log li.bad { color: var(--red); font-weight: 700; }
+  .log li.skip { color: var(--dim); }
+  .outcome { position: relative; background: var(--panel); border-radius: 16px; padding: 18px 26px; display: grid; grid-template-columns: 1fr 120px; align-items: center; gap: 16px; }
+  .outcome .ot { font: 700 44px/1 var(--display); white-space: nowrap; font-variation-settings: "wdth" 85; }
+  .outcome .os { font-size: 24px; line-height: 1.3; margin-top: 8px; color: var(--dim); }
+  .outcome .os b { color: var(--green); }
+  .outcome.prod-ok .ot { color: var(--green); }
+  .outcome.blocked .ot, .outcome.stolen .ot { color: var(--red); }
+  .attacker { display: grid; justify-items: center; gap: 4px; opacity: .3; transition: opacity 300ms; }
+  .attacker svg { width: 96px; height: 96px; }
+  .attacker span { font: 600 18px var(--mono); color: var(--dim); }
+  .attacker.lit { opacity: 1; }
+  .attacker.lit span { color: var(--red); }
+  .secret {
+    position: absolute; z-index: 5; font: 700 22px var(--mono); background: var(--red); color: #fff; padding: 4px 12px; border-radius: 8px;
+    white-space: nowrap; transition: transform 1000ms cubic-bezier(.55, 0, .75, .4), opacity 1000ms ease-in;
+  }
+
+  /* 11 · doesn't save you */
+  .nope { display: grid; grid-template-columns: 90px 1fr; gap: 10px 30px; padding: 26px 0; border-top: 4px solid var(--edge); }
+  .nope .x { font: 700 76px/1 var(--display); color: var(--red); grid-row: span 2; }
+  .nope .t { font: 700 46px var(--display); }
+  .nope .tie { font: 600 24px var(--mono); color: var(--accent); margin-top: 6px; }
+
+  /* 12 · takeaways */
+  .take { display: grid; grid-template-columns: 130px 1fr; align-items: center; gap: 30px; margin-bottom: 52px; }
+  .take .n { font: 700 120px/1 var(--display); color: var(--accent); }
+  .take p { font: 700 60px/1.12 var(--display); }
+
+  /* 13 · thanks */
+  .s-end h1 { font-size: 150px; }
+  .s-end .q { font: 700 70px var(--display); color: var(--accent); margin: 14px 0 26px; }
+  .sources { margin-top: 44px; display: grid; gap: 8px; }
+  .sources .kicker { font-size: 22px; margin-bottom: 6px; }
+  .sources p { font-size: 23px; line-height: 1.35; color: var(--dim); }
+  .sources code { color: var(--fg); font-size: 21px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .station, .station .chk, .token-run, .caret, .ghost-box, .gate.checking, .prod.owned { animation: none; }
+    .station .chk { opacity: 1; }
+    .token-run { display: none; }
+    .secret { transition-duration: 250ms; }
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="section"></div>
+
+  <!-- 1 · Title -->
+  <section class="slide s-title" data-label="">
+    <div class="kicker">HackDev · Slopsquatting</div>
+    <h1>Phantom<br>Dependencies</h1>
+    <p class="sub">How Attackers Pre-Register Your AI's Imagination</p>
+    <p class="lede">Slopsquatting and how your CI/CD pipeline can stop it</p>
+    <div class="cmd"><span class="p">$</span> npm install <span class="ghost-name">react-codeshift</span>
+      <small>An AI made this name up. Someone registered it anyway.</small></div>
+    <p class="speaker" id="speaker"></p>
+    <svg class="ghost-box" viewBox="0 0 400 460" aria-hidden="true">
+      <g fill="none" stroke="#ffbf3c" stroke-width="7" stroke-dasharray="20 14" stroke-linejoin="round">
+        <path d="M200 30 L370 120 L200 210 L30 120 Z"/>
+        <path d="M30 120 V300 L200 390 V210"/>
+        <path d="M370 120 V300 L200 390"/>
+      </g>
+      <text x="200" y="152" text-anchor="middle" fill="#ffbf3c" font-family="Bahnschrift, Arial Narrow, sans-serif" font-weight="700" font-size="96">?</text>
+      <ellipse cx="200" cy="440" rx="150" ry="14" fill="rgba(255,191,60,.12)"/>
+    </svg>
+  </section>
+
+  <!-- 2 · Demo 1: Real or Phantom? -->
+  <section class="slide" data-module="realOrPhantom" data-label="DEMO 1 · REAL OR PHANTOM?">
+    <h2>Real or phantom?</h2>
+    <div class="rp-pair">
+      <div class="rp-card"><span class="eco"></span><code class="name"></code><span class="badge">✓ REAL</span><span class="stamp"></span></div>
+      <div class="rp-vs">or</div>
+      <div class="rp-card"><span class="eco"></span><code class="name"></code><span class="badge">✓ REAL</span><span class="stamp"></span></div>
+    </div>
+    <div class="rp-foot">
+      <p class="rp-why"></p>
+      <div style="display:flex;gap:28px;align-items:center"><span class="rp-progress"></span><button class="btn ghost rp-btn">Show pair</button></div>
+    </div>
+    <p class="rp-summary" data-step-local>The fakes <em>sound</em> right. That's the whole attack.</p>
+  </section>
+
+  <!-- 3 · What is slopsquatting? -->
+  <section class="slide s-def" data-label="THE ATTACK">
+    <h2>What is slopsquatting?</h2>
+    <div class="vs2">
+      <div class="col">
+        <div class="col-h">Typosquatting</div>
+        <p>Bets on a <b>human typo</b>.</p>
+        <code class="eg typo">reqeusts</code>
+        <p class="dim">A misspelling of a real name.</p>
+      </div>
+      <div class="col slop" data-step="1">
+        <div class="col-h">Slopsquatting</div>
+        <p>Bets on the <b>AI's mistake</b>.</p>
+        <code class="eg">react-codeshift</code>
+        <p class="dim">A confident, plausible name the model invents.</p>
+      </div>
+    </div>
+    <p class="foot" data-step="1">Term coined by Seth Larson (Python Software Foundation).</p>
+  </section>
+
+  <!-- 4 · Demo 2: Hallucination Roulette -->
+  <section class="slide" data-module="roulette" data-label="DEMO 2 · HALLUCINATION ROULETTE">
+    <div class="rl">
+      <div class="chat">
+        <div class="chat-bar"><span>AI assistant</span><span class="note">SIMULATED · NO REAL AI</span></div>
+        <div class="msg-user"></div>
+        <div class="msg-ai"><div class="ai-intro"></div><pre class="ai-code"></pre></div>
+      </div>
+      <div class="rl-side">
+        <h2>Same question.<br>Ask again.</h2>
+        <p class="rl-label"><code>react-codeshift</code> seen:</p>
+        <div class="rl-count"><span id="rlSeen">0</span> <small>/ <span id="rlRuns">0</span> runs</small></div>
+        <div class="rl-dots"></div>
+        <button class="btn rl-ask">Ask again ↻</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · The numbers -->
+  <section class="slide" data-label="THE NUMBERS">
+    <h2>The numbers</h2>
+    <div class="stats">
+      <div class="stat" data-step="1">
+        <div class="num">19.7%</div>
+        <p>of packages recommended in 576,000 AI-generated code samples didn't exist.</p>
+        <span class="note">16 models · USENIX Security 2025</span>
+      </div>
+      <div class="stat" data-step="2">
+        <div class="num">205,474</div>
+        <p>unique invented package names.</p>
+      </div>
+      <div class="stat" data-step="3">
+        <div class="num">43%</div>
+        <p>of hallucinated names reappeared in all 10 re-runs of the same prompt. <b class="accent">Predictable means plannable.</b></p>
+      </div>
+      <div class="stat" data-step="4">
+        <span class="tag">2026 UPDATE</span>
+        <div class="num">127</div>
+        <p>fake names invented identically by all five newer models tested, even though they hallucinate less (about 4.6–6.1%).</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · Demo 3: The Attacker's View -->
+  <section class="slide" data-module="attacker" data-label="DEMO 3 · THE ATTACKER'S VIEW">
+    <div class="at">
+      <div class="browser">
+        <div class="b-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">https://registry.example/search</span></div>
+        <div class="b-body">
+          <div class="reg-brand">registry<span>.example</span><small>MOCK REGISTRY</small></div>
+          <div class="search"><div class="box"><span class="q"></span></div><button class="btn at-search">Search</button></div>
+          <div class="result"></div>
+        </div>
+      </div>
+      <div class="at-right">
+        <div class="term"><div class="t-bar">attacker@laptop · simulated</div><pre class="t-out"></pre></div>
+        <div class="feed">
+          <div class="f-head"><b>Installs</b><span class="note">SIMULATED</span><button class="btn ghost at-live" disabled>Go live ▸</button></div>
+          <ul></ul>
+        </div>
+      </div>
+    </div>
+    <p class="at-caption">Cost to the attacker: one free account and a few minutes.</p>
+  </section>
+
+  <!-- 7 · It already happened -->
+  <section class="slide s-inc" data-label="IT ALREADY HAPPENED">
+    <h2>It already happened</h2>
+    <div class="inc" data-step="1">
+      <div class="h"><code>huggingface-cli</code><span>2024</span></div>
+      <p>Bar Lanyado (Lasso Security) saw AI models keep suggesting this non-existent package and published an empty one under the name. <b>30,000+ downloads in three months.</b> Alibaba had copied the install command into a public README.</p>
+    </div>
+    <div class="inc" data-step="2">
+      <div class="h"><code>react-codeshift</code><span>2026</span></div>
+      <p>Charlie Eriksen (Aikido) found this never-registered name in AI-generated agent skill files. It had spread to <b>237 repositories</b>. After he claimed it, AI agents kept trying to install it.</p>
+    </div>
+    <div class="inc" data-step="3">
+      <div class="h"><code>unused-imports</code><span>npm</span></div>
+      <p>A malicious npm package matching the slopsquatting pattern. Still <b>~233 weekly downloads</b> in early 2026, despite an npm security hold.</p>
+    </div>
+    <div class="inc" data-step="4">
+      <div class="h"><code>AI on the other side</code><span>July 2026</span></div>
+      <p>Anthropic disclosed that in a misconfigured security evaluation with accidental internet access, a Claude model registered a phantom name from a setup document on the real PyPI. It ran on <b>15 real systems</b> in about an hour before PyPI removed it.</p>
+    </div>
+  </section>
+
+  <!-- 8 · Why AI agents make it worse -->
+  <section class="slide" data-label="AGENTS">
+    <h2>Why AI agents make it worse</h2>
+    <div class="lane">
+      <div class="who">You + AI chat</div>
+      <div class="flow"><span class="chip">AI suggests a name</span><span class="arr">→</span><span class="chip">You read the name</span><span class="arr">→</span><span class="chip">You run the install</span></div>
+    </div>
+    <div class="lane" data-step="1">
+      <div class="who accent">AI agent</div>
+      <div class="flow"><span class="chip">AI suggests a name</span><span class="arr">→</span><span class="chip gap">No one looks</span><span class="arr">→</span><span class="chip">Agent runs the install</span></div>
+    </div>
+    <div class="script" data-step="2">
+      <p>Install scripts run code <b class="accent">immediately</b>, before the package is ever imported.</p>
+      <code>"postinstall": "<b>node setup.js</b>"   <span class="dim">// runs on npm install · illustrative</span></code>
+    </div>
+  </section>
+
+  <!-- 9 · What is a CI/CD pipeline? -->
+  <section class="slide s-cicd" data-label="FOR THE NON-DEVELOPERS">
+    <h2>What is a CI/CD pipeline?</h2>
+    <p class="lead">An assembly line for code. Every change passes automatic quality checks on its way to users.</p>
+    <div class="cicd">
+      <div class="stations">
+        <div class="station" style="--d:.22s"><span class="chk">✓</span><span class="n">01</span><span class="l">Code change</span><span class="s">someone pushes</span></div>
+        <div class="station" style="--d:1.94s"><span class="chk">✓</span><span class="n">02</span><span class="l">Build</span><span class="s">install &amp; assemble</span></div>
+        <div class="station" style="--d:3.66s"><span class="chk">✓</span><span class="n">03</span><span class="l">Test</span><span class="s">run the checks</span></div>
+        <div class="station" style="--d:5.38s"><span class="chk">✓</span><span class="n">04</span><span class="l">Deploy</span><span class="s">ship to users</span></div>
+      </div>
+      <div class="track"></div>
+      <div class="token-run">{ }</div>
+    </div>
+    <p class="quote" data-step="1">Every check is a gate. The question is whether any of the gates ask the right question.</p>
+  </section>
+
+  <!-- 10 · Demo 4: Pipeline Simulator -->
+  <section class="slide" data-module="pipeline" data-label="DEMO 4 · PIPELINE SIMULATOR">
+    <div class="sim">
+      <div class="sim-top">
+        <h2>Pipeline simulator</h2>
+        <span class="note">Card details are illustrative.</span>
+        <div class="presets"></div>
+        <button class="btn sim-run">Run pipeline ▸</button>
+      </div>
+      <div class="deck"></div>
+      <div class="pipe">
+        <div class="tok"></div>
+        <div class="gates"></div>
+      </div>
+      <div class="sim-bottom">
+        <div class="log"><div class="lh">RUN LOG</div><ul></ul></div>
+        <div class="outcome">
+          <div><div class="ot"></div><div class="os"></div></div>
+          <div class="attacker">
+            <svg viewBox="0 0 96 96" aria-hidden="true"><path d="M48 8c-17 0-28 14-28 32v8c-8 4-12 14-12 26v14h80V74c0-12-4-22-12-26v-8C76 22 65 8 48 8z" fill="#ff5b4f"/><path d="M33 44c4-3 10-4 15-4s11 1 15 4v10c-4 3-10 5-15 5s-11-2-15-5z" fill="#0b0c0e"/><circle cx="40" cy="49" r="3.5" fill="#ff5b4f"/><circle cx="56" cy="49" r="3.5" fill="#ff5b4f"/></svg>
+            <span>attacker</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 · What doesn't save you -->
+  <section class="slide" data-label="FALSE COMFORT">
+    <h2>What doesn't save you</h2>
+    <div class="nope" data-step="1">
+      <span class="x">✗</span><div class="t">CVE scanners, such as <code>pip-audit</code></div>
+      <div><p>A brand-new malicious package has no advisory yet.</p><div class="tie">↺ gate 5 let the trick card and react-codeshift through</div></div>
+    </div>
+    <div class="nope" data-step="2">
+      <span class="x">✗</span><div class="t">Signed attestations</div>
+      <div><p>They prove <b>who built</b> a package, not that <b>you wanted</b> it. An attacker can sign their own package.</p><div class="tie">↺ the trick card had a valid one</div></div>
+    </div>
+    <div class="nope" data-step="3">
+      <span class="x">✗</span><div class="t">Download counts</div>
+      <div><p>Easy to fake. In the first hour, a legit and a malicious new package look the same.</p></div>
+    </div>
+  </section>
+
+  <!-- 12 · Takeaways -->
+  <section class="slide" data-label="TAKEAWAYS">
+    <h2>Three things to keep</h2>
+    <div class="take" data-step="1"><span class="n">1</span><p>Treat AI-suggested package names as untrusted input.</p></div>
+    <div class="take" data-step="2"><span class="n">2</span><p>Pin dependencies with hashes, so unknown names fail by default.</p></div>
+    <div class="take" data-step="3"><span class="n">3</span><p>Never let agents or scanners install packages where real credentials live.</p></div>
+  </section>
+
+  <!-- 13 · Thank you / Q&A -->
+  <section class="slide s-end" data-label="">
+    <h1>Thank you</h1>
+    <p class="q">Questions?</p>
+    <p class="speaker" id="speaker-end"></p>
+    <div class="sources">
+      <div class="kicker">Sources</div>
+      <p>Spracklen et al., "We Have a Package for You!", USENIX Security 2025 · <code>arxiv.org/abs/2406.10279</code></p>
+      <p>Lasso Security, AI package hallucinations · <code>lasso.security/blog/ai-package-hallucinations</code></p>
+      <p>Aikido, slopsquatting cases · <code>aikido.dev/blog/slopsquatting-ai-package-hallucination-attacks</code></p>
+      <p>Help Net Security, Anthropic evaluation incidents (July 2026) · <code>helpnetsecurity.com/2026/07/31/anthropic-claude-cybersecurity-incidents</code></p>
+      <p>Slopsquatting and Python defenses (2026 data) · <code>pasqualepillitteri.it/en/news/9586/slopsquatting-pypi-ai-hallucinated-packages</code></p>
+    </div>
+  </section>
+
+  <div id="counter"></div>
+</div>
+
+<script>
+"use strict";
+
+/* ===================== Content (edit here) ===================== */
+
+const SPEAKER = "Shananth";
+
+// Speaker notes, one per slide, shown only in the P window.
+const NOTES = [
+  "Welcome. Today is about package names that AI coding tools make up, and the people who register those names before you install them.",
+  "Space shows a pair, Space again reveals, Space again for the next pair. Ask the audience to pick before the reveal.",
+  "Typosquatting waits for a human typo. Slopsquatting waits for the AI's confident mistake. Term coined by Seth Larson (PSF).",
+  "Press Space or click Ask again. Five prepared answers; four of them include react-codeshift. Watch the counter.",
+  "One stat per Space. 19.7% across 576,000 samples from 16 models (USENIX Security 2025). 205,474 unique fake names. 43% came back in all 10 re-runs: predictable means plannable. 2026: newer models hallucinate less (about 4.6–6.1%), but 127 names were invented identically by all five.",
+  "Space 1: search. Space 2: publish. Space 3: installs start; AI agents are highlighted. Cost to the attacker: one free account and a few minutes.",
+  "One story per Space. huggingface-cli (2024), react-codeshift (2026), unused-imports, and the July 2026 Anthropic evaluation incident.",
+  "With an agent, no human reads the name before the install runs. Install scripts execute immediately, before any import.",
+  "For non-developers: an assembly line with quality checks. Space reveals the line about gates asking the right question.",
+  "Start in Unprotected and run cards with Space. Then Typical: only the malware scan, so react-codeshift and the trick card get through. Then Hardened: everything bad stops at gate 1. Optional: turn gate 1 off and show the later gates still catch them.",
+  "CVE scanners need an advisory that doesn't exist yet. Attestations prove who built it, not that you wanted it. Download counts are easy to fake.",
+  "Three takeaways, one per Space.",
+  "Thank you. Questions. Sources are on screen.",
+];
+
+const PAIRS = [
+  { fake: "huggingface-cli", real: "huggingface_hub[cli]", eco: "PYPI", fakeLeft: true, stamp: "PHANTOM",
+    why: "<code>huggingface-cli</code>: a hallucinated name. A researcher registered it as a harmless test." },
+  { fake: "unused-imports", real: "eslint-plugin-unused-imports", eco: "NPM", fakeLeft: false, stamp: "MALICIOUS",
+    why: "<code>unused-imports</code>: a malicious npm package, now under npm security hold." },
+  { fake: "react-codeshift", real: "jscodeshift", eco: "NPM", fakeLeft: true, stamp: "PHANTOM",
+    why: "<code>react-codeshift</code>: hallucinated, a mash-up of two real tools." },
+];
+
+const PHANTOM = "react-codeshift";
+const ROULETTE_PROMPT = "Write a Node.js script to migrate my React class components to hooks automatically.";
+// Hand-written, simulated answers. Any mention of PHANTOM is highlighted and counted.
+const ROULETTE_RUNS = [
+  { intro: "Here's a script that does it automatically:", code:
+`// migrate.js: convert class components to hooks
+const { execSync } = require("child_process");
+
+execSync("npm install --save-dev react-codeshift");
+execSync("npx react-codeshift --transform class-to-hooks src/",
+  { stdio: "inherit" });
+console.log("Done. Review the diff before committing.");` },
+  { intro: "Easiest is a codemod from the command line:", code:
+`# install the codemod runner
+npm install -g react-codeshift
+
+# convert every component under src/
+react-codeshift hooks ./src --extensions=js,jsx
+
+# then run your tests
+npm test` },
+  { intro: "Honestly, no single tool does this fully automatically:", code:
+`// Convert one component at a time:
+//   1. this.state        -> useState
+//   2. lifecycle methods -> useEffect
+//   3. this.props.x      -> props.x
+//   4. class ... extends -> function
+// Run your tests after each component.` },
+  { intro: "You can wrap the codemod in a small Node script:", code:
+`const { spawnSync } = require("node:child_process");
+
+const files = process.argv.slice(2);
+spawnSync("npx", ["react-codeshift", "--hooks", ...files], {
+  stdio: "inherit",
+});
+// usage: node migrate.js src/**/*.jsx` },
+  { intro: "Add it as an npm script so the whole team can run it:", code:
+`// package.json
+"scripts": {
+  "migrate": "npx react-codeshift -t class-to-hooks src"
+},
+"devDependencies": {
+  "react-codeshift": "^2.1.0"
+}` },
+];
+
+const PUBLISH_LOG = [
+  ["pr", "$ npm adduser"],
+  ["", "Logged in as fresh-account-4821"],
+  ["pr", "$ npm publish"],
+  ["", "npm notice package: react-codeshift@1.0.0"],
+  ["", "npm notice total files: 3"],
+  ["ok", "+ react-codeshift@1.0.0"],
+];
+// [who, command, downloads added]. Entries starting with "AI agent" are highlighted.
+const INSTALLERS = [
+  ["dev laptop", "npm install react-codeshift", 3],
+  ["AI agent (auto-install)", "npx react-codeshift --hooks src/", 5],
+  ["CI runner", "npm install", 2],
+  ["AI agent (auto-install)", "npx react-codeshift -t class-to-hooks", 8],
+  ["dev laptop", "npx react-codeshift ./src", 4],
+  ["AI agent (auto-install)", "npm install react-codeshift", 9],
+  ["CI runner", "npm install", 6],
+  ["AI agent (auto-install)", "npx react-codeshift --hooks", 12],
+  ["dev laptop", "npm i -D react-codeshift", 7],
+  ["AI agent (auto-install)", "npx react-codeshift src/", 15],
+];
+
+// Pipeline gates. check(card) returns { pass, why }. Evaluated in order; the first block stops the run.
+const GATES = [
+  { name: "Lockfile & hash", q: "Did a human approve this dependency?",
+    check: c => c.inLockfile
+      ? { pass: true, why: "In lockfile with an approved hash (npm ci / --require-hashes)" }
+      : { pass: false, why: "Not in lockfile — no approved hash" } },
+  { name: "Registry existence", q: "Does it even exist?",
+    check: c => c.exists
+      ? { pass: true, why: c.name === PHANTOM && Store.attackerRegistered ? "Exists — the attacker registered it in Demo 3" : "Exists on the registry" }
+      : { pass: false, why: "Not on the registry — phantom name" } },
+  { name: "Age & publisher", q: "New? One release? No source repo? Unknown publisher?",
+    check: c => {
+      const p = [];
+      if (c.ageDays < 30) p.push("created " + c.age + " ago");
+      if (c.releases <= 1) p.push("one release");
+      if (!c.repo) p.push("no source repo");
+      if (!c.knownPublisher) p.push("unknown publisher");
+      return p.length ? { pass: false, why: cap(p.join(" · ")), short: cap(p.slice(0, 2).join(" · ")) }
+                      : { pass: true, why: c.age + " old, long history, known publisher" };
+    } },
+  { name: "Sandboxed install", q: "What does it do when installed?",
+    check: c => c.installScript
+      ? { pass: false, why: c.installScript }
+      : { pass: true, why: "No network or credential access during install" } },
+  { name: "Malware & CVE scan", q: "Is it on a known-bad list?",
+    check: c => c.knownBad
+      ? { pass: false, why: c.knownBad }
+      : { pass: true, why: "Not on any known-bad list" } },
+];
+
+// facts: [text, good?] shown on the card. installScript stays hidden until gate 4 finds it.
+const CARDS = [
+  { name: "requests", eco: "PyPI", age: "10+ years", ageDays: 3650, releases: 100, repo: true, knownPublisher: true,
+    inLockfile: true, exists: true, installScript: null, knownBad: null, malicious: false,
+    facts: [["in lockfile + hash", 1], ["known publisher", 1]] },
+  { name: "react-codeshift", eco: "npm", age: "2 days", ageDays: 2, releases: 1, repo: false, knownPublisher: false,
+    inLockfile: false, exists: true, installScript: "postinstall script phones home", knownBad: null, malicious: true,
+    facts: [["attacker-registered", 0], ["not in lockfile", 0]] },
+  { name: "reqeusts", eco: "PyPI", age: "months", ageDays: 200, releases: 1, repo: false, knownPublisher: false,
+    inLockfile: false, exists: true, installScript: null, knownBad: "On known-malware lists — reported months ago", malicious: true,
+    facts: [["classic typosquat", 0], ["reported months ago", 0]] },
+  { name: "unused-imports", eco: "npm", age: "months", ageDays: 400, releases: 1, repo: false, knownPublisher: false,
+    inLockfile: false, exists: true, installScript: null, knownBad: "Known malicious — under npm security hold", malicious: true,
+    facts: [["known malicious", 0], ["npm security hold", 0]] },
+  { name: "ai-helper-utils-pro", eco: "npm", age: "1 day", ageDays: 1, releases: 1, repo: true, knownPublisher: false,
+    inLockfile: false, exists: true, installScript: "Install fetches its payload from a remote URL", knownBad: null, malicious: true,
+    illustrative: true, facts: [["signed attestation", 1], ["0 CVEs, clean-looking code", 1]] },
+];
+
+const PRESETS = { Unprotected: [0, 0, 0, 0, 0], Typical: [0, 0, 0, 0, 1], Hardened: [1, 1, 1, 1, 1] };
+const SECRETS = ["API_KEY", "CLOUD_TOKEN", "NPM_TOKEN", "DB_PASSWORD", "DEPLOY_KEY"];
+
+/* ===================== Helpers ===================== */
+
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const ms = n => REDUCED ? Math.round(n * .3) : n;
+const $ = (root, sel) => root.querySelector(sel);
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+
+// Per-demo timers. clear() cancels everything, and any sleep() still pending never resolves,
+// so an interrupted async sequence simply stops.
+function timers() {
+  const ids = new Set();
+  return {
+    after(t, fn) { const id = setTimeout(() => { ids.delete(id); fn(); }, t); ids.add(id); },
+    sleep(t) { return new Promise(r => this.after(ms(t), r)); },
+    clear() { ids.forEach(clearTimeout); ids.clear(); },
+  };
+}
+
+function restartAnim(el, cls) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+
+// Position of el relative to root, in unscaled stage pixels.
+function rel(el, root) {
+  let x = 0, y = 0;
+  while (el && el !== root) { x += el.offsetLeft; y += el.offsetTop; el = el.offsetParent; }
+  return { x, y };
+}
+
+// Shared across demos: Demo 3 sets this, Demo 4 reads it.
+const Store = { attackerRegistered: false };
+
+/* ===================== Generic slide: reveal [data-step] items ===================== */
+
+function revealModule() {
+  return {
+    init(el) {
+      this.items = [...el.querySelectorAll("[data-step]")];
+      this.max = Math.max(0, ...this.items.map(e => +e.dataset.step));
+    },
+    reset() { this.n = 0; this.render(); },
+    finish() { this.n = this.max; this.render(); },
+    step() { if (this.n >= this.max) return false; this.n++; this.render(); return true; },
+    render() { this.items.forEach(e => e.classList.toggle("shown", +e.dataset.step <= this.n)); },
+  };
+}
+
+/* ===================== Demo 1: Real or Phantom? ===================== */
+
+const realOrPhantom = {
+  // phase 0: empty, odd: pair shown, even: pair revealed, last: summary
+  init(el) {
+    this.cards = [...el.querySelectorAll(".rp-card")];
+    this.why = $(el, ".rp-why");
+    this.progress = $(el, ".rp-progress");
+    this.btn = $(el, ".rp-btn");
+    this.summary = $(el, ".rp-summary");
+    this.last = PAIRS.length * 2 + 1;
+    this.btn.addEventListener("click", () => this.step());
+  },
+  reset() { this.phase = 0; this.render(); },
+  step() {
+    if (this.phase >= this.last) return false;
+    this.phase++; this.render(); return true;
+  },
+  render() {
+    const p = this.phase, i = Math.min(Math.floor((p - 1) / 2), PAIRS.length - 1);
+    const shown = p > 0, revealed = p > 0 && (p % 2 === 0 || p === this.last);
+    const pair = PAIRS[i];
+    if (shown && p % 2 === 1 && p !== this.last) {
+      const names = pair.fakeLeft ? [pair.fake, pair.real] : [pair.real, pair.fake];
+      this.cards.forEach((c, k) => {
+        const isFake = names[k] === pair.fake;
+        c.className = "rp-card " + (isFake ? "fake" : "real");
+        $(c, ".eco").textContent = pair.eco;
+        const n = $(c, ".name");
+        n.textContent = names[k];
+        n.style.fontSize = Math.min(72, Math.floor(740 / (names[k].length * .6))) + "px";
+        $(c, ".stamp").textContent = pair.stamp;
+        restartAnim(c, "in");
+      });
+      this.why.innerHTML = pair.why;
+    }
+    if (!shown) this.cards.forEach(c => { c.className = "rp-card"; });
+    this.cards.forEach(c => c.classList.toggle("revealed", revealed));
+    this.why.classList.toggle("in", revealed);
+    this.summary.classList.toggle("shown", p === this.last);
+    this.summary.style.opacity = p === this.last ? 1 : 0;
+    this.progress.textContent = shown ? "Pair " + (i + 1) + " of " + PAIRS.length : "";
+    this.btn.textContent = p === 0 ? "Show pair" : p === this.last ? "Done" : p % 2 === 1 ? "Reveal" : i === PAIRS.length - 1 ? "Wrap up" : "Next pair";
+    this.btn.disabled = p === this.last;
+  },
+};
+
+/* ===================== Demo 2: Hallucination Roulette ===================== */
+
+const roulette = {
+  T: timers(),
+  init(el) {
+    $(el, ".msg-user").textContent = ROULETTE_PROMPT;
+    this.intro = $(el, ".ai-intro");
+    this.code = $(el, ".ai-code");
+    this.seenEl = $(el, "#rlSeen");
+    this.runsEl = $(el, "#rlRuns");
+    this.dots = $(el, ".rl-dots");
+    this.btn = $(el, ".rl-ask");
+    this.dots.innerHTML = ROULETTE_RUNS.map(() => "<i></i>").join("");
+    this.btn.addEventListener("click", () => this.ask());
+  },
+  reset() {
+    this.T.clear();
+    this.run = 0; this.seen = 0; this.busy = false;
+    this.intro.textContent = ""; this.code.textContent = "";
+    [...this.dots.children].forEach(d => d.className = "");
+    this.btn.disabled = false; this.btn.textContent = "Ask again ↻";
+    this.count();
+  },
+  step() {
+    if (this.busy) return true;
+    if (this.run >= ROULETTE_RUNS.length) return false;
+    this.ask(); return true;
+  },
+  count() { this.seenEl.textContent = this.seen; this.runsEl.textContent = this.run; },
+  async ask() {
+    if (this.busy || this.run >= ROULETTE_RUNS.length) return;
+    this.busy = true; this.btn.disabled = true;
+    const v = ROULETTE_RUNS[this.run++];
+    this.intro.textContent = ""; this.code.textContent = "";
+    // Build empty spans, then fill them in typing order.
+    const parts = [{ node: this.intro, text: v.intro }];
+    v.code.split(new RegExp("(" + PHANTOM + ")")).forEach(seg => {
+      if (!seg) return;
+      const span = document.createElement("span");
+      if (seg === PHANTOM) span.className = "ph";
+      this.code.appendChild(span);
+      parts.push({ node: span, text: seg });
+    });
+    const caret = document.createElement("span"); caret.className = "caret";
+    const total = parts.reduce((n, p) => n + p.text.length, 0);
+    const perTick = Math.max(1, Math.ceil(total / (ms(2800) / 30)));
+    for (const p of parts) {
+      for (let i = 0; i < p.text.length; i += perTick) {
+        p.node.textContent = p.text.slice(0, i + perTick);
+        p.node.after(caret);
+        await this.T.sleep(30);
+      }
+      if (p.node.classList.contains("ph")) p.node.classList.add("hit");
+    }
+    caret.remove();
+    const hit = v.code.includes(PHANTOM);
+    if (hit) this.seen++;
+    this.dots.children[this.run - 1].className = hit ? "hit" : "miss";
+    this.count();
+    this.busy = false;
+    const done = this.run >= ROULETTE_RUNS.length;
+    this.btn.disabled = done;
+    this.btn.textContent = done ? "All runs shown" : "Ask again ↻";
+  },
+};
+
+/* ===================== Demo 3: The Attacker's View ===================== */
+
+const attacker = {
+  T: timers(),
+  init(el) {
+    this.q = $(el, ".q");
+    this.result = $(el, ".result");
+    this.term = $(el, ".t-out");
+    this.feed = $(el, ".feed ul");
+    this.caption = $(el, ".at-caption");
+    this.searchBtn = $(el, ".at-search");
+    this.liveBtn = $(el, ".at-live");
+    this.searchBtn.addEventListener("click", () => { if (this.phase === 0) this.step(); });
+    this.liveBtn.addEventListener("click", () => { if (this.phase === 2) this.step(); });
+    this.result.addEventListener("click", e => { if (e.target.closest(".at-publish") && this.phase === 1) this.step(); });
+  },
+  reset() {
+    this.T.clear();
+    this.phase = 0; this.busy = false; this.downloads = 0;
+    this.q.innerHTML = '<span class="ph-text">Search packages</span>';
+    this.result.innerHTML = "";
+    this.term.innerHTML = '<span class="pr">$</span> <span class="caret"></span>';
+    this.feed.innerHTML = "";
+    this.caption.classList.remove("in");
+    this.searchBtn.disabled = false; this.liveBtn.disabled = true;
+  },
+  step() {
+    if (this.busy) return true;
+    if (this.phase >= 3) return false;
+    this.phase++;
+    this.busy = true;
+    [null, this.search, this.publish, this.live][this.phase].call(this).then(() => { this.busy = false; });
+    return true;
+  },
+  async search() {
+    this.searchBtn.disabled = true;
+    this.q.textContent = "";
+    for (const ch of PHANTOM) { this.q.textContent += ch; await this.T.sleep(85); }
+    await this.T.sleep(250);
+    this.result.innerHTML = '<p class="dim fade-in">Searching…</p>';
+    await this.T.sleep(600);
+    this.result.innerHTML = '<div class="fade-in"><div class="nf">Package not found.</div><p>This name is available.</p>' +
+      '<button class="btn at-publish">Publish package</button></div>';
+  },
+  async publish() {
+    const b = $(this.result, ".at-publish");
+    if (b) { b.classList.add("pressed"); b.disabled = true; }
+    this.term.innerHTML = "";
+    for (const [cls, line] of PUBLISH_LOG) {
+      await this.T.sleep(cls === "pr" ? 450 : 300);
+      this.term.innerHTML += '<span class="' + cls + '">' + esc(line) + "</span>\n";
+    }
+    Store.attackerRegistered = true;
+    await this.T.sleep(400);
+    this.result.innerHTML = '<div class="pkg fade-in"><h3>' + PHANTOM + '</h3>' +
+      '<div class="meta">v1.0.0 · published just now by fresh-account-4821</div>' +
+      '<div class="desc">Migrate React class components to hooks automatically.</div>' +
+      '<div class="dl"><b class="dl-n">0</b><span>DOWNLOADS (SIMULATED)</span></div></div>';
+    this.liveBtn.disabled = false;
+  },
+  async live() {
+    this.liveBtn.disabled = true;
+    const n = $(this.result, ".dl-n");
+    for (let i = 0; i < INSTALLERS.length; i++) {
+      const [who, cmd, add] = INSTALLERS[i];
+      const ai = who.startsWith("AI agent");
+      const li = document.createElement("li");
+      if (ai) li.className = "ai";
+      li.innerHTML = '<div class="who">' + esc(who) + (ai ? "<small>NO HUMAN REVIEW</small>" : "") + "</div><code>" + esc(cmd) + "</code>";
+      this.feed.prepend(li);
+      while (this.feed.children.length > 4) this.feed.lastElementChild.remove();
+      for (let k = 0; k < add; k++) { this.downloads++; if (n) n.textContent = this.downloads; await this.T.sleep(Math.round(700 / add)); }
+      if (i === 3) this.caption.classList.add("in");
+    }
+  },
+};
+
+/* ===================== Demo 4: Pipeline Simulator ===================== */
+
+// Pure rule engine: same inputs, same result, whatever the preset.
+function evaluate(card, on) {
+  const steps = [];
+  for (let i = 0; i < GATES.length; i++) {
+    if (!on[i]) { steps.push({ i, skipped: true }); continue; }
+    const r = GATES[i].check(card);
+    steps.push({ i, ...r });
+    if (!r.pass) return { steps, outcome: "blocked", gate: i + 1 };
+  }
+  return { steps, outcome: card.malicious ? "stolen" : "production" };
+}
+
+const pipeline = {
+  T: timers(),
+  init(el) {
+    this.el = el;
+    this.sim = $(el, ".sim");
+    this.tok = $(el, ".tok");
+    this.logEl = $(el, ".log ul");
+    this.outcome = $(el, ".outcome");
+    this.att = $(el, ".attacker");
+    this.runBtn = $(el, ".sim-run");
+
+    const presets = $(el, ".presets");
+    presets.innerHTML = Object.keys(PRESETS).map(k => '<button data-p="' + k + '">' + k + "</button>").join("") + '<span class="custom">CUSTOM</span>';
+    this.presetBtns = [...presets.querySelectorAll("button")];
+    this.customTag = $(presets, ".custom");
+    presets.addEventListener("click", e => { const b = e.target.closest("button"); if (b && !this.busy) this.applyPreset(b.dataset.p); });
+
+    $(el, ".deck").innerHTML = CARDS.map((c, i) =>
+      '<div class="pcard" data-i="' + i + '">' + (c.illustrative ? '<span class="ill">ILLUSTRATIVE</span>' : "") +
+      '<span class="badge"></span><span class="nm"' + (c.name.length > 16 ? ' style="font-size:24px"' : "") + ">" + c.name + "</span>" +
+      '<span class="meta">' + c.eco + " · " + c.age + " old</span>" +
+      c.facts.map(([t, g]) => '<span class="f ' + (g ? "g" : "b") + '">' + esc(t) + "</span>").join("") + "</div>").join("");
+    this.cardEls = [...el.querySelectorAll(".pcard")];
+    $(el, ".deck").addEventListener("click", e => { const c = e.target.closest(".pcard"); if (c && !this.busy) this.select(+c.dataset.i); });
+
+    $(el, ".gates").innerHTML = GATES.map((g, i) =>
+      '<div class="gate" data-i="' + i + '"><span class="gn">GATE ' + (i + 1) + '</span><span class="gt">' + esc(g.name) +
+      '</span><span class="gq">' + esc(g.q) + '</span><span class="gs"></span><span class="stamp">BLOCKED</span></div>').join("") +
+      '<div class="prod"><span class="gt">Production</span><span class="gq">The build runner here holds API keys and cloud tokens.</span></div>';
+    this.gateEls = [...el.querySelectorAll(".gate")];
+    this.prod = $(el, ".prod");
+    $(el, ".gates").addEventListener("click", e => { const g = e.target.closest(".gate"); if (g && !this.busy) this.toggle(+g.dataset.i); });
+
+    this.runBtn.addEventListener("click", () => { if (!this.busy) this.run(); });
+  },
+  reset() {
+    this.T.clear();
+    this.busy = false; this.sel = null; this.results = CARDS.map(() => null);
+    this.sim.querySelectorAll(".secret").forEach(s => s.remove());
+    this.logEl.innerHTML = "";
+    this.applyPreset("Unprotected", true);
+    this.select(null);
+    this.runBtn.disabled = false;
+  },
+  step() {
+    if (this.busy) return true;
+    let i = this.sel != null && !this.results[this.sel] ? this.sel : this.results.findIndex(r => !r);
+    if (i < 0) return false;
+    this.select(i); this.run(); return true;
+  },
+  applyPreset(name, quiet) {
+    this.on = PRESETS[name].slice();
+    this.changed(quiet ? null : "Preset: " + name);
+  },
+  toggle(i) {
+    this.on[i] = this.on[i] ? 0 : 1;
+    this.changed("Gate " + (i + 1) + " turned " + (this.on[i] ? "on" : "off"));
+  },
+  // Any change to the gates invalidates earlier results.
+  changed(msg) {
+    const match = Object.keys(PRESETS).find(k => PRESETS[k].every((v, i) => v === this.on[i]));
+    this.presetBtns.forEach(b => b.classList.toggle("on", b.dataset.p === match));
+    this.customTag.classList.toggle("in", !match);
+    this.results = CARDS.map(() => null);
+    this.cardEls.forEach(c => { const b = $(c, ".badge"); b.className = "badge"; b.textContent = ""; });
+    this.clearRun();
+    if (msg) this.log("— " + msg + " —", "skip");
+  },
+  select(i) {
+    this.sel = i;
+    this.cardEls.forEach((c, k) => c.classList.toggle("sel", k === i));
+  },
+  clearRun() {
+    this.gateEls.forEach((g, i) => {
+      g.className = "gate " + (this.on[i] ? "on" : "off");
+      $(g, ".gs").innerHTML = '<span class="pill">' + (this.on[i] ? "ON" : "OFF") + "</span>";
+    });
+    this.prod.className = "prod";
+    this.tok.className = "tok";
+    this.att.classList.remove("lit");
+    this.outcome.className = "outcome";
+    $(this.outcome, ".ot").textContent = "Pick a card, then run";
+    $(this.outcome, ".os").textContent = "Click gates to switch them on or off.";
+  },
+  log(text, cls) {
+    const li = document.createElement("li");
+    li.textContent = text; li.className = cls || "";
+    this.logEl.appendChild(li);
+    while (this.logEl.children.length > 40) this.logEl.firstElementChild.remove();
+  },
+  async moveTo(el) {
+    this.tok.style.left = (el.offsetLeft + el.offsetWidth / 2 - this.tok.offsetWidth / 2) + "px";
+    await this.T.sleep(560);
+  },
+  async run() {
+    if (this.busy) return;
+    if (this.sel == null) this.select(0);
+    const i = this.sel, card = CARDS[i], plan = evaluate(card, this.on);
+    this.busy = true; this.runBtn.disabled = true;
+    this.clearRun();
+    $(this.outcome, ".ot").textContent = "Running…";
+    $(this.outcome, ".os").textContent = card.name;
+    this.log("▶ " + card.name, "head");
+
+    // Drop the token above gate 1 without animating the jump.
+    this.tok.textContent = card.name;
+    this.tok.classList.add("still");
+    this.tok.style.left = (this.gateEls[0].offsetLeft + this.gateEls[0].offsetWidth / 2 - this.tok.offsetWidth / 2) + "px";
+    void this.tok.offsetWidth;
+    this.tok.classList.remove("still"); this.tok.classList.add("in");
+    await this.T.sleep(300);
+
+    for (const s of plan.steps) {
+      const g = this.gateEls[s.i], gs = $(g, ".gs"), label = "Gate " + (s.i + 1) + " · " + GATES[s.i].name;
+      await this.moveTo(g);
+      if (s.skipped) {
+        g.classList.add("skipped"); gs.textContent = "skipped";
+        this.log("  · " + label + ": skipped (off)", "skip");
+        await this.T.sleep(380);
+        continue;
+      }
+      g.classList.add("checking"); gs.textContent = "checking…";
+      await this.T.sleep(700);
+      g.classList.remove("checking");
+      if (s.pass) {
+        g.classList.add("pass"); gs.textContent = "✓ pass";
+        this.log("  ✓ " + label + ": " + s.why, "ok");
+        await this.T.sleep(260);
+      } else {
+        g.classList.add("blocked"); gs.textContent = s.short || s.why;
+        this.tok.classList.add("bad");
+        this.log("  ✗ " + label + ": " + s.why, "bad");
+        this.settle(i, "blocked", "BLOCKED AT GATE " + plan.gate, GATES[s.i].name + ". <b>Nothing installed. Secrets safe.</b>");
+        return;
+      }
+    }
+
+    await this.moveTo(this.prod);
+    if (plan.outcome === "stolen") {
+      this.prod.classList.add("owned"); this.tok.classList.add("bad");
+      this.log("  ☠ Installed on the build runner. Install script sent secrets to the attacker.", "bad");
+      await this.steal();
+      this.settle(i, "stolen", "SECRETS STOLEN", "Its install script ran on the build runner and sent your keys out.");
+    } else {
+      this.prod.classList.add("ok"); this.tok.classList.add("good");
+      this.log("  ✓ Reached production", "ok");
+      this.settle(i, "prod-ok", "REACHED PRODUCTION", card.name + " passed every active gate.");
+    }
+  },
+  settle(i, kind, title, sub) {
+    this.outcome.className = "outcome " + kind;
+    $(this.outcome, ".ot").textContent = title;
+    $(this.outcome, ".os").innerHTML = sub;
+    const b = $(this.cardEls[i], ".badge");
+    b.className = "badge " + (kind === "prod-ok" ? "prod" : kind);
+    b.textContent = kind === "prod-ok" ? "✓ PROD" : kind === "stolen" ? "STOLEN" : "✗ GATE " + title.slice(-1);
+    this.results[i] = kind;
+    this.busy = false; this.runBtn.disabled = false;
+  },
+  async steal() {
+    const from = rel(this.prod, this.sim), to = rel(this.att, this.sim);
+    const fx = from.x + this.prod.offsetWidth / 2, fy = from.y + this.prod.offsetHeight / 2;
+    const tx = to.x + this.att.offsetWidth / 2, ty = to.y + 40;
+    this.att.classList.add("lit");
+    const chips = SECRETS.map((name, k) => {
+      const s = document.createElement("span");
+      s.className = "secret"; s.textContent = name;
+      this.sim.appendChild(s);
+      s.style.left = (fx - s.offsetWidth / 2 + (k - 2) * 24) + "px";
+      s.style.top = (fy - 20 + (k - 2) * 26) + "px";
+      return s;
+    });
+    void this.sim.offsetWidth;
+    chips.forEach((s, k) => this.T.after(ms(k * 160), () => {
+      s.style.transform = "translate(" + (tx - fx - (k - 2) * 24) + "px," + (ty - fy - (k - 2) * 26) + "px) scale(.5)";
+      s.style.opacity = "0";
+    }));
+    await this.T.sleep(160 * SECRETS.length + 1000);
+    chips.forEach(s => s.remove());
+  },
+};
+
+const DEMOS = { realOrPhantom, roulette, attacker, pipeline };
+
+/* ===================== Slide controller ===================== */
+
+const stage = document.getElementById("stage");
+const slides = [...document.querySelectorAll(".slide")];
+const mods = slides.map(el => { const m = el.dataset.module ? DEMOS[el.dataset.module] : revealModule(); m.init(el); return m; });
+const sectionEl = document.getElementById("section");
+const counterEl = document.getElementById("counter");
+let cur = -1;
+
+document.getElementById("speaker").textContent = SPEAKER;
+document.getElementById("speaker-end").textContent = SPEAKER;
+
+function go(i, dir) {
+  i = Math.max(0, Math.min(slides.length - 1, i));
+  if (i === cur) return;
+  if (cur >= 0) { slides[cur].classList.remove("active"); mods[cur].T && mods[cur].T.clear(); }
+  cur = i;
+  mods[cur].reset();
+  if (dir < 0 && mods[cur].finish) mods[cur].finish();
+  slides[cur].classList.add("active");
+  sectionEl.textContent = slides[cur].dataset.label || "";
+  counterEl.textContent = (cur + 1) + " / " + slides.length;
+  broadcast();
+}
+
+function onKey(key) {
+  switch (key) {
+    case "ArrowRight": case "PageDown": go(cur + 1, 1); break;
+    case "ArrowLeft": case "PageUp": go(cur - 1, -1); break;
+    case " ": if (!mods[cur].step()) go(cur + 1, 1); break;
+    case "r": case "R": mods[cur].reset(); break;
+    case "f": case "F":
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+      else document.exitFullscreen();
+      break;
+    case "Home": go(0, 1); break;
+    case "End": go(slides.length - 1, 1); break;
+    case "p": case "P": openNotes(); break;
+    default: return false;
+  }
+  return true;
+}
+
+document.addEventListener("keydown", e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key === " " && e.repeat) { e.preventDefault(); return; }
+  if (onKey(e.key)) e.preventDefault();
+});
+// Keep Space and Enter from re-clicking whichever button was clicked last.
+document.addEventListener("click", e => { const b = e.target.closest("button"); if (b) b.blur(); });
+
+function fit() {
+  const s = Math.min(innerWidth / 1920, innerHeight / 1080);
+  stage.style.transform = "translate(-50%, -50%) scale(" + s + ")";
+}
+addEventListener("resize", fit);
+
+/* ===================== Presenter notes (P) ===================== */
+
+const chan = typeof BroadcastChannel === "function" ? new BroadcastChannel("phantom-notes") : null;
+
+function broadcast() {
+  if (!chan) return;
+  const title = s => s.dataset.label || ($(s, "h1, h2") || {}).textContent || "";
+  chan.postMessage({
+    type: "state", pos: (cur + 1) + " / " + slides.length, title: title(slides[cur]), notes: NOTES[cur] || "",
+    next: slides[cur + 1] ? "Next: " + title(slides[cur + 1]).replace(/\n/g, " ") : "Last slide",
+  });
+}
+
+if (chan) chan.onmessage = e => {
+  if (e.data.type === "hello") broadcast();
+  if (e.data.type === "key") onKey(e.data.key);
+};
+
+const NOTES_HTML = '<!doctype html><html><head><meta charset="utf-8"><title>Presenter notes</title><style>' +
+  'body{margin:0;padding:28px 32px;background:#111214;color:#eee;font:24px/1.45 "Segoe UI",Arial,sans-serif}' +
+  '#pos{font:600 18px Consolas,monospace;color:#ffbf3c;letter-spacing:.1em}' +
+  '#title{font:700 34px Bahnschrift,Arial,sans-serif;margin:8px 0 18px}#next{margin-top:28px;color:#999;font-size:18px}' +
+  '#help{position:fixed;bottom:14px;left:32px;color:#666;font:14px Consolas,monospace}</style></head><body>' +
+  '<div id="pos"></div><div id="title"></div><div id="notes">Waiting for the deck…</div><div id="next"></div>' +
+  '<div id="help">Keys typed here also drive the deck.</div><script>' +
+  'var ch=new BroadcastChannel("phantom-notes");' +
+  'ch.onmessage=function(e){var d=e.data;if(d.type!=="state")return;' +
+  'document.getElementById("pos").textContent=d.pos;document.getElementById("title").textContent=d.title;' +
+  'document.getElementById("notes").textContent=d.notes;document.getElementById("next").textContent=d.next;};' +
+  'ch.postMessage({type:"hello"});' +
+  'addEventListener("keydown",function(e){if(e.repeat&&e.key===" ")return;ch.postMessage({type:"key",key:e.key});' +
+  'if([" ","ArrowLeft","ArrowRight","PageUp","PageDown"].indexOf(e.key)>=0)e.preventDefault();});' +
+  '<\/script></body></html>';
+
+function openNotes() {
+  if (!chan) return;
+  const w = window.open("", "phantom-notes", "width=760,height=620");
+  if (!w) return;
+  if (!w.document.getElementById("notes")) { w.document.write(NOTES_HTML); w.document.close(); }
+  w.focus();
+  broadcast();
+}
+
+/* ===================== Start ===================== */
+
+fit();
+go(0, 1);
+
+// deck.html#selftest: check the pipeline rules against the expected outcome table.
+if (location.hash === "#selftest") {
+  const want = {
+    "requests":            ["production", "production", "production"],
+    "react-codeshift":     ["stolen", "stolen", "blocked@1"],
+    "reqeusts":            ["stolen", "blocked@5", "blocked@1"],
+    "unused-imports":      ["stolen", "blocked@5", "blocked@1"],
+    "ai-helper-utils-pro": ["stolen", "stolen", "blocked@1"],
+  };
+  const name = r => r.outcome === "blocked" ? "blocked@" + r.gate : r.outcome;
+  let bad = 0;
+  CARDS.forEach(c => ["Unprotected", "Typical", "Hardened"].forEach((p, k) => {
+    const got = name(evaluate(c, PRESETS[p]));
+    if (got !== want[c.name][k]) { bad++; console.error("selftest", c.name, p, "got", got, "want", want[c.name][k]); }
+  }));
+  const noG1 = [0, 1, 1, 1, 1];
+  ["react-codeshift", "ai-helper-utils-pro"].forEach(n => {
+    const got = name(evaluate(CARDS.find(c => c.name === n), noG1));
+    if (got !== "blocked@3") { bad++; console.error("selftest", n, "Hardened without gate 1 got", got); }
+  });
+  CARDS.filter(c => c.malicious).forEach(c => {
+    if (evaluate(c, noG1).outcome !== "blocked") { bad++; console.error("selftest", c.name, "escaped Hardened without gate 1"); }
+  });
+  if (name(evaluate(CARDS[0], noG1)) !== "production") { bad++; console.error("selftest requests blocked without gate 1"); }
+  console.log(bad ? "selftest FAILED: " + bad : "selftest ok");
+}
+</script>
+</body>
+</html>
