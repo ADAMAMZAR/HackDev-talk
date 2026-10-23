@@ -6,7 +6,7 @@ const DEMOS = [
   ['2', 'StudyBuddy', 'http://localhost:5102/'],
   ['2', 'Fixed', 'http://localhost:5102/fixed'],
   ['3', 'CampusConnect', 'http://localhost:5103/'],
-  ['4A', 'Slopsquat', 'http://localhost:5100/04a-slopsquat/'],
+  ['4A', 'MCP plug-in', 'http://localhost:5100/04a-mcp-plugin/'],
   ['4B', 'KedaiKita', 'http://localhost:5104/'],
   ['4C', 'Agent', 'http://localhost:5100/04c-agent-console/'],
   ['5', 'KopiCheck', 'http://localhost:5100/05-kopicheck/'],

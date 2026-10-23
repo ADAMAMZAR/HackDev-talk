@@ -20,7 +20,7 @@ const SERVERS = [
 // Port 5100 serves the static demos and the shared navbar. Only these exact paths are served.
 const STATIC = {
   '/nav.js': 'nav.js',
-  '/04a-slopsquat/': '04a-slopsquat/index.html',
+  '/04a-mcp-plugin/': '04a-mcp-plugin/index.html',
   '/04c-agent-console/': '04c-agent-console/index.html',
   '/05-kopicheck/': '05-kopicheck/index.html',
 }

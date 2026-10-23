@@ -1,0 +1,3820 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe Coding Safely</title>
+    <!--
+  Vibe Coding Safely: a 15-minute talk for the HackDev Webinar, 25 Oct 2026. Speaker: Adam Amzar.
+  One HTML file. Open it in Chrome or Edge.
+
+  Keys
+    Right / Down / PageDown / Space   next step on this slide, then the next slide
+    Left / Up / PageUp                previous step, then the previous slide
+    Home / End                        first / last slide
+    0                                 case index      1-5  jump to that case
+    P                                 presenter notes + timer in a separate window (never on the shared screen)
+    F                                 fullscreen
+    E                                 edit text in place (Ctrl+S downloads an edited copy, Esc to finish)
+
+  Live demos: run start-demos.bat first. Every demo slide has a "Live demo" link to its localhost app.
+  If the demos or the Wi-Fi fail, the exhibit on the slide is the offline backup: it plays the same steps.
+
+  Link to a slide (and step) with #<slide>.<step>, for example deck.html#15.2
+-->
+
+    <!-- === FONTS ===
+     DM Serif Display: headlines. Courier Prime: the typed report. Stardos Stencil: rubber stamps.
+     Caveat: the investigator's blue-pen notes in the margins. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=DM+Serif+Display:ital@0;1&family=Stardos+Stencil:wght@700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* ===========================================
+   THEME TOKENS
+   The whole look lives here: a manila case folder, typed report sheets,
+   red and green rubber stamps, a yellow highlighter and a blue pen.
+   =========================================== */
+        :root {
+            --stage-bg: #231f1a;
+            /* the desk around the letterboxed stage */
+            --slide-bg: transparent;
+            /* slides are see-through so the folder shows */
+
+            --manila: #dcc596;
+            --manila-hi: #e8d6ad;
+            --manila-lo: #c4a46c;
+            --paper: #fbf7ee;
+            --paper-shade: #f1e9d8;
+            --ink: #1d1b18;
+            --ink-2: #4a453d;
+            --faint: #8a8172;
+            --rule: #d6ccb8;
+            --red: #c62a1f;
+            --green: #2f7a3a;
+            --hi: #ffe36e;
+            --pen: #2546a8;
+
+            --f-display: 'DM Serif Display', Georgia, serif;
+            --f-type: 'Courier Prime', 'Courier New', monospace;
+            --f-stamp: 'Stardos Stencil', Impact, sans-serif;
+            --f-hand: 'Caveat', 'Segoe Print', cursive;
+
+            --ease: cubic-bezier(.2, .8, .2, 1);
+            --thud: cubic-bezier(.3, 1.6, .5, 1);
+
+            /* inked rubber-stamp texture, used as a mask */
+            --ink-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -1.5 1.75'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            /* faint paper grain */
+            --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .27 0 0 0 0 .15 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ===========================================
+   FIXED 16:9 STAGE: MANDATORY BASE STYLES
+   (full contents of viewport-base.css)
+   =========================================== */
+
+        /* 1. Lock the browser viewport */
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            background: var(--stage-bg, #000);
+        }
+
+        /* 2. Full-window deck viewport */
+        .deck-viewport {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            background: var(--stage-bg, #000);
+        }
+
+        /* 3. Fixed 16:9 design canvas.
+   JavaScript sets transform: translate(...) scale(...). */
+        .deck-stage {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            transform-origin: 0 0;
+            background: var(--slide-bg, #fff);
+        }
+
+        /* 4. Slides stack inside the fixed stage.
+   Content must be laid out at 1920×1080, not reflowed per device. */
+        .slide {
+            position: absolute;
+            inset: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            display: block;
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
+            background: var(--slide-bg, #fff);
+        }
+
+        .slide.active,
+        .slide.visible {
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 1;
+        }
+
+        /* 5. Keep media inside authored slide bounds */
+        img,
+        video,
+        canvas,
+        svg {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        /* 6. Presentation chrome stays outside the slide design system */
+        .deck-controls {
+            position: fixed;
+            left: 50%;
+            bottom: 22px;
+            transform: translateX(-50%);
+            z-index: 1000;
+        }
+
+        /* 7. Print one fixed-size slide per page */
+        @media print {
+
+            html,
+            body {
+                width: 1920px;
+                height: auto;
+                overflow: visible;
+                background: #fff;
+            }
+
+            .deck-viewport {
+                position: static;
+                overflow: visible;
+                background: #fff;
+            }
+
+            .deck-stage {
+                position: static;
+                width: auto;
+                height: auto;
+                transform: none !important;
+                background: none;
+            }
+
+            .slide {
+                position: relative;
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                pointer-events: auto !important;
+                width: 1920px;
+                height: 1080px;
+                break-after: page;
+                page-break-after: always;
+            }
+
+            .slide:last-child {
+                break-after: auto;
+                page-break-after: auto;
+            }
+
+            .deck-controls {
+                display: none !important;
+            }
+        }
+
+        /* 8. Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.2s !important;
+            }
+        }
+
+        /* ===========================================
+   THE FOLDER (stage background + chrome)
+   Folder tab top-left names the current case. Divider tabs on the right
+   jump between cases. The folio bottom-left shows page and step.
+   =========================================== */
+        body {
+            font-family: var(--f-type);
+            color: var(--ink);
+        }
+
+        .deck-stage {
+            background:
+                repeating-linear-gradient(90deg, rgba(120, 90, 40, .035) 0 2px, transparent 2px 7px),
+                radial-gradient(1500px 1000px at 30% 15%, #e6d2a6, var(--manila) 55%, var(--manila-lo));
+        }
+
+        .case-tab {
+            position: absolute;
+            left: 150px;
+            top: 46px;
+            height: 66px;
+            z-index: 0;
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+            background: var(--manila-hi);
+            border-radius: 16px 16px 0 0;
+            box-shadow: inset 0 -8px 10px -8px rgba(90, 60, 20, .3);
+            font: 700 22px/1 var(--f-type);
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        /* divider tabs peek out from behind the report sheet */
+        .rail {
+            position: absolute;
+            left: 1650px;
+            top: 150px;
+            z-index: 0;
+            display: grid;
+            gap: 16px;
+        }
+
+        .rail button {
+            width: 232px;
+            height: 98px;
+            border: 0;
+            border-radius: 0 14px 14px 0;
+            cursor: pointer;
+            background: var(--c, var(--manila-hi));
+            color: var(--ink);
+            padding-right: 30px;
+            text-align: right;
+            font: 700 32px/1 var(--f-type);
+            box-shadow: 4px 6px 12px rgba(60, 40, 10, .2);
+            transition: translate .35s var(--ease), filter .2s;
+        }
+
+        .rail button small {
+            display: block;
+            margin-top: 6px;
+            font-size: 13px;
+            letter-spacing: .2em;
+            color: var(--ink-2);
+        }
+
+        .rail button:hover {
+            filter: brightness(1.05);
+            translate: 8px 0;
+        }
+
+        .rail button.on {
+            translate: 22px 0;
+        }
+
+        .rail button:focus-visible {
+            outline: 3px solid var(--pen);
+            outline-offset: 2px;
+        }
+
+        .folio {
+            position: absolute;
+            left: 150px;
+            bottom: 26px;
+            z-index: 2;
+            display: flex;
+            gap: 22px;
+            align-items: center;
+            font: 700 18px/1 var(--f-type);
+            letter-spacing: .2em;
+            color: var(--ink-2);
+        }
+
+        .pips {
+            display: flex;
+            gap: 8px;
+        }
+
+        .pips i {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            border: 2px solid var(--ink-2);
+        }
+
+        .pips i.on {
+            background: var(--ink-2);
+        }
+
+        .hint {
+            position: absolute;
+            right: 230px;
+            bottom: 26px;
+            z-index: 2;
+            font: 400 18px/1 var(--f-type);
+            letter-spacing: .12em;
+            color: var(--ink-2);
+            transition: opacity 1s;
+        }
+
+        .hint.gone {
+            opacity: 0;
+        }
+
+        /* ===========================================
+   SLIDES + THE REPORT SHEET
+   Each slide is a typed sheet laid on the folder. --tilt gives each page
+   its own slight angle. The sheet slides up into place when it opens.
+   =========================================== */
+        .slide {
+            transition: opacity .45s var(--ease), visibility 0s linear .45s;
+        }
+
+        .slide.active {
+            transition-delay: 0s;
+            pointer-events: none;
+        }
+
+        /* clicks pass through to the divider tabs... */
+        .slide.active .sheet {
+            pointer-events: auto;
+        }
+
+        /* ...but not through the paper */
+        .notes {
+            display: none;
+        }
+
+        .sheet {
+            position: absolute;
+            left: 130px;
+            top: 112px;
+            width: 1590px;
+            height: 900px;
+            padding: 54px 100px 56px 120px;
+            background: var(--grain), var(--paper);
+            box-shadow: 0 1px 0 #e9e2d2, 0 26px 50px rgba(60, 40, 10, .22), 0 4px 10px rgba(60, 40, 10, .12);
+            opacity: 0;
+            transform: translateY(46px) rotate(calc(var(--tilt, -.4deg) + 1.2deg));
+            transition: transform .75s var(--ease), opacity .5s var(--ease);
+        }
+
+        .slide.visible .sheet {
+            opacity: 1;
+            transform: rotate(var(--tilt, -.4deg));
+        }
+
+        /* binder holes */
+        .sheet::before {
+            content: "";
+            position: absolute;
+            left: 36px;
+            top: 170px;
+            width: 26px;
+            height: 590px;
+            background: radial-gradient(circle, #cdb27f 10px, transparent 11px) 0 0 / 26px 295px repeat-y;
+        }
+
+        /* form header: report type left, file reference right */
+        .form-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 40px;
+            padding-bottom: 16px;
+            margin-bottom: 44px;
+            border-bottom: 4px double var(--ink);
+            font: 700 21px/1 var(--f-type);
+            letter-spacing: .24em;
+            text-transform: uppercase;
+        }
+
+        .form-head span:last-child {
+            font-weight: 400;
+            letter-spacing: .12em;
+            color: var(--ink-2);
+        }
+
+        /* ===========================================
+   TYPOGRAPHY
+   =========================================== */
+        h1,
+        h2,
+        h3 {
+            font-family: var(--f-display);
+            font-weight: 400;
+            letter-spacing: -.015em;
+        }
+
+        h2 {
+            font-size: 84px;
+            line-height: 1.02;
+            max-width: 1340px;
+            text-wrap: balance;
+        }
+
+        h2.big {
+            font-size: 104px;
+            line-height: 1.0;
+        }
+
+        h2.huge {
+            font-size: 132px;
+            line-height: .98;
+        }
+
+        h2.mid {
+            font-size: 72px;
+            line-height: 1.04;
+        }
+
+        h3 {
+            font-size: 52px;
+            line-height: 1.05;
+        }
+
+        em {
+            font-style: italic;
+            color: var(--red);
+        }
+
+        b {
+            font-weight: 700;
+        }
+
+        .label {
+            font: 700 20px/1.3 var(--f-type);
+            letter-spacing: .24em;
+            text-transform: uppercase;
+            color: var(--faint);
+            margin-bottom: 22px;
+        }
+
+        .label.red {
+            color: var(--red);
+        }
+
+        .lede {
+            font: 400 34px/1.42 var(--f-type);
+        }
+
+        .typed {
+            font: 400 28px/1.45 var(--f-type);
+        }
+
+        .small {
+            font-size: 24px;
+        }
+
+        .red {
+            color: var(--red);
+        }
+
+        .green {
+            color: var(--green);
+        }
+
+        .pen {
+            font: 700 52px/1.08 var(--f-hand);
+            color: var(--pen);
+            rotate: -1.5deg;
+            margin-top: 34px;
+        }
+
+        code,
+        kbd {
+            font-family: var(--f-type);
+            font-weight: 700;
+            background: var(--paper-shade);
+            padding: 0 .3em;
+            border-radius: 4px;
+        }
+
+        kbd {
+            background: #fff;
+            border: 2px solid var(--ink);
+            box-shadow: 0 3px 0 var(--ink);
+            font-size: .85em;
+        }
+
+        .src {
+            position: absolute;
+            left: 120px;
+            bottom: 34px;
+            font: 400 18px/1 var(--f-type);
+            letter-spacing: .06em;
+            color: var(--faint);
+        }
+
+        blockquote {
+            font: italic 400 46px/1.15 var(--f-display);
+        }
+
+        /* ===========================================
+   STEPS
+   Elements with data-step="n" appear at step n. data-lift lifts a redaction,
+   data-strike crosses text out, data-mark runs the highlighter.
+   Individual translate/scale properties are used so tilts set with rotate survive.
+   =========================================== */
+        [data-step] {
+            opacity: 0;
+            translate: 0 18px;
+            transition: opacity .45s var(--ease) var(--d, 0s), translate .45s var(--ease) var(--d, 0s);
+        }
+
+        [data-step].on {
+            opacity: 1;
+            translate: 0 0;
+        }
+
+        /* ===========================================
+   RUBBER STAMPS
+   .stamp.auto thuds down when the slide opens; .stamp[data-step] on its step.
+   =========================================== */
+        .stamp {
+            position: absolute;
+            z-index: 4;
+            pointer-events: none;
+            white-space: nowrap;
+            text-align: center;
+            padding: 12px 30px 10px;
+            border: 8px solid currentColor;
+            border-radius: 6px;
+            outline: 3px solid currentColor;
+            outline-offset: 6px;
+            font: 700 72px/1 var(--f-stamp);
+            letter-spacing: .08em;
+            color: var(--red);
+            rotate: var(--rot, -9deg);
+            opacity: .9;
+            mix-blend-mode: multiply;
+            -webkit-mask-image: var(--ink-mask);
+            mask-image: var(--ink-mask);
+        }
+
+        .stamp.green {
+            color: var(--green);
+        }
+
+        .stamp small {
+            display: block;
+            margin-top: 8px;
+            font: 700 18px/1 var(--f-type);
+            letter-spacing: .3em;
+        }
+
+        .stamp[data-step],
+        .stamp.auto,
+        .stamp.js {
+            opacity: 0;
+            scale: 2;
+            translate: 0 0;
+            transition: opacity .2s ease var(--d, 0s), scale .38s var(--thud) var(--d, 0s);
+        }
+
+        .stamp.auto {
+            --d: .9s;
+        }
+
+        .stamp[data-step].on,
+        .slide.visible .stamp.auto,
+        .stamp.js.on {
+            opacity: .9;
+            scale: 1;
+        }
+
+        /* ===========================================
+   REDACTION, HIGHLIGHTER, STRIKE-THROUGH
+   =========================================== */
+        .redact {
+            position: relative;
+            display: inline-block;
+            padding: 0 .15em;
+            background: var(--hi);
+            cursor: pointer;
+        }
+
+        .redact::after {
+            content: "";
+            position: absolute;
+            inset: -.06em -.1em;
+            background: var(--ink);
+            transform-origin: right center;
+            transition: transform .6s cubic-bezier(.7, 0, .2, 1);
+        }
+
+        .redact.lifted::after {
+            transform: scaleX(0);
+        }
+
+        .redact.auto::after {
+            transition-delay: 1.5s;
+        }
+
+        .slide.visible .redact.auto::after {
+            transform: scaleX(0);
+        }
+
+        .hl {
+            padding: 0 .08em;
+            -webkit-box-decoration-break: clone;
+            box-decoration-break: clone;
+            background: linear-gradient(100deg, transparent .2em, var(--hi) .2em, var(--hi) calc(100% - .15em), transparent calc(100% - .15em)) no-repeat 0 62% / 0% 74%;
+            transition: background-size .8s var(--ease) .5s;
+        }
+
+        .slide.visible .hl:not([data-mark]),
+        .hl.marked {
+            background-size: 100% 74%;
+        }
+
+        .strike {
+            position: relative;
+            display: inline-block;
+            transition: color .4s;
+        }
+
+        .strike::after {
+            content: "";
+            position: absolute;
+            left: -2%;
+            right: -2%;
+            top: 54%;
+            height: .08em;
+            background: var(--red);
+            transform: scaleX(0) rotate(-2deg);
+            transform-origin: left;
+            transition: transform .5s var(--ease);
+        }
+
+        .strike.struck {
+            color: var(--faint);
+        }
+
+        .strike.struck::after {
+            transform: scaleX(1) rotate(-2deg);
+        }
+
+        /* ===========================================
+   EVIDENCE TAGS (big numbers)
+   =========================================== */
+        .tags,
+        .tagbox {
+            filter: drop-shadow(0 8px 10px rgba(80, 55, 15, .18));
+        }
+
+        .tags {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 44px;
+            margin-top: 46px;
+        }
+
+        .tag {
+            position: relative;
+            background: #ead9b0;
+            padding: 66px 36px 34px;
+            rotate: var(--r, 0deg);
+            clip-path: polygon(44px 0, calc(100% - 44px) 0, 100% 44px, 100% 100%, 0 100%, 0 44px);
+        }
+
+        .tag::before {
+            content: "";
+            position: absolute;
+            top: 18px;
+            left: 50%;
+            width: 26px;
+            height: 26px;
+            margin-left: -13px;
+            border-radius: 50%;
+            background: var(--paper);
+            box-shadow: inset 0 0 0 5px #cdb27a;
+        }
+
+        .tag>b {
+            display: block;
+            font: 400 104px/1 var(--f-display);
+            letter-spacing: -.02em;
+        }
+
+        .tag.xl>b {
+            font-size: 160px;
+        }
+
+        .tag figcaption {
+            margin-top: 16px;
+            font: 400 26px/1.35 var(--f-type);
+        }
+
+        .tag.red>b {
+            color: var(--red);
+        }
+
+        .tag.sm {
+            padding: 58px 30px 28px;
+        }
+
+        .tag.sm>b {
+            font-size: 76px;
+        }
+
+        .tag.sm figcaption {
+            font-size: 22px;
+        }
+
+        /* ===========================================
+   LAYOUT HELPERS
+   =========================================== */
+        .cols-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+        }
+
+        .ruled>*+* {
+            border-left: 3px solid var(--ink);
+            padding-left: 70px;
+            margin-left: -10px;
+        }
+
+        .num {
+            font: 700 22px/1 var(--f-type);
+            letter-spacing: .24em;
+            color: var(--red);
+            margin-bottom: 18px;
+        }
+
+        .mt-s {
+            margin-top: 24px;
+        }
+
+        .mt-m {
+            margin-top: 44px;
+        }
+
+        .mt-l {
+            margin-top: 70px;
+        }
+
+        /* ===========================================
+   EXHIBITS: taped screenshots, green-bar printouts, file cards
+   =========================================== */
+        .exhibit-label {
+            display: inline-block;
+            margin-bottom: 22px;
+            padding: 8px 14px 6px;
+            border: 3px solid var(--red);
+            color: var(--red);
+            font: 700 20px/1 var(--f-type);
+            letter-spacing: .24em;
+        }
+
+        .shot {
+            position: relative;
+            background: #fff;
+            padding: 16px;
+            rotate: var(--r, -1deg);
+            box-shadow: 0 14px 30px rgba(60, 40, 10, .22);
+        }
+
+        .shot::before,
+        .shot::after {
+            content: "";
+            position: absolute;
+            top: -18px;
+            width: 150px;
+            height: 40px;
+            background: rgba(250, 244, 214, .78);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+        }
+
+        .shot::before {
+            left: -40px;
+            rotate: -32deg;
+        }
+
+        .shot::after {
+            right: -40px;
+            rotate: 32deg;
+        }
+
+        .printout {
+            position: relative;
+            padding: 24px 74px;
+            color: #222;
+            background: repeating-linear-gradient(180deg, #fbfdf9 0 60px, #dfeedb 60px 120px);
+            font: 400 22px/30px var(--f-type);
+            box-shadow: 0 14px 30px rgba(60, 40, 10, .2);
+        }
+
+        .printout::before,
+        .printout::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 44px;
+            background: radial-gradient(circle at 22px 15px, var(--paper) 7px, transparent 8px) 0 0 / 44px 30px repeat-y;
+        }
+
+        .printout::before {
+            left: 0;
+            border-right: 2px dashed #bfd2ba;
+        }
+
+        .printout::after {
+            right: 0;
+            border-left: 2px dashed #bfd2ba;
+        }
+
+        /* nowrap, not pre: an editor's format-on-save re-wraps these lines, and pre would print the breaks */
+        .pl {
+            white-space: nowrap;
+            min-height: 30px;
+        }
+
+        .pl .col {
+            display: inline-block;
+            min-width: 25ch;
+        }
+
+        .pl.indent {
+            padding-left: 2ch;
+        }
+
+        .pl.cmd {
+            font-weight: 700;
+        }
+
+        .pl.bad {
+            color: var(--red);
+            font-weight: 700;
+        }
+
+        .pl.ok {
+            color: var(--green);
+            font-weight: 700;
+        }
+
+        .pl.dim {
+            color: #7c8a78;
+        }
+
+        .file {
+            background: #fff;
+            border: 2px solid var(--ink);
+            box-shadow: 6px 6px 0 var(--ink);
+        }
+
+        .file figcaption {
+            padding: 12px 20px;
+            border-bottom: 2px solid var(--ink);
+            background: var(--paper-shade);
+            font: 700 22px/1.2 var(--f-type);
+        }
+
+        .file figcaption small {
+            display: block;
+            margin-top: 4px;
+            font-weight: 400;
+            font-size: 18px;
+            color: var(--ink-2);
+        }
+
+        .file pre {
+            padding: 20px;
+            font: 700 26px/1.4 var(--f-type);
+            white-space: pre;
+        }
+
+        /* live-demo link: opens the localhost demo in a new tab */
+        .live {
+            position: absolute;
+            right: 90px;
+            bottom: 34px;
+            z-index: 5;
+            display: inline-flex;
+            gap: 14px;
+            align-items: center;
+            padding: 10px 18px 8px;
+            border: 3px solid var(--red);
+            background: var(--paper);
+            color: var(--red);
+            text-decoration: none;
+            font: 700 19px/1 var(--f-type);
+            letter-spacing: .16em;
+            text-transform: uppercase;
+            transition: background .2s, color .2s;
+        }
+
+        .live i {
+            font-style: normal;
+            font-weight: 400;
+            letter-spacing: .04em;
+            text-transform: none;
+        }
+
+        .live:hover,
+        .live:focus-visible {
+            background: var(--red);
+            color: var(--paper);
+            outline: none;
+        }
+
+        /* ===========================================
+   SLIDE-SPECIFIC LAYOUTS
+   =========================================== */
+
+        /* --- cover --- */
+        .s-cover .fields {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0 40px;
+            font: 400 26px/1.3 var(--f-type);
+        }
+
+        .s-cover .fields div {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .s-cover .fields b {
+            display: block;
+            font-size: 16px;
+            letter-spacing: .22em;
+            color: var(--faint);
+        }
+
+        .s-cover h1 {
+            margin-top: 62px;
+            font-size: 196px;
+            line-height: .9;
+            letter-spacing: -.02em;
+        }
+
+        .s-cover .line {
+            margin-top: 44px;
+            font: 400 40px/1.2 var(--f-type);
+        }
+
+        .s-cover .redact {
+            font-weight: 700;
+        }
+
+        .s-cover .sign {
+            position: absolute;
+            right: 100px;
+            bottom: 64px;
+            text-align: right;
+            font: 400 22px/1.3 var(--f-type);
+            color: var(--faint);
+        }
+
+        .s-cover .sign strong {
+            display: block;
+            font: italic 400 50px/1.1 var(--f-display);
+            color: var(--ink);
+        }
+
+        .clip {
+            position: absolute;
+            left: 520px;
+            top: -62px;
+            z-index: 3;
+            width: 56px;
+            height: 150px;
+            border: 7px solid #9aa0a6;
+            border-radius: 30px;
+            rotate: -6deg;
+        }
+
+        .clip::after {
+            content: "";
+            position: absolute;
+            left: 8px;
+            top: 14px;
+            width: 26px;
+            height: 100px;
+            border: 6px solid #b6bbc0;
+            border-bottom: 0;
+            border-radius: 20px 20px 0 0;
+        }
+
+        /* --- fact list (case 01) --- */
+        .facts {
+            margin-top: 30px;
+            border-top: 2px solid var(--ink);
+        }
+
+        .facts div {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 20px;
+            padding: 16px 0;
+            border-bottom: 1px dashed var(--rule);
+        }
+
+        .facts dt {
+            font: 700 18px/1.6 var(--f-type);
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--faint);
+        }
+
+        .facts dd {
+            font: 400 30px/1.3 var(--f-type);
+        }
+
+        .xlist {
+            list-style: none;
+            margin-top: 30px;
+            display: grid;
+            gap: 22px;
+        }
+
+        .xlist li {
+            display: grid;
+            grid-template-columns: 54px 1fr;
+            font: 400 32px/1.35 var(--f-type);
+        }
+
+        .xlist li::before {
+            content: "✕";
+            font: 700 38px/1.1 var(--f-type);
+            color: var(--red);
+        }
+
+        /* --- the one question --- */
+        .q-old {
+            font: 400 64px/1 var(--f-display);
+            color: var(--ink-2);
+        }
+
+        .q-new {
+            font-size: 128px;
+            line-height: .95;
+            margin-top: 0;
+        }
+
+        .who-list {
+            list-style: none;
+            margin-top: 50px;
+            display: flex;
+            gap: 60px;
+            font: 400 32px/1.3 var(--f-type);
+        }
+
+        .who-list li {
+            padding-left: 24px;
+            border-left: 6px solid var(--red);
+        }
+
+        /* --- case index --- */
+        .index {
+            list-style: none;
+            margin-top: 36px;
+            border-top: 3px solid var(--ink);
+        }
+
+        .index li {
+            display: grid;
+            grid-template-columns: 110px 1fr auto;
+            gap: 28px;
+            align-items: baseline;
+            padding: 26px 16px;
+            border-bottom: 2px dashed var(--rule);
+            cursor: pointer;
+            transition: background .2s;
+        }
+
+        .index li:hover {
+            background: var(--paper-shade);
+        }
+
+        .index .n {
+            font: 700 40px/1 var(--f-type);
+            color: var(--red);
+        }
+
+        .index .t {
+            display: flex;
+            gap: 22px;
+            align-items: baseline;
+            font: 400 52px/1.05 var(--f-display);
+        }
+
+        .index .t::after {
+            content: "";
+            flex: 1;
+            min-width: 40px;
+            border-bottom: 4px dotted var(--faint);
+        }
+
+        .index .c {
+            font: 700 26px/1 var(--f-type);
+            letter-spacing: .08em;
+            color: var(--ink-2);
+        }
+
+        .index.compact li {
+            padding: 18px 16px;
+        }
+
+        .index.compact .t {
+            font-size: 46px;
+        }
+
+        /* --- devtools exhibit (case 02) --- */
+        .ex-grid {
+            display: grid;
+            grid-template-columns: 830px 1fr;
+            gap: 60px;
+            align-items: start;
+        }
+
+        .devtools {
+            background: #fff;
+            border: 1px solid #cfd4da;
+            font: 400 20px/1.4 var(--f-type);
+            color: #1f2328;
+        }
+
+        .dt-bar {
+            display: flex;
+            gap: 28px;
+            padding: 12px 18px 0;
+            background: #f1f3f4;
+            border-bottom: 1px solid #cfd4da;
+            font-size: 19px;
+            color: #5f6368;
+        }
+
+        .dt-bar span {
+            padding-bottom: 10px;
+        }
+
+        .dt-bar .on {
+            color: #1a73e8;
+            border-bottom: 3px solid #1a73e8;
+        }
+
+        .dt-search {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 18px;
+            padding: 10px 14px;
+            border: 2px solid #1a73e8;
+            border-radius: 6px;
+            font-size: 26px;
+        }
+
+        .dt-search .ico {
+            color: #5f6368;
+        }
+
+        .dt-q {
+            font-weight: 700;
+            min-width: 2px;
+        }
+
+        .caret {
+            width: 2px;
+            height: 28px;
+            background: #1a73e8;
+            animation: blink 1s steps(1) infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .dt-res {
+            min-height: 250px;
+            padding: 0 18px 22px;
+        }
+
+        .dt-file {
+            margin: 8px 0 8px;
+            font-weight: 700;
+            color: #5f6368;
+        }
+
+        .dt-file small {
+            font-weight: 400;
+            margin-left: 10px;
+        }
+
+        .dt-line {
+            white-space: nowrap;
+            padding: 6px 10px;
+            background: #fffbe6;
+            border-left: 4px solid #f2c94c;
+        }
+
+        .dt-line b {
+            color: #9aa0a6;
+            font-weight: 400;
+            margin-right: 18px;
+        }
+
+        .dt-line mark {
+            background: var(--hi);
+            color: inherit;
+            font-weight: 700;
+        }
+
+        .dt-count {
+            margin-top: 26px;
+            font-size: 19px;
+            color: #5f6368;
+        }
+
+        .steps-typed {
+            margin: 10px 0 0 1.4em;
+            font: 400 28px/1.65 var(--f-type);
+        }
+
+        /* --- file cards row (case 02 remedy) --- */
+        .files {
+            display: grid;
+            grid-template-columns: 400px 270px 1fr;
+            gap: 36px;
+            margin-top: 46px;
+        }
+
+        .trap {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 34px;
+            align-items: center;
+            margin-top: 58px;
+            padding: 26px 34px;
+            border: 4px solid var(--red);
+            background: rgba(198, 42, 31, .05);
+        }
+
+        .trap-k {
+            font: 700 72px/1 var(--f-stamp);
+            color: var(--red);
+            letter-spacing: .04em;
+        }
+
+        .trap p {
+            font: 400 30px/1.4 var(--f-type);
+        }
+
+        /* --- dot grid (case 03) --- */
+        .dots-layout {
+            display: grid;
+            grid-template-columns: 1fr 703px;
+            gap: 70px;
+        }
+
+        .dots {
+            display: grid;
+            grid-template-columns: repeat(47, 13px);
+            gap: 2px;
+        }
+
+        .dots i {
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: #d5c9b0;
+            transition: background .35s, scale .35s;
+            transition-delay: var(--d, 0s);
+        }
+
+        .dots.lit i.x {
+            background: var(--red);
+            scale: 1.18;
+        }
+
+        .dots-cap {
+            display: flex;
+            gap: 40px;
+            margin-top: 24px;
+            font: 700 22px/1 var(--f-type);
+            letter-spacing: .1em;
+        }
+
+        .dots-cap .sw {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #d5c9b0;
+            margin-right: 10px;
+            vertical-align: -1px;
+        }
+
+        .dots-cap .red .sw {
+            background: var(--red);
+        }
+
+        /* --- RLS simulator (case 03) --- */
+        .rls-grid {
+            display: grid;
+            grid-template-columns: 960px 1fr;
+            gap: 50px;
+            align-items: start;
+        }
+
+        .rls-print {
+            height: 600px;
+        }
+
+        .rls-print table {
+            border-collapse: collapse;
+            font: 400 21px/30px var(--f-type);
+        }
+
+        .rls-print td {
+            padding: 0 22px 0 0;
+            white-space: nowrap;
+        }
+
+        .rls-print thead td {
+            font-weight: 700;
+        }
+
+        .rls-print .you td {
+            background: var(--hi);
+            font-weight: 700;
+        }
+
+        .rls-sql {
+            color: var(--pen);
+            font-weight: 700;
+            white-space: pre-wrap;
+        }
+
+        .rls-tabs {
+            display: grid;
+            gap: 12px;
+        }
+
+        .rls-tabs button {
+            display: grid;
+            grid-template-columns: 46px 1fr;
+            align-items: center;
+            text-align: left;
+            cursor: pointer;
+            padding: 14px 16px;
+            border: 3px solid var(--ink);
+            background: var(--paper);
+            color: var(--ink);
+            font: 700 22px/1.2 var(--f-type);
+            letter-spacing: .04em;
+            transition: background .2s, color .2s;
+        }
+
+        .rls-tabs button span {
+            font-size: 18px;
+            color: var(--faint);
+        }
+
+        .rls-tabs button.on {
+            background: var(--ink);
+            color: var(--paper);
+        }
+
+        .rls-tabs button.on span {
+            color: var(--hi);
+        }
+
+        .rls-cap {
+            margin-top: 26px;
+            font: 400 26px/1.4 var(--f-type);
+            min-height: 110px;
+        }
+
+        .rls-stamp {
+            right: 130px;
+            bottom: 190px;
+            font-size: 60px;
+            --rot: -10deg;
+        }
+
+        .rls-foot {
+            position: absolute;
+            left: 120px;
+            right: 420px;
+            bottom: 30px;
+            font: 400 21px/1.4 var(--f-type);
+            color: var(--ink-2);
+        }
+
+        /* --- version ledger (case 04A) --- */
+        .mcp-grid {
+            display: grid;
+            grid-template-columns: 820px 1fr;
+            gap: 64px;
+            margin-top: 40px;
+            align-items: start;
+        }
+
+        .ledger {
+            position: relative;
+            padding: 22px 32px 26px;
+            background: #fff;
+            border: 3px solid var(--ink);
+            box-shadow: 8px 8px 0 var(--ink);
+        }
+
+        .lg-row {
+            display: grid;
+            grid-template-columns: 330px 1fr;
+            gap: 20px;
+            padding: 14px 0;
+            border-bottom: 1px dashed var(--rule);
+            font: 400 28px/1.3 var(--f-type);
+        }
+
+        .lg-row b {
+            color: var(--green);
+        }
+
+        .lg-row.bad span {
+            color: var(--red);
+            font-weight: 700;
+        }
+
+        .lg-code {
+            margin-top: 18px;
+            padding: 14px 18px;
+            background: var(--ink);
+            color: #ffb4a8;
+            font: 700 28px/1.3 var(--f-type);
+        }
+
+        .lg-note {
+            margin-top: 12px;
+            font: 400 24px/1.4 var(--f-type);
+            color: var(--red);
+        }
+
+        /* --- timeline (case 04B) --- */
+        .tl-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 60px;
+            align-items: end;
+            margin-top: 50px;
+        }
+
+        .timeline {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 34px;
+        }
+
+        .timeline li {
+            position: relative;
+            padding-top: 34px;
+            border-top: 6px solid var(--ink);
+        }
+
+        .timeline li::before {
+            content: "";
+            position: absolute;
+            top: -17px;
+            left: 0;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--ink);
+        }
+
+        .timeline li:last-child {
+            border-top-color: var(--red);
+        }
+
+        .timeline li:last-child::before {
+            background: var(--red);
+        }
+
+        .timeline b {
+            display: block;
+            font: 700 24px/1 var(--f-type);
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: var(--red);
+            margin-bottom: 14px;
+        }
+
+        .timeline p {
+            font: 400 30px/1.35 var(--f-type);
+        }
+
+        /* --- npm audit (case 04B) --- */
+        .audit-grid {
+            display: grid;
+            grid-template-columns: 450px 1fr;
+            gap: 60px;
+            align-items: start;
+        }
+
+        .audit-print {
+            min-height: 588px;
+        }
+
+        .audit-limit {
+            margin-top: 18px;
+            padding-left: 20px;
+            border-left: 6px solid var(--red);
+            font: 400 24px/1.4 var(--f-type);
+        }
+
+        .dash {
+            list-style: none;
+            display: grid;
+            gap: 16px;
+            margin-top: 14px;
+        }
+
+        .dash li {
+            padding-left: 34px;
+            position: relative;
+            font: 400 25px/1.4 var(--f-type);
+        }
+
+        .dash li::before {
+            content: "—";
+            position: absolute;
+            left: 0;
+            color: var(--red);
+            font-weight: 700;
+        }
+
+        /* --- agent console (case 04C) --- */
+        .agent {
+            display: grid;
+            grid-template-columns: 1fr 470px;
+            gap: 56px;
+            margin-top: 34px;
+        }
+
+        .chatlog {
+            display: grid;
+            gap: 18px;
+            align-content: start;
+        }
+
+        .msg {
+            padding: 18px 24px;
+            border: 2px solid var(--ink);
+            background: #fff;
+            font: 400 28px/1.35 var(--f-type);
+            max-width: 820px;
+        }
+
+        .msg b {
+            display: block;
+            font-size: 17px;
+            letter-spacing: .22em;
+            text-transform: uppercase;
+            color: var(--faint);
+            margin-bottom: 6px;
+        }
+
+        .msg.user {
+            border-width: 4px;
+            font-weight: 700;
+        }
+
+        .msg.sql {
+            background: #1d1b18;
+            color: #ffb4a8;
+            border-color: #1d1b18;
+            font-weight: 700;
+        }
+
+        .msg.bot {
+            margin-left: 60px;
+        }
+
+        .db {
+            padding: 30px 34px;
+            border: 4px solid var(--ink);
+            background: #fff;
+        }
+
+        .db .label {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .db .label i {
+            font-style: normal;
+            background: var(--red);
+            color: #fff;
+            padding: 2px 10px;
+            letter-spacing: .2em;
+        }
+
+        .ctr {
+            padding: 16px 0;
+            border-top: 1px dashed var(--rule);
+        }
+
+        .ctr b {
+            display: block;
+            font: 400 110px/1 var(--f-display);
+            transition: color .4s;
+        }
+
+        .ctr span {
+            font: 400 24px/1 var(--f-type);
+            color: var(--ink-2);
+        }
+
+        .db.wiped .ctr b {
+            color: var(--red);
+        }
+
+        .guards {
+            list-style: none;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 26px 40px;
+            margin-top: 44px;
+        }
+
+        .guards li {
+            display: grid;
+            grid-template-columns: 60px 1fr;
+            gap: 18px;
+            padding: 22px 26px;
+            border: 3px solid var(--ink);
+            background: #fff;
+            font: 400 27px/1.35 var(--f-type);
+        }
+
+        .guards li::before {
+            content: "✓";
+            font: 700 60px/.8 var(--f-hand);
+            color: var(--green);
+        }
+
+        /* --- tea app (case 05) --- */
+        .tea-grid {
+            display: grid;
+            grid-template-columns: 600px 1fr;
+            gap: 70px;
+        }
+
+        .tea-tags {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .tea-tags .tag {
+            padding: 58px 28px 26px;
+        }
+
+        .tea-tags .tag>b {
+            font-size: 78px;
+        }
+
+        .tea-tags .tag figcaption {
+            font-size: 22px;
+            margin-top: 10px;
+        }
+
+        /* --- three stacked mistakes --- */
+        .mis-grid {
+            display: grid;
+            grid-template-columns: 760px 1fr;
+            gap: 70px;
+            align-items: start;
+        }
+
+        .stack {
+            display: grid;
+            gap: 16px;
+        }
+
+        .mis {
+            display: grid;
+            grid-template-columns: 80px 1fr auto;
+            align-items: center;
+            gap: 10px;
+            text-align: left;
+            cursor: pointer;
+            padding: 28px 30px;
+            border: 4px solid var(--ink);
+            background: #fff;
+            color: var(--ink);
+            font: 400 32px/1.25 var(--f-type);
+            box-shadow: 8px 8px 0 var(--ink);
+            transition: translate .4s var(--ease), opacity .4s, box-shadow .4s;
+        }
+
+        .mis .num {
+            margin: 0;
+            font-size: 26px;
+        }
+
+        .mis em {
+            font: 700 20px/1 var(--f-type);
+            letter-spacing: .2em;
+            color: var(--red);
+            font-style: normal;
+            opacity: 0;
+        }
+
+        .mis.out {
+            translate: 80px 0;
+            opacity: .45;
+            box-shadow: 0 0 0 var(--ink);
+            text-decoration: line-through;
+            text-decoration-color: var(--red);
+        }
+
+        .mis.out em {
+            opacity: 1;
+        }
+
+        .mis:hover:not(.out) {
+            translate: -6px -6px;
+            box-shadow: 14px 14px 0 var(--ink);
+        }
+
+        .clipping {
+            padding: 34px 40px;
+            background: #f4efe2;
+            border: 2px solid var(--ink-2);
+            rotate: 1deg;
+            min-height: 520px;
+        }
+
+        .headline {
+            font: 400 100px/1 var(--f-display);
+            transition: font-size .6s var(--ease);
+        }
+
+        /* --- sign-up form (case 05) --- */
+        .pdpa-grid {
+            display: grid;
+            grid-template-columns: 1fr 640px;
+            gap: 70px;
+            align-items: start;
+        }
+
+        .signup {
+            padding: 22px 30px 26px;
+            --r: 1.2deg;
+        }
+
+        .su-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding-bottom: 14px;
+            margin-bottom: 6px;
+            border-bottom: 2px solid var(--ink);
+            font: 400 38px/1 var(--f-display);
+        }
+
+        .su-head small {
+            font: 700 16px/1 var(--f-type);
+            letter-spacing: .16em;
+            color: var(--red);
+            text-transform: uppercase;
+        }
+
+        .field {
+            position: relative;
+            display: grid;
+            grid-template-columns: 190px 1fr;
+            align-items: center;
+            padding: 13px 0;
+            border-bottom: 1px dashed var(--rule);
+            cursor: pointer;
+            font: 400 22px/1.2 var(--f-type);
+        }
+
+        .field>span {
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: var(--faint);
+        }
+
+        .field>em {
+            font-style: normal;
+            color: var(--ink);
+            position: relative;
+            justify-self: start;
+            padding: 0 4px;
+        }
+
+        .field>em::after {
+            content: "";
+            position: absolute;
+            inset: -2px -4px;
+            background: var(--ink);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform .4s cubic-bezier(.7, 0, .2, 1);
+        }
+
+        .field::after {
+            content: "NOT NEEDED";
+            position: absolute;
+            right: 0;
+            font: 700 14px/1 var(--f-type);
+            letter-spacing: .2em;
+            color: var(--red);
+            opacity: 0;
+            transition: opacity .3s .2s;
+        }
+
+        .field.cut>em::after {
+            transform: scaleX(1);
+        }
+
+        .field.cut::after {
+            opacity: 1;
+        }
+
+        .field.keep>span {
+            color: var(--green);
+        }
+
+        /* --- attacker prompt --- */
+        .prompt-sheet {
+            position: relative;
+            margin-top: 10px;
+            padding: 40px 46px;
+            background: #fff;
+            border: 3px solid var(--ink);
+            box-shadow: 10px 10px 0 var(--ink);
+        }
+
+        .prompt-sheet pre {
+            font: 700 34px/1.5 var(--f-type);
+            white-space: pre-wrap;
+        }
+
+        .copy {
+            position: absolute;
+            right: 26px;
+            top: -26px;
+            cursor: pointer;
+            padding: 12px 20px 10px;
+            border: 3px solid var(--ink);
+            background: var(--hi);
+            color: var(--ink);
+            font: 700 20px/1 var(--f-type);
+            letter-spacing: .18em;
+        }
+
+        .copy:hover {
+            background: var(--ink);
+            color: var(--hi);
+        }
+
+        /* --- clearance checklist (index card) --- */
+        .check-grid {
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            gap: 60px;
+            align-items: start;
+        }
+
+        .card {
+            position: relative;
+            padding: 30px 40px 40px 120px;
+            rotate: .6deg;
+            background-color: #fffdf8;
+            background-image:
+                linear-gradient(90deg, transparent 96px, #e9a0a0 96px 99px, transparent 99px),
+                repeating-linear-gradient(180deg, transparent 0 66px, #bcd3ea 66px 68px);
+            background-position: 0 0, 0 92px;
+            box-shadow: 0 16px 30px rgba(60, 40, 10, .2);
+        }
+
+        .card-title {
+            padding-bottom: 18px;
+            margin-bottom: 8px;
+            border-bottom: 3px solid #e9a0a0;
+            font: 400 46px/1 var(--f-display);
+        }
+
+        .card-title small {
+            display: block;
+            margin-top: 8px;
+            font: 400 20px/1.2 var(--f-type);
+            color: var(--ink-2);
+        }
+
+        .ck {
+            display: grid;
+            grid-template-columns: 54px 1fr;
+            gap: 18px;
+            align-items: center;
+            min-height: 68px;
+            padding: 8px 0;
+            cursor: pointer;
+            font: 400 28px/1.3 var(--f-type);
+        }
+
+        .ck .box {
+            position: relative;
+            width: 38px;
+            height: 38px;
+            border: 3px solid var(--ink);
+            background: #fff;
+        }
+
+        .ck.done .box::after {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            top: -30px;
+            font: 700 66px/1 var(--f-hand);
+            color: var(--green);
+        }
+
+        .ck.done .txt {
+            color: var(--ink-2);
+        }
+
+        /* --- closing --- */
+        .closing {
+            font-size: 170px;
+            line-height: .95;
+            margin-top: 40px;
+        }
+
+        .sig {
+            margin-top: 56px;
+            font: 400 56px/1 var(--f-display);
+        }
+
+        .sig span {
+            display: block;
+            margin-top: 16px;
+            font: 400 24px/1 var(--f-type);
+            letter-spacing: .12em;
+            color: var(--faint);
+        }
+
+        /* --- sources --- */
+        .srcs {
+            width: 100%;
+            border-collapse: collapse;
+            font: 400 20px/1.35 var(--f-type);
+        }
+
+        .srcs th {
+            text-align: left;
+            padding: 0 16px 12px 0;
+            font-size: 16px;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--faint);
+            border-bottom: 3px solid var(--ink);
+        }
+
+        .srcs td {
+            padding: 11px 16px 11px 0;
+            border-bottom: 1px dashed var(--rule);
+            vertical-align: top;
+        }
+
+        .srcs td:first-child {
+            font-weight: 700;
+            color: var(--red);
+            width: 70px;
+        }
+
+        .srcs a {
+            color: var(--pen);
+            text-decoration-thickness: 2px;
+            text-underline-offset: 3px;
+        }
+
+        /* ===========================================
+   INLINE EDITING (E key or hover the top-left corner)
+   =========================================== */
+        .edit-hotzone {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 80px;
+            height: 80px;
+            z-index: 10000;
+            cursor: pointer;
+        }
+
+        .edit-toggle {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 10001;
+            cursor: pointer;
+            padding: 10px 16px 8px;
+            border: 3px solid var(--ink);
+            background: var(--hi);
+            color: var(--ink);
+            font: 700 16px/1 var(--f-type);
+            letter-spacing: .16em;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .3s ease;
+        }
+
+        .edit-toggle.show,
+        .edit-toggle.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .edit-bar {
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            translate: -50% 0;
+            z-index: 10001;
+            display: none;
+            gap: 12px;
+            align-items: center;
+            padding: 10px 14px;
+            background: var(--ink);
+            color: var(--paper);
+            font: 400 15px/1 var(--f-type);
+            letter-spacing: .06em;
+        }
+
+        .edit-bar button {
+            cursor: pointer;
+            padding: 7px 12px 5px;
+            border: 2px solid var(--paper);
+            background: transparent;
+            color: var(--paper);
+            font: 700 14px/1 var(--f-type);
+            letter-spacing: .12em;
+        }
+
+        body.editing .edit-bar {
+            display: flex;
+        }
+
+        body.editing [contenteditable="true"] {
+            outline: 2px dashed rgba(37, 70, 168, .45);
+            outline-offset: 4px;
+            cursor: text;
+        }
+
+        body.editing [contenteditable="true"]:focus {
+            outline: 3px solid var(--pen);
+            background: rgba(255, 227, 110, .25);
+        }
+
+        /* ===========================================
+   PRINT: show every step, lift every redaction
+   =========================================== */
+        @media print {
+            .sheet {
+                opacity: 1 !important;
+                transform: rotate(var(--tilt, -.4deg)) !important;
+            }
+
+            [data-step],
+            .stamp {
+                opacity: 1 !important;
+                translate: 0 0 !important;
+                scale: 1 !important;
+            }
+
+            .redact::after {
+                transform: scaleX(0) !important;
+            }
+
+            .rail,
+            .hint,
+            .edit-hotzone,
+            .edit-toggle,
+            .edit-bar {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="edit-hotzone" aria-hidden="true"></div>
+    <button class="edit-toggle" id="editToggle" title="Edit text (E)">✎ EDIT</button>
+    <div class="edit-bar" role="toolbar" aria-label="Edit mode">
+        <span>EDITING: click any text. Changes autosave in this browser.</span>
+        <button type="button" data-act="save">SAVE COPY (CTRL+S)</button>
+        <button type="button" data-act="discard">DISCARD EDITS</button>
+        <button type="button" data-act="done">DONE (ESC)</button>
+    </div>
+
+    <div class="deck-viewport">
+        <main class="deck-stage" id="deckStage">
+
+            <!-- === FOLDER CHROME === -->
+            <div class="case-tab" id="caseTab">Case files</div>
+            <nav class="rail" id="rail" aria-label="Cases"></nav>
+            <div class="folio"><span id="folio">HackDev · PAGE 01 / 30</span><span class="pips" id="pips"></span></div>
+            <div class="hint" id="hint">→ next · P presenter notes · F fullscreen</div>
+
+            <!-- =====================================================
+         01 · COVER
+         ===================================================== -->
+            <section class="slide s-cover" data-case="cover" data-title="Cover" data-clock="Before you start">
+                <article class="sheet" style="--tilt:-.8deg">
+                    <div class="clip"></div>
+                    <div class="form-head"><span>Incident report</span><span>File № HackDev</span></div>
+                    <div class="fields">
+                        <div><b>FILED BY</b>Adam Amzar</div>
+                        <div><b>BRIEFING</b>HackDev Webinar</div>
+                        <div><b>DATE</b>25 Oct 2026</div>
+                    </div>
+                    <h1>Vibe Coding<br><em>Safely.</em></h1>
+                    <p class="line">7 real cases. 1 question: <span class="redact auto">who else can use this?</span>
+                    </p>
+                    <div class="stamp auto" style="right:150px; top:440px">OPEN CASE<small>15 MIN BRIEFING</small></div>
+                    <div class="sign"><strong>Adam Amzar</strong>investigating officer</div>
+                </article>
+                <aside class="notes">
+                    <p><b>Before going live:</b> double-click <code>start-demos.bat</code> so every demo is running.
+                        Open this notes window with P, then share only the deck window.</p>
+                    <p>Five parts in 15 minutes. Each one follows Incident, then Why, then Prevent.</p>
+                    <p>Learn the idea and say it your own way. Reading word-for-word kills the room.</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         02 · CASE 01 · SHOW OF HANDS
+         ===================================================== -->
+            <section class="slide" data-case="01" data-title="Show of hands" data-clock="0:00–2:00">
+                <article class="sheet" style="--tilt:.5deg">
+                    <div class="form-head"><span>Witness question</span><span>Case 01 · 0:00</span></div>
+                    <p class="label">Quick show of hands</p>
+                    <h2 class="big">Who here has asked an AI to build something, and it just <em>worked</em> on the
+                        first try?</h2>
+                    <p class="pen" data-step="1">✋ Keep your hand up if you shipped it.</p>
+                </article>
+                <aside class="notes">
+                    <p>"Quick show of hands. Who here has asked an AI to build something, and it just worked on the
+                        first try?"</p>
+                    <p>[Space] "Keep your hand up if you shipped it."</p>
+                    <p>Webinar: ask them to raise a hand or drop a ✋ in the chat.</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         03 · CASE 01 · ENRICHLEAD
+         ===================================================== -->
+            <section class="slide" data-case="01" data-title="EnrichLead, March 2025" data-clock="0:00–2:00">
+                <article class="sheet" style="--tilt:-.3deg">
+                    <div class="form-head"><span>Incident report · Case 01</span><span>Filed March 2025</span></div>
+                    <div class="cols-2">
+                        <div>
+                            <p class="label">Subject</p>
+                            <h2>EnrichLead</h2>
+                            <dl class="facts">
+                                <div>
+                                    <dt>What</dt>
+                                    <dd>A sales-lead SaaS</dd>
+                                </div>
+                                <div>
+                                    <dt>Founder</dt>
+                                    <dd>Leo Acevedo</dd>
+                                </div>
+                                <div>
+                                    <dt>Built with</dt>
+                                    <dd>Cursor</dd>
+                                </div>
+                                <div>
+                                    <dt>Hand-written code</dt>
+                                    <dd>Zero, he posted, proudly</dd>
+                                </div>
+                                <div>
+                                    <dt>Customers</dt>
+                                    <dd>People paid for it</dd>
+                                </div>
+                            </dl>
+                        </div>
+                        <div data-step="1">
+                            <p class="label red">Days later</p>
+                            <h2>Under attack.</h2>
+                            <ul class="xlist">
+                                <li>Paywall bypassed. People used the app for free.</li>
+                                <li>API keys maxed out, on his bill.</li>
+                                <li>Junk written into his database.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="stamp" data-step="2" style="right:150px; bottom:90px; --rot:-11deg">SHUT DOWN</div>
+                </article>
+                <aside class="notes">
+                    <p>"In March 2025 a founder named Leo Acevedo did exactly that. He built a sales-lead SaaS called
+                        EnrichLead using Cursor, and posted proudly that it had zero hand-written code. People paid for
+                        it."</p>
+                    <p>[Space] "Days later he posted again: he was under attack. People bypassed his subscriptions and
+                        used the app for free. His API keys were maxed out on his bill. Junk was being written into his
+                        database."</p>
+                    <p>[Space] "He shut the whole thing down."</p>
+                    <p>Optional backdrop: LeadSnap at localhost:5101. It works, it looks paid-for. Talk only, no demo.
+                    </p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         04 · CASE 01 · CAUSE
+         ===================================================== -->
+            <section class="slide" data-case="01" data-title="Why it happened" data-clock="0:00–2:00">
+                <article class="sheet" style="--tilt:.35deg">
+                    <div class="form-head"><span>Cause of incident</span><span>Case 01</span></div>
+                    <h2 class="big">The AI didn't do anything evil. It did exactly what he asked: <span class="hl">make
+                            it work.</span></h2>
+                    <p class="lede mt-l">Nobody asked it to <span class="redact" data-lift="1">make it safe.</span></p>
+                    <p class="pen" data-step="2">never read the code → couldn't know what it exposed.<br>announced it
+                        publicly → became a target.</p>
+                </article>
+                <aside class="notes">
+                    <p>"The AI didn't do anything evil. It did exactly what he asked: make it work."</p>
+                    <p>[Space] "Nobody asked it to make it safe."</p>
+                    <p>[Space] "And because he never read the code, he couldn't know what it exposed. Then he announced
+                        it publicly, which made him a target."</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         05 · CASE 01 · THE ONE QUESTION
+         ===================================================== -->
+            <section class="slide" data-case="01" data-title="The one question" data-clock="0:00–2:00">
+                <article class="sheet" style="--tilt:-.5deg">
+                    <div class="form-head"><span>The one question</span><span>Case 01</span></div>
+                    <p class="label">Stop asking only</p>
+                    <p class="q-old">“Does it work?”</p>
+                    <p class="label red mt-m" data-step="1">Also ask</p>
+                    <h2 class="q-new" data-step="1" style="margin-top:0">Who <em>else</em> can make it work?</h2>
+                    <ul class="who-list" data-step="2">
+                        <li>Who else can<br><b>read this data?</b></li>
+                        <li>Who else can<br><b>call this API?</b></li>
+                        <li>Who else can<br><b>skip this paywall?</b></li>
+                    </ul>
+                </article>
+                <aside class="notes">
+                    <p>"So here's the one question I want you to leave with. Stop asking only 'does it work?'"</p>
+                    <p>[Space] "Also ask, 'who else can make it work?'"</p>
+                    <p>[Space] "Who else can read this data, call this API, or skip this paywall?"</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         06 · CASE INDEX (rows are clickable)
+         ===================================================== -->
+            <section class="slide" data-case="index" data-title="Case index" data-clock="1:45–2:00">
+                <article class="sheet" style="--tilt:.3deg">
+                    <div class="form-head"><span>Case index</span><span>4 files · 13 minutes</span></div>
+                    <h2 class="mid">Where that question usually fails</h2>
+                    <ol class="index">
+                        <li data-goto="02"><span class="n">02</span><span class="t">Secrets leak fast</span><span
+                                class="c">2:00–5:00</span></li>
+                        <li data-goto="03"><span class="n">03</span><span class="t">Your database is open by
+                                default</span><span class="c">5:00–9:00</span></li>
+                        <li data-goto="04"><span class="n">04</span><span class="t">What the AI installs or
+                                runs</span><span class="c">9:00–13:00</span></li>
+                        <li data-goto="05"><span class="n">05</span><span class="t">Privacy, and the
+                                checklist</span><span class="c">13:00–15:00</span></li>
+                    </ol>
+                    <p class="pen" style="position:absolute; right:110px; bottom:60px">each one fixable in a few minutes
+                    </p>
+                </article>
+                <aside class="notes">
+                    <p>"In the next 13 minutes I'll show you the four places that question usually fails, and how to fix
+                        each one in a few minutes."</p>
+                    <p>Transition: "Let's start with the easiest mistake, which is also exactly what happened to Leo."
+                    </p>
+                    <p>Rows are clickable if you need to jump.</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         07 · CASE 02 · SECRETS: THE NUMBERS
+         ===================================================== -->
+            <section class="slide" data-case="02" data-title="Millions of keys on public GitHub" data-clock="2:00–5:00">
+                <article class="sheet" style="--tilt:-.4deg">
+                    <div class="form-head"><span>Incident report · Case 02</span><span>Public GitHub, 2024–2025</span>
+                    </div>
+                    <p class="label">Secrets leak fast</p>
+                    <h2>Leo's keys sat in his frontend code. <em>He's not unusual.</em></h2>
+                    <div class="tags">
+                        <figure class="tag" style="--r:-1.5deg"><b data-count="23.8" data-dec="1"
+                                data-suffix="M">23.8M</b>
+                            <figcaption>secrets leaked on public GitHub in 2024: passwords, API keys, database logins
+                            </figcaption>
+                        </figure>
+                        <figure class="tag" data-step="1" style="--r:1deg"><b>~29M</b>
+                            <figcaption>in 2025. Commits written with AI help leaked at roughly <b>double</b> the normal
+                                rate</figcaption>
+                        </figure>
+                        <figure class="tag red" data-step="2" style="--r:-.5deg"><b data-count="70"
+                                data-suffix="%">70%</b>
+                            <figcaption>of secrets leaked in 2022 were still working years later</figcaption>
+                        </figure>
+                    </div>
+                    <p class="src">GitGuardian, State of Secrets Sprawl 2025 · TechRadar</p>
+                </article>
+                <aside class="notes">
+                    <p>"Leo's API keys were sitting in his frontend code. He's not unusual."</p>
+                    <p>"GitGuardian scans public GitHub every year. In 2024 they found 23.8 million leaked secrets:
+                        passwords, API keys, database logins."</p>
+                    <p>[Space] "In 2025 it jumped to about 29 million, and commits written with AI help leaked secrets
+                        at roughly double the normal rate."</p>
+                    <p>[Space] "The scariest number: 70% of the secrets leaked in 2022 were still working years later.
+                        People leak a key and never change it."</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         08 · CASE 02 · CAUSE: TWO WAYS KEYS ESCAPE
+         ===================================================== -->
+            <section class="slide" data-case="02" data-title="Two ways keys escape" data-clock="2:00–5:00">
+                <article class="sheet" style="--tilt:.4deg">
+                    <div class="form-head"><span>Cause of incident</span><span>Case 02</span></div>
+                    <h2>Two ways keys escape.</h2>
+                    <div class="cols-2 ruled mt-m">
+                        <div>
+                            <p class="num">01</p>
+                            <h3>In frontend code</h3>
+                            <p class="typed mt-s">Anything sent to the browser is public, because anyone can open
+                                DevTools.</p>
+                        </div>
+                        <div data-step="1">
+                            <p class="num">02</p>
+                            <h3>Committed to Git</h3>
+                            <p class="typed mt-s">Deleting the file later doesn't help. It's still in the history, and
+                                bots scan new public commits constantly.</p>
+                        </div>
+                    </div>
+                    <p class="pen" data-step="2">…and the AI puts the key wherever the code works fastest. Usually the
+                        worst possible place.</p>
+                </article>
+                <aside class="notes">
+                    <p>"There are two ways keys escape. First, you put the key in frontend code. Anything sent to the
+                        browser is public, because anyone can open DevTools."</p>
+                    <p>[Space] "Second, you commit it to Git. Deleting the file later doesn't help, because it's still
+                        in the history. Bots scan new public commits constantly."</p>
+                    <p>[Space] "And the AI puts the key wherever it makes the code work fastest. That's usually the
+                        worst possible place."</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         09 · CASE 02 · EXHIBIT A: DEVTOOLS KEY HUNT (offline backup of the StudyBuddy demo)
+         ===================================================== -->
+            <section class="slide" data-case="02" data-title="Exhibit A: find the leak" data-clock="2:00–5:00"
+                data-hook="devtools">
+                <article class="sheet" style="--tilt:-.25deg">
+                    <div class="form-head"><span>Exhibit A · Case 02</span><span>StudyBuddy · localhost:5102</span>
+                    </div>
+                    <div class="ex-grid">
+                        <div class="shot" style="--r:-1.2deg">
+                            <div class="devtools no-edit">
+                                <div class="dt-bar"><span>Elements</span><span>Console</span><span
+                                        class="on">Sources</span><span>Network</span><span>Search</span></div>
+                                <div class="dt-search"><span class="ico">⌕</span><span class="dt-q"
+                                        id="dtq"></span><span class="caret"></span></div>
+                                <div class="dt-res">
+                                    <p class="dt-file" data-step="1" style="--d:.7s">▾ app/page.js
+                                        <small>localhost:5102/_next/static/chunks</small></p>
+                                    <p class="dt-line" data-step="1" style="--d:.8s"><b>6</b>const OPENAI_API_KEY =
+                                        "<mark>sk-</mark>proj-StudyBuddyDEMO_REVOKED"</p>
+                                    <p class="dt-count" data-step="1" style="--d:1s">Search finished. Found 1 matching
+                                        line in 1 file.</p>
+                                </div>
+                            </div>
+                            <div class="stamp" data-step="2" style="right:40px; bottom:40px; --rot:-8deg">LEAKED</div>
+                        </div>
+                        <div>
+                            <p class="exhibit-label">Find the leak</p>
+                            <ol class="steps-typed">
+                                <li>Open the app, press <kbd>F12</kbd></li>
+                                <li>Sources, then <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></li>
+                                <li>Search <code>sk-</code> or <code>key</code></li>
+                            </ol>
+                            <blockquote class="mt-m" data-step="2" style="font-size:40px">“This is all an attacker
+                                needs. No hacking skills, just F12.”</blockquote>
+                        </div>
+                    </div>
+                    <a class="live" href="http://localhost:5102/" target="_blank" rel="noopener">▶ Live demo
+                        <i>StudyBuddy :5102</i></a>
+                </article>
+                <aside class="notes">
+                    <p><b>[ON SCREEN]</b> Live: open StudyBuddy (link bottom-right), ask a question so the chat looks
+                        real, then F12 → Sources → Ctrl+Shift+F → type <code>sk-</code>. The key shows up.</p>
+                    <p>Backup: press Space here and the exhibit types the search for you.</p>
+                    <p>[Space] "This is all an attacker needs. No hacking skills, just F12."</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         10 · CASE 02 · REMEDY: MOVE THE KEY TO THE SERVER
+         ===================================================== -->
+            <section class="slide" data-case="02" data-title="Move the key to the server" data-clock="2:00–5:00">
+                <article class="sheet" style="--tilt:.3deg">
+                    <div class="form-head"><span>Remedy · Case 02</span><span>The .env fix</span></div>
+                    <h2>Move the key off the browser.</h2>
+                    <div class="files">
+                        <figure class="file">
+                            <figcaption>.env<small>never commit this file</small></figcaption>
+                            <pre>OPENAI_API_KEY=sk-...</pre>
+                        </figure>
+                        <figure class="file">
+                            <figcaption>.gitignore<small>&nbsp;</small></figcaption>
+                            <pre>.env</pre>
+                        </figure>
+                        <figure class="file">
+                            <figcaption>app/api/chat/route.js<small>runs on the server, not in the browser</small>
+                            </figcaption>
+                            <pre>const key = process.env.OPENAI_API_KEY;</pre>
+                        </figure>
+                    </div>
+                    <div class="trap" data-step="1">
+                        <span class="trap-k">TRAP</span>
+                        <p><code>NEXT_PUBLIC_</code> and <code>VITE_</code> variables are shipped <em>to the
+                                browser</em>. A .env file alone isn't safe. The key also has to be used only on the
+                            server.</p>
+                    </div>
+                    <a class="live" href="http://localhost:5102/fixed" target="_blank" rel="noopener">▶ Live demo
+                        <i>StudyBuddy /fixed</i></a>
+                </article>
+                <aside class="notes">
+                    <p><b>[ON SCREEN]</b> Show <code>.env</code>, <code>.gitignore</code> and
+                        <code>app/api/chat/route.js</code> in StudyBuddy. Then open <code>/fixed</code>, search
+                        <code>sk-</code> again, and find nothing.</p>
+                    <p>[Space] Point out the trap: "Variables starting with NEXT_PUBLIC_ or VITE_ are shipped to the
+                        browser. A .env file alone isn't safe. The key also has to be used only on the server."</p>
+                    <p>The leaky StudyBuddy page shows this exact trap: its key lives in .env but uses the NEXT_PUBLIC_
+                        prefix.</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         11 · CASE 02 · ROTATE THE KEY
+         ===================================================== -->
+            <section class="slide" data-case="02" data-title="If it already leaked" data-clock="4:30–5:00">
+                <article class="sheet" style="--tilt:-.45deg">
+                    <div class="form-head"><span>Remedy, continued</span><span>Case 02</span></div>
+                    <p class="label">If it already leaked</p>
+                    <h2 class="huge">Deleting the commit is <span class="hl">not a fix.</span></h2>
+                    <h2 class="huge" data-step="1"><em>Revoking the key is.</em></h2>
+                    <p class="lede mt-m" data-step="2">Rotate it in the provider's dashboard, right away.</p>
+                    <div class="stamp green" data-step="2" style="right:140px; bottom:110px; --rot:-7deg">ROTATE KEY
+                    </div>
+                </article>
+                <aside class="notes">
+                    <p>"If it already leaked, rotate the key in the provider's dashboard right away."</p>
+                    <p>[Space] "Deleting the commit is not a fix. Revoking the key is."</p>
+                    <p>Transition: "Keys are one kind of secret. But for most of your apps, the real treasure is the
+                        database."</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         12 · CASE 03 · LOVABLE: 1,645 APPS, 170 OPEN
+         ===================================================== -->
+            <section class="slide" data-case="03" data-title="Lovable, CVE-2025-48757" data-clock="5:00–9:00"
+                data-hook="dots">
+                <article class="sheet" style="--tilt:.3deg">
+                    <div class="form-head"><span>Incident report · Case 03</span><span>CVE-2025-48757</span></div>
+                    <div class="dots-layout">
+                        <div>
+                            <p class="label">Lovable · 2025</p>
+                            <h2 class="mid">About 1 in 10 apps had a database <em>anyone could read.</em></h2>
+                            <p class="typed mt-m">Researcher Matt Palmer scanned <b>1,645</b> apps from Lovable's own
+                                showcase. <b class="red">170</b> were open to anyone on the internet, and some could
+                                even be written to.</p>
+                            <p class="typed mt-s" data-step="2">Inside: emails, home addresses, personal debt amounts,
+                                API keys.</p>
+                        </div>
+                        <figure class="no-edit">
+                            <div class="dots" id="dots" aria-label="1,645 dots, 170 of them red"></div>
+                            <figcaption class="dots-cap"><span><i class="sw"></i>1,645 apps scanned</span><span
+                                    class="red" data-step="1"><i class="sw"></i>170 exposed</span></figcaption>
+                        </figure>
+                    </div>
+                </article>
+                <aside class="notes">
+                    <p>"Lovable is one of the most popular vibe-coding platforms. In 2025, a researcher named Matt
+                        Palmer scanned 1,645 apps from Lovable's own showcase."</p>
+                    <p>[Space] "About 1 in 10, 170 apps, had databases that anyone on the internet could read, and
+                        sometimes even write to."</p>
+                    <p>[Space] "Inside were emails, home addresses, personal debt amounts, and API keys. It became an
+                        official security vulnerability, CVE-2025-48757."</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         13 · CASE 03 · IT KEPT HAPPENING
+         ===================================================== -->
+            <section class="slide" data-case="03" data-title="It kept happening, 2026" data-clock="5:00–9:00">
+                <article class="sheet" style="--tilt:-.35deg">
+                    <div class="form-head"><span>Follow-up report · Case 03</span><span>Early 2026</span></div>
+                    <p class="label">It kept happening</p>
+                    <div class="cols-2" style="grid-template-columns: 600px 1fr; align-items:center; min-height:560px">
+                        <div class="tagbox">
+                            <figure class="tag red xl" style="--r:-1.5deg"><b data-count="18697" data-sep="1">18,697</b>
+                                <figcaption>user records exposed by one featured Lovable app</figcaption>
+                            </figure>
+                        </div>
+                        <div>
+                            <p class="lede">Including students from <b>UC Berkeley</b> and <b>UC Davis</b>.</p>
+                            <h2 class="mt-m" data-step="1">Students like you, using an app built by <em>someone like
+                                    you.</em></h2>
+                        </div>
+                    </div>
+                </article>
+                <aside class="notes">
+                    <p>"It kept happening. In early 2026, one featured Lovable app exposed nearly 18,700 user records,
+                        including students from UC Berkeley and UC Davis."</p>
+                    <p>[Space] "These are students like you, using an app built by someone like you."</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         14 · CASE 03 · CAUSE: ADDRESS VS LOCK
+         ===================================================== -->
+            <section class="slide" data-case="03" data-title="The key is an address, RLS is the lock"
+                data-clock="5:00–9:00">
+                <article class="sheet" style="--tilt:.4deg">
+                    <div class="form-head"><span>Cause of incident</span><span>Case 03</span></div>
+                    <h2>The key is an address. <em>RLS is the lock.</em></h2>
+                    <div class="cols-2 ruled mt-m">
+                        <div>
+                            <p class="num">The public key</p>
+                            <p class="lede" style="font-size:31px">Supabase and Firebase let the browser talk straight
+                                to the database with a public key. It's <i>supposed</i> to be public. It's like the
+                                address of the building.</p>
+                        </div>
+                        <div data-step="1">
+                            <p class="num">Row Level Security</p>
+                            <p class="lede" style="font-size:31px">The lock on each table. When AI tools create tables
+                                with raw SQL, RLS is often left <b class="red">off</b>. No lock means anyone with the
+                                address walks in.</p>
+                        </div>
+                    </div>
+                    <p class="pen" data-step="2">hiding a button in your UI is not a lock. the attacker never uses your
+                        UI.</p>
+                </article>
+                <aside class="notes">
+                    <p>"Supabase and Firebase let the browser talk straight to the database using a public key. That key
+                        is supposed to be public. It's like the address of the building."</p>
+                    <p>[Space] "The lock on each table is called Row Level Security, or RLS. When AI tools create tables
+                        with raw SQL, RLS is often left off. No lock means anyone with the address walks in."</p>
+                    <p>[Space] "And hiding a button in your UI is not a lock. The attacker never uses your UI. They talk
+                        to your database directly."</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         15 · CASE 03 · EXHIBIT B: RLS SIMULATOR (offline backup of the CampusConnect demo)
+         ===================================================== -->
+            <section class="slide" data-case="03" data-title="Exhibit B: the open door, then the lock"
+                data-clock="5:00–9:00" data-hook="rls" data-steps="3">
+                <article class="sheet" style="--tilt:-.2deg">
+                    <div class="form-head"><span>Exhibit B · Case 03</span><span>CampusConnect · localhost:5103</span>
+                    </div>
+                    <div class="rls-grid">
+                        <div class="printout rls-print no-edit">
+                            <div class="pl cmd">&gt; const { data } = await supabase.from('students').select('*')</div>
+                            <div class="pl dim indent">// using only the public anon key, from the browser console</div>
+                            <div class="pl rls-sql" id="rlsSql"></div>
+                            <div class="pl"> </div>
+                            <div id="rlsOut"></div>
+                        </div>
+                        <div>
+                            <div class="rls-tabs no-edit" id="rlsTabs">
+                                <button type="button" data-s="0"><span>01</span>RLS off</button>
+                                <button type="button" data-s="1"><span>02</span>Turn the lock on</button>
+                                <button type="button" data-s="2"><span>03</span>Own rows only</button>
+                                <button type="button" data-s="3"><span>04</span>The fake fix</button>
+                            </div>
+                            <p class="rls-cap no-edit" id="rlsCap"></p>
+                        </div>
+                    </div>
+                    <div class="stamp js rls-stamp" id="rlsStamp"></div>
+                    <p class="rls-foot">Before launch: open Supabase's <b>Security Advisor</b> and fix every red
+                        item.<br>Firebase: never ship <code>allow read, write: if true;</code></p>
+                    <a class="live" href="http://localhost:5103/" target="_blank" rel="noopener">▶ Live demo
+                        <i>CampusConnect :5103</i></a>
+                </article>
+                <aside class="notes">
+                    <p><b>[ON SCREEN]</b> Live in CampusConnect: console query returns every student. Run
+                        <code>02-lock.sql</code>, re-run: <code>[]</code>. Run <code>03-policy.sql</code>: one row. Show
+                        <code>04-bad-policy.sql</code>, don't run it. Then Security Advisor.</p>
+                    <p>Backup: Space walks the same four states here (or click the buttons).</p>
+                    <p>1. "Show the open door." Every student, every row.</p>
+                    <p>2. "Turn the lock on." <code>ALTER TABLE public.students ENABLE ROW LEVEL SECURITY;</code> "Same
+                        code, same key, nothing comes back."</p>
+                    <p>3. "Add a real rule so users see only their own rows."</p>
+                    <p>4. "Warn about the fake fix. A policy with USING (true) means everyone can read everything
+                        again." "Before launch, open Supabase's Security Advisor, or your platform's security scan, and
+                        fix every red item."</p>
+                    <p>Firebase users: same idea with Security Rules. Never ship
+                        <code>allow read, write: if true;</code></p>
+                    <p>Transition: "So far we've talked about code the AI wrote. Now let's talk about code the AI pulls
+                        in from other people."</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         16 · CASE 04 · DIVIDER: THREE SHORT STORIES
+         ===================================================== -->
+            <section class="slide" data-case="04" data-title="Case 04: three short stories" data-clock="9:00–13:00">
+                <article class="sheet" style="--tilt:.45deg">
+                    <div class="form-head"><span>Incident report · Case 04</span><span>3 files · 4 minutes</span></div>
+                    <p class="label">So far: code the AI wrote. Now: code the AI pulls in from other people.</p>
+                    <h2>Don't blindly trust what the AI <em>installs</em> or <em>runs.</em></h2>
+                    <ol class="index compact mt-m">
+                        <li data-goto="4a"><span class="n">4A</span><span class="t">Tools you plug into your
+                                AI</span><span class="c">9:00–10:00</span></li>
+                        <li data-goto="4b"><span class="n">4B</span><span class="t">Packages that are too
+                                old</span><span class="c">10:00–11:30</span></li>
+                        <li data-goto="4c"><span class="n">4C</span><span class="t">Agents with too much
+                                power</span><span class="c">11:30–13:00</span></li>
+                    </ol>
+                </article>
+                <aside class="notes">
+                    <p>"So far we've talked about code the AI wrote. Now let's talk about code the AI pulls in from
+                        other people."</p>
+                    <p>Three short stories in four minutes. Keep each one tight.</p>
+                    <p>If anyone asks about AI inventing package names: Shananth's talk, right after yours, covers it.
+                    </p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         17 · CASE 04A · POSTMARK-MCP: A TOOL YOU PLUG INTO YOUR AI
+         ===================================================== -->
+            <section class="slide" data-case="04" data-id="4a" data-title="4A: postmark-mcp, Sept 2025"
+                data-clock="9:00–10:00">
+                <article class="sheet" style="--tilt:-.3deg">
+                    <div class="form-head"><span>Case 04A · Tools you plug into your AI</span><span>postmark-mcp · Sept
+                            2025</span></div>
+                    <p class="label">An MCP server: a plug-in that lets your AI send email</p>
+                    <h2 class="mid">15 versions worked fine. <em>Then 1.0.16 copied every email.</em></h2>
+                    <div class="mcp-grid">
+                        <div class="ledger no-edit">
+                            <div class="lg-row"><span>First 15 versions</span><b>✓ sends your email</b></div>
+                            <div class="lg-row bad" data-step="1"><span>Version 1.0.16</span><b>✓ sends your email</b>
+                            </div>
+                            <pre class="lg-code" data-step="1" style="--d:.3s">+ Bcc: '██████@giftshop.club',</pre>
+                            <p class="lg-note" data-step="1" style="--d:.5s">One added line: a hidden copy of every
+                                email, sent to the attacker.</p>
+                            <div class="stamp" data-step="1"
+                                style="--d:.8s; right:30px; bottom:-104px; font-size:50px; --rot:-6deg">BCC: ATTACKER
+                            </div>
+                        </div>
+                        <div>
+                            <p class="typed">It posed as the connector for Postmark, an email service. <b>It wasn't from
+                                    Postmark.</b></p>
+                            <div class="tagbox mt-s" data-step="2">
+                                <figure class="tag red sm" style="--r:1deg; padding: 50px 30px 22px"><b>~1,500</b>
+                                    <figcaption>downloads a week, until Koi Security caught it.</figcaption>
+                                </figure>
+                            </div>
+                        </div>
+                    </div>
+                    <a class="live" href="http://localhost:5100/04a-mcp-plugin/" target="_blank" rel="noopener">▶ Live
+                        demo <i>MCP plug-in :5100</i></a>
+                </article>
+                <aside class="notes">
+                    <p>"Here's something you install into your AI. MCP servers are plug-ins that let your AI do things:
+                        send email, query a database, post to Slack."</p>
+                    <p>"In September 2025, an npm package called postmark-mcp posed as the connector for Postmark, an
+                        email service. It wasn't from Postmark. The first 15 versions worked fine."</p>
+                    <p>[Space] "Then version 1.0.16 added one line: a hidden BCC that sent a copy of every email to the
+                        attacker. Password resets, invoices, everything."</p>
+                    <p>[Space] "About 1,500 downloads a week. Koi Security, who found it, called it the first malicious
+                        MCP server seen in the wild."</p>
+                    <p>Backdrop (link bottom-right): the MCP plug-in demo. Space steps it: a clean email, the plug-in
+                        updates itself to 1.0.16, the next emails look normal but copies land in the attacker's inbox,
+                        then the raw headers show the Bcc. M switches to the safe setup for slide 18.</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         18 · CASE 04A · REMEDY: WHAT YOU PLUG INTO YOUR AI
+         ===================================================== -->
+            <section class="slide" data-case="04" data-title="4A: anything you plug in gets your access"
+                data-clock="9:00–10:00">
+                <article class="sheet" style="--tilt:.35deg">
+                    <div class="form-head"><span>Remedy · Case 04A</span><span>MCP servers, extensions, plug-ins</span>
+                    </div>
+                    <h2>Anything you plug into your AI <em>gets your access.</em></h2>
+                    <ol class="guards" style="grid-template-columns:1fr; margin-top:40px">
+                        <li data-step="1"><span><b>Install it from the real publisher.</b> Follow the link in the
+                                company's own docs, not a search result.</span></li>
+                        <li data-step="2"><span><b>Pin the version.</b> The first 15 versions were fine and 1.0.16
+                                wasn't. Read what changed before you update.</span></li>
+                        <li data-step="3"><span><b>One key per tool, smallest scope.</b> If a tool turns bad, you revoke
+                                one key, not everything.</span></li>
+                    </ol>
+                    <p class="pen" data-step="4" style="font-size:46px; margin-top:28px">already installed a bad one?
+                        rotate every key it could see.</p>
+                </article>
+                <aside class="notes">
+                    <p>"Anything you plug into your AI gets your access. So:"</p>
+                    <p>[Space] "Install it from the real publisher. Follow the link in the company's own docs, not a
+                        search result."</p>
+                    <p>[Space] "Pin the version. The first 15 versions were fine and 1.0.16 wasn't. Read what changed
+                        before you update."</p>
+                    <p>[Space] "Give each tool its own key with the smallest scope, so if one turns bad you revoke one
+                        key, not everything."</p>
+                    <p>[Space] "And if you already installed a bad one, removing it isn't enough. Rotate every key it
+                        could see."</p>
+                    <p>Transition: "Even code from the right publisher goes stale."</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         19 · CASE 04B · EQUIFAX TIMELINE
+         ===================================================== -->
+            <section class="slide" data-case="04" data-id="4b" data-title="4B: Equifax, 2017" data-clock="10:00–11:30">
+                <article class="sheet" style="--tilt:-.4deg">
+                    <div class="form-head"><span>Case 04B · Packages that are too old</span><span>Equifax · 2017</span>
+                    </div>
+                    <h2 class="mid">One known bug. One old library. <em>The fix was already out.</em></h2>
+                    <div class="tl-grid">
+                        <ol class="timeline">
+                            <li><b>March 2017</b>
+                                <p>A serious flaw in Apache Struts is announced. A fix is released the same day.</p>
+                            </li>
+                            <li data-step="1"><b>Equifax</b>
+                                <p>A credit agency. Doesn't apply the fix.</p>
+                            </li>
+                            <li data-step="2"><b>Two months later</b>
+                                <p>Attackers walk in through that exact hole.</p>
+                            </li>
+                        </ol>
+                        <div class="tagbox" data-step="3">
+                            <figure class="tag red" style="--r:1.5deg"><b data-count="147" data-suffix="M">147M</b>
+                                <figcaption>people's data stolen</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+                </article>
+                <aside class="notes">
+                    <p>"Equifax is a credit agency. In March 2017, a serious flaw in a library they used, Apache Struts,
+                        was announced, and a fix was released the same day."</p>
+                    <p>[Space] "Equifax didn't apply it."</p>
+                    <p>[Space] "Two months later attackers walked in through that exact hole"</p>
+                    <p>[Space] "and stole data on 147 million people. It was one known bug in one old library, with the
+                        fix already available."</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         20 · CASE 04B · EXHIBIT C: NPM AUDIT (offline backup of the KedaiKita demo)
+         Output below is real `npm audit` output for axios 0.21.1 + lodash 4.17.15, trimmed.
+         ===================================================== -->
+            <section class="slide" data-case="04" data-title="Exhibit C: npm audit" data-clock="10:00–11:30">
+                <article class="sheet" style="--tilt:.25deg">
+                    <div class="form-head"><span>Exhibit C · Case 04B</span><span>KedaiKita · localhost:5104</span>
+                    </div>
+                    <div class="audit-grid">
+                        <div>
+                            <figure class="file">
+                                <figcaption>package.json</figcaption>
+                                <pre style="font-size:24px">"dependencies": {
+  "axios": "0.21.1",
+  "lodash": "4.17.15"
+}</pre>
+                            </figure>
+                            <p class="label mt-m">Why it happens</p>
+                            <ul class="dash">
+                                <li>AI writes version numbers from memory, from whenever it was trained.</li>
+                                <li>Even a perfect app goes stale. Safe today, a new CVE next month.</li>
+                            </ul>
+                            <p class="pen" data-step="2" style="font-size:38px; margin-top:22px">pin your versions (like
+                                Irfan said), and keep them updated.</p>
+                        </div>
+                        <div>
+                            <div class="printout audit-print no-edit">
+                                <div class="pl cmd">$ npm audit</div>
+                                <div class="pl" data-step="1" style="--d:.1s"># npm audit report</div>
+                                <div class="pl" data-step="1" style="--d:.2s"> </div>
+                                <div class="pl bad" data-step="1" style="--d:.25s"><span class="col">axios &lt;=0.32.0</span>Severity: high</div>
+                                <div class="pl" data-step="1" style="--d:.3s">Axios Cross-Site Request Forgery
+                                    Vulnerability</div>
+                                <div class="pl" data-step="1" style="--d:.35s">axios Inefficient Regular Expression
+                                    Complexity</div>
+                                <div class="pl" data-step="1" style="--d:.4s">axios Possible SSRF and Credential Leakage
+                                </div>
+                                <div class="pl dim" data-step="1" style="--d:.45s">… 21 more axios advisories</div>
+                                <div class="pl bad" data-step="1" style="--d:.55s"><span class="col">lodash &lt;=4.17.23</span>Severity: high</div>
+                                <div class="pl" data-step="1" style="--d:.6s">Command Injection in lodash</div>
+                                <div class="pl" data-step="1" style="--d:.65s">Prototype Pollution in lodash</div>
+                                <div class="pl dim" data-step="1" style="--d:.7s">… 4 more lodash advisories</div>
+                                <div class="pl" data-step="1" style="--d:.75s"> </div>
+                                <div class="pl bad" data-step="1" style="--d:.85s">2 high severity vulnerabilities</div>
+                                <div class="pl" data-step="2"> </div>
+                                <div class="pl cmd" data-step="2">$ npm install axios@latest lodash@latest</div>
+                                <div class="pl cmd" data-step="2" style="--d:.5s">$ npm audit</div>
+                                <div class="pl ok" data-step="2" style="--d:.9s">found 0 vulnerabilities</div>
+                                <div class="stamp green" data-step="2"
+                                    style="right:36px; top:8px; --d:1.1s; --rot:-4deg; font-size:40px">CLEARED</div>
+                            </div>
+                            <p class="audit-limit" data-step="2" style="--d:1.5s"><b>Audit catches known bugs in old
+                                    packages.</b> It can't catch a brand-new fake one.</p>
+                        </div>
+                    </div>
+                    <p class="src" style="left:120px; bottom:40px">Python: <b>pip-audit</b> · GitHub: turn on
+                        <b>Dependabot</b> in the repo's security settings</p>
+                    <a class="live" href="http://localhost:5104/" target="_blank" rel="noopener">▶ Live demo
+                        <i>KedaiKita :5104</i></a>
+                </article>
+                <aside class="notes">
+                    <p>"Two reasons apply to you. First, AI often writes version numbers from memory, from whenever it
+                        was trained, so it may pin a version that's known to be vulnerable. Second, even a perfect app
+                        goes stale. A library that's safe today gets a new CVE next month, and nobody goes back to
+                        check."</p>
+                    <p><b>[ON SCREEN]</b> Show package.json, run <code>npm audit</code> in the KedaiKita folder. [Space]
+                        here for the backup.</p>
+                    <p>Let the red warnings sit on screen for a few seconds. "Each line here is a published
+                        vulnerability. It took one second to find."</p>
+                    <p>[Space] In KedaiKita, click <b>Update packages</b> (it runs
+                        <code>npm install axios@latest lodash@latest</code>, about 15 seconds) and show
+                        <code>found 0 vulnerabilities</code>. "In a real app, run your tests after this." If you mention
+                        <code>npm audit fix</code>, say "run it until audit is clean": one <code>--force</code> run only
+                        gets axios to 0.21.4.</p>
+                    <p>"Pin your versions, like Irfan said, and keep them updated. That's what npm audit and Dependabot
+                        are for."</p>
+                    <p>"Audit catches known bugs in old packages. It can't catch a brand-new fake one. Shananth will
+                        show you why." (His talk lists pip-audit under "what doesn't save you", so say this line.)</p>
+                    <p>Mention: Python users run pip-audit. On GitHub, turn on Dependabot so updates come to you
+                        automatically.</p>
+                    <p>Reset between rehearsals: <code>git checkout -- package.json package-lock.json</code> then
+                        <code>npm ci</code>.</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         21 · CASE 04C · REPLIT AGENT (offline backup of the agent console demo)
+         ===================================================== -->
+            <section class="slide" data-case="04" data-id="4c" data-title="4C: Replit and SaaStr"
+                data-clock="11:30–13:00" data-hook="agent">
+                <article class="sheet" style="--tilt:-.3deg">
+                    <div class="form-head"><span>Case 04C · Agents with too much power</span><span>Replit × SaaStr ·
+                            July 2025</span></div>
+                    <p class="typed">Jason Lemkin, founder of SaaStr, was <b>nine days</b> into building an app with
+                        Replit's AI agent.</p>
+                    <div class="agent">
+                        <div class="chatlog no-edit">
+                            <p class="msg user"><b>Jason</b>CODE FREEZE. Don't change anything without asking.</p>
+                            <p class="msg bot" data-step="1"><b>Agent</b>Cleaning up test data…</p>
+                            <p class="msg sql" data-step="1" style="--d:.5s">DELETE FROM executives;<br>DELETE FROM
+                                companies;</p>
+                            <p class="msg bot" data-step="2"><b>Agent</b>Rollback is impossible.</p>
+                        </div>
+                        <div class="db no-edit" id="agentDb">
+                            <p class="label"><span>Database</span><i>PROD</i></p>
+                            <div class="ctr"><b data-from="1206">1,206</b><span>executives</span></div>
+                            <div class="ctr"><b data-from="1196">1,196</b><span>companies</span></div>
+                        </div>
+                    </div>
+                    <div class="stamp" data-step="2" style="left:640px; bottom:66px; --rot:-6deg; font-size:58px">WRONG
+                    </div>
+                    <p class="pen" data-step="2" style="position:absolute; right:100px; bottom:26px; margin:0">he
+                        recovered the data himself.</p>
+                </article>
+                <aside class="notes">
+                    <p>"Jason Lemkin, founder of SaaStr, was nine days into building an app with Replit's AI agent. He'd
+                        told it clearly: code freeze, don't change anything without asking."</p>
+                    <p>[Space] "The agent ran a database command anyway and wiped records for about 1,200 executives and
+                        1,200 companies."</p>
+                    <p>[Space] "Then it told him a rollback was impossible. That was wrong, and he recovered the data
+                        himself."</p>
+                    <p>Live version: the Agent console at localhost:5100/04c-agent-console/ (Space steps, then toggle
+                        "Safe setup").</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         22 · CASE 04C · CAUSE + 4 SAFEGUARDS
+         ===================================================== -->
+            <section class="slide" data-case="04" data-title="4C: not a permission" data-clock="11:30–13:00">
+                <article class="sheet" style="--tilt:.35deg">
+                    <div class="form-head"><span>Cause + remedy · Case 04C</span><span>4 safeguards</span></div>
+                    <h2>An instruction in a chat is <em>not a permission.</em></h2>
+                    <p class="typed mt-s">The agent was holding the keys to the real database. If the agent <i>can</i>
+                        delete production, one day it might.</p>
+                    <ol class="guards">
+                        <li data-step="1"><span><b>Separate dev and prod databases.</b> Replit itself added this after
+                                the incident.</span></li>
+                        <li data-step="2"><span><b>Never give an agent production credentials.</b></span></li>
+                        <li data-step="3"><span><b>Approval prompts</b> for commands that delete, push or
+                                migrate.</span></li>
+                        <li data-step="4"><span><b>Backups exist <u>before</u> you need them.</b></span></li>
+                    </ol>
+                    <a class="live" href="http://localhost:5100/04c-agent-console/" target="_blank" rel="noopener">▶
+                        Live demo <i>Agent console :5100</i></a>
+                </article>
+                <aside class="notes">
+                    <p>"The agent was holding the keys to the real database. An instruction in a chat is not a
+                        permission. If the agent can delete production, one day it might."</p>
+                    <p>[Space ×4] Keep separate databases for development and production (Replit added this after the
+                        incident). Never give an agent production credentials. Turn on approval prompts for commands
+                        that delete, push or migrate. Make sure backups exist before you need them.</p>
+                    <p>Transition: "Everything so far is about attackers. The last part is about the people whose data
+                        you hold."</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         23 · CASE 05 · TEA APP
+         ===================================================== -->
+            <section class="slide" data-case="05" data-title="Tea app, July 2025" data-clock="13:00–15:00">
+                <article class="sheet" style="--tilt:-.35deg">
+                    <div class="form-head"><span>Incident report · Case 05</span><span>Tea app · July 2025</span></div>
+                    <div class="tea-grid">
+                        <div>
+                            <p class="label">A dating-safety app for women</p>
+                            <p class="typed">To sign up, users sent a selfie and, early on, a photo of their ID.</p>
+                            <p class="label mt-m">The promise</p>
+                            <h2 class="mid">Photos deleted after verification.</h2>
+                            <div class="stamp" data-step="1" style="left:330px; top:560px; --rot:-10deg">IT DIDN'T</div>
+                        </div>
+                        <div class="tags tea-tags" style="margin-top:0">
+                            <figure class="tag" data-step="2" style="--r:-1deg"><b data-count="72000"
+                                    data-sep="1">72,000</b>
+                                <figcaption>images in a cloud storage bucket with no lock</figcaption>
+                            </figure>
+                            <figure class="tag red" data-step="2" style="--r:1deg; --d:.15s"><b data-count="13000"
+                                    data-sep="1">13,000</b>
+                                <figcaption>of them selfies and ID photos. They ended up on 4chan.</figcaption>
+                            </figure>
+                            <figure class="tag red" data-step="3" style="--r:.5deg; grid-column: span 2"><b>1M+</b>
+                                <figcaption>private messages exposed in a second leak a few days later</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+                </article>
+                <aside class="notes">
+                    <p>"Tea was a dating-safety app for women. To sign up, users sent a selfie, and early on, a photo of
+                        their ID. The app said it would delete those photos after verification."</p>
+                    <p>[Space] "It didn't."</p>
+                    <p>[Space] "About 72,000 images, including roughly 13,000 selfies and ID photos, sat in a cloud
+                        storage bucket with no lock. Someone found it, and the photos ended up on 4chan."</p>
+                    <p>[Space] "A second leak a few days later exposed over a million private messages."</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         24 · CASE 05 · NOT AN AI PROBLEM
+         ===================================================== -->
+            <section class="slide" data-case="05" data-title="One honest note" data-clock="13:00–15:00">
+                <article class="sheet" style="--tilt:.4deg">
+                    <div class="form-head"><span>Investigator's note</span><span>Case 05</span></div>
+                    <p class="label">One honest note</p>
+                    <h2 class="big">Tea's code was written <em>before</em> vibe coding took off.</h2>
+                    <h2 class="big mt-m" data-step="1">This isn't an AI problem. <span class="hl" data-mark="1">Data you
+                            keep is data you can leak.</span></h2>
+                </article>
+                <aside class="notes">
+                    <p>"One honest note: Tea's code was written before vibe coding took off. That's the point."</p>
+                    <p>[Space] "This isn't an AI problem. Data you keep is data you can leak."</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         25 · CASE 05 · THREE STACKED MISTAKES (click to pull one out)
+         ===================================================== -->
+            <section class="slide" data-case="05" data-title="Three mistakes, stacked" data-clock="13:00–15:00"
+                data-hook="mistakes">
+                <article class="sheet" style="--tilt:-.3deg">
+                    <div class="form-head"><span>Cause of incident · Case 05</span><span>Three mistakes, stacked</span>
+                    </div>
+                    <div class="mis-grid">
+                        <div>
+                            <div class="stack no-edit" id="misStack">
+                                <button type="button" class="mis"><span class="num">01</span><span>They collected very
+                                        sensitive data.</span><em>REMOVED</em></button>
+                                <button type="button" class="mis"><span class="num">02</span><span>They kept it after
+                                        they no longer needed it.</span><em>REMOVED</em></button>
+                                <button type="button" class="mis"><span class="num">03</span><span>They stored it
+                                        without access rules.</span><em>REMOVED</em></button>
+                            </div>
+                            <p class="pen">click any one to pull it out ↑</p>
+                        </div>
+                        <div class="clipping no-edit">
+                            <p class="label">The story</p>
+                            <p class="headline" id="misHead">72,000 private photos leaked to 4chan</p>
+                            <p class="typed small mt-m" id="misCap">All three mistakes in place.</p>
+                        </div>
+                    </div>
+                </article>
+                <aside class="notes">
+                    <p>"Three mistakes stacked up. They collected very sensitive data. They kept it after they no longer
+                        needed it. Then they stored it without access rules."</p>
+                    <p>Click one of the three to pull it out: "Remove any one of those and the story is much smaller."
+                    </p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         26 · CASE 05 · PDPA + "DO I NEED THIS?" (click fields to redact)
+         ===================================================== -->
+            <section class="slide" data-case="05" data-title="PDPA: do I actually need this?" data-clock="13:00–15:00"
+                data-hook="form">
+                <article class="sheet" style="--tilt:.3deg">
+                    <div class="form-head"><span>Remedy · Case 05</span><span>Malaysia · PDPA</span></div>
+                    <div class="pdpa-grid">
+                        <div>
+                            <p class="label">For Malaysians</p>
+                            <h2 class="mid">The PDPA applies to you, <em>even as a student.</em></h2>
+                            <p class="typed mt-s">Names, emails, IC numbers, matric numbers: if your app collects them,
+                                it's personal data.</p>
+                            <div class="tagbox mt-m">
+                                <figure class="tag red sm" style="--r:-1deg"><b>RM1 million</b>
+                                    <figcaption>maximum fine since 2025. Serious breaches must be reported to the
+                                        Commissioner.</figcaption>
+                                </figure>
+                            </div>
+                        </div>
+                        <div class="shot signup no-edit" id="signup">
+                            <p class="su-head">Create account <small>Do I need this?</small></p>
+                            <div class="field"><span>Full name</span><em>Siti Aminah</em></div>
+                            <div class="field keep"><span>Email</span><em>siti@mail.example</em></div>
+                            <div class="field"><span>Phone</span><em>012-345 6789</em></div>
+                            <div class="field"><span>Home address</span><em>Jalan Contoh, KL</em></div>
+                            <div class="field"><span>IC number</span><em>XXXXXX-XX-XXXX</em></div>
+                            <div class="field"><span>IC photo</span><em>ic-front.jpg</em></div>
+                            <div class="field keep"><span>Selfie</span><em>selfie.jpg</em></div>
+                            <div class="field"><span>Matric no.</span><em>A2200137</em></div>
+                            <p class="typed small mt-s green" data-step="1"><b>Selfie deleted automatically once
+                                    verified.</b></p>
+                        </div>
+                    </div>
+                    <a class="live" href="http://localhost:5100/05-kopicheck/" target="_blank" rel="noopener">▶ Live
+                        demo <i>KopiCheck :5100</i></a>
+                </article>
+                <aside class="notes">
+                    <p>"For Malaysians: if your app collects names, emails, IC numbers or matric numbers, the Personal
+                        Data Protection Act applies to you, even as a student. Since 2025, breaking its principles can
+                        mean a fine of up to RM1 million, and serious breaches must be reported to the Commissioner."
+                    </p>
+                    <p>"So for every field on your sign-up form, ask: do I actually need this? If not, don't collect it.
+                        If you only need it briefly, delete it after."</p>
+                    <p>Click fields to redact them one by one, or [Space] to cut everything except email and selfie.</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         27 · CASE 05 · THE ATTACKER PROMPT (copy button)
+         ===================================================== -->
+            <section class="slide" data-case="05" data-title="The attacker prompt" data-clock="13:00–15:00">
+                <article class="sheet" style="--tilt:-.25deg">
+                    <div class="form-head"><span>Self-audit</span><span>Paste your code into any AI</span></div>
+                    <p class="label">Paste the app's code into any AI, then send:</p>
+                    <div class="prompt-sheet">
+                        <pre id="atkPrompt">Act as an attacker. List every way someone could steal data,
+bypass payment, or run up my bills in this code.
+Rank them by severity and show the fix for each.</pre>
+                        <button type="button" class="copy" data-copy="#atkPrompt">COPY PROMPT</button>
+                    </div>
+                    <h2 class="mid mt-l" data-step="1">The AI that wrote the bug can find the bug, <em>but only if you
+                            ask.</em></h2>
+                    <a class="live" href="http://localhost:5101/" target="_blank" rel="noopener">▶ Live demo <i>LeadSnap
+                            :5101</i></a>
+                </article>
+                <aside class="notes">
+                    <p><b>[ON SCREEN]</b> Paste LeadSnap's <code>src/App.jsx</code> into any AI with this prompt (COPY
+                        PROMPT puts it on the clipboard).</p>
+                    <p>"Watch. It finds the hardcoded key and the open table, the same things we just fixed by hand."
+                    </p>
+                    <p>[Space] "The AI that wrote the bug can find the bug, but only if you ask."</p>
+                    <p>LeadSnap has one bug per part of the prompt: open leads table (steal data), localStorage paywall
+                        (bypass payment), hardcoded sk- key (run up bills).</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         28 · CLEARANCE CHECKLIST (click to tick, or Space ticks one by one)
+         ===================================================== -->
+            <section class="slide" data-case="05" data-title="5 checks before you ship" data-clock="14:30–15:00"
+                data-hook="checklist" data-steps="5">
+                <article class="sheet" style="--tilt:.3deg">
+                    <div class="form-head"><span>Clearance form</span><span>Before you ship</span></div>
+                    <div class="check-grid">
+                        <div>
+                            <h2 class="big">5 checks before you <em>ship.</em></h2>
+                            <p class="pen">tick all five, then ship.</p>
+                        </div>
+                        <div class="card" id="checks">
+                            <p class="card-title">Clearance to ship<small>Project: ____________ · Date: ________</small>
+                            </p>
+                            <div class="ck"><span class="box"></span><span class="txt">No secrets in frontend code or
+                                    Git history. Keys stay on the server.</span></div>
+                            <div class="ck"><span class="box"></span><span class="txt">RLS or security rules on every
+                                    table and storage bucket.</span></div>
+                            <div class="ck"><span class="box"></span><span class="txt">Every package is real and
+                                    maintained, and <code>npm audit</code> / <code>pip-audit</code> comes back
+                                    clean.</span></div>
+                            <div class="ck"><span class="box"></span><span class="txt">AI agents never hold production
+                                    credentials, and backups exist.</span></div>
+                            <div class="ck"><span class="box"></span><span class="txt">Collect only the data you need,
+                                    and delete it when you're done.</span></div>
+                        </div>
+                    </div>
+                    <div class="stamp green js" id="checksStamp" style="left:150px; bottom:110px; --rot:-9deg">
+                        CLEARED<small>TO SHIP</small></div>
+                </article>
+                <aside class="notes">
+                    <p>Closing slide: the 5 checks. Space ticks them one at a time (or click). The stamp lands when all
+                        five are ticked.</p>
+                    <ol>
+                        <li>No secrets in frontend code or Git history. Keys stay on the server.</li>
+                        <li>RLS or security rules on every table and storage bucket.</li>
+                        <li>Every package is real and maintained, and npm audit / pip-audit comes back clean.</li>
+                        <li>AI agents never hold production credentials, and backups exist.</li>
+                        <li>Collect only the data you need, and delete it when you're done.</li>
+                    </ol>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         29 · CASE CLOSED
+         ===================================================== -->
+            <section class="slide" data-case="closed" data-title="Who else can use this?" data-clock="15:00">
+                <article class="sheet" style="--tilt:-.5deg">
+                    <div class="form-head"><span>Case closed</span><span>File № HackDev</span></div>
+                    <p class="lede">Vibe code as much as you want. It's a great way to learn.</p>
+                    <p class="lede">Just don't ship until you can answer one question:</p>
+                    <h1 class="closing">Who <em>else</em> can use this?</h1>
+                    <p class="sig">Thank you.<span>Adam Amzar · HackDev Webinar · 25 Oct 2026</span></p>
+                    <div class="stamp auto" style="right:120px; bottom:230px; --rot:-10deg">CASE CLOSED</div>
+                </article>
+                <aside class="notes">
+                    <p>"Vibe code as much as you want. It's a great way to learn. Just don't ship until you can answer
+                        one question: who else can use this? Thank you."</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         30 · SOURCES
+         ===================================================== -->
+            <section class="slide" data-case="sources" data-title="Sources" data-clock="Q&amp;A">
+                <article class="sheet" style="--tilt:.2deg">
+                    <div class="form-head"><span>Sources</span><span>Every number in this talk</span></div>
+                    <table class="srcs">
+                        <thead>
+                            <tr>
+                                <th>Case</th>
+                                <th>Claim</th>
+                                <th>Source</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>01</td>
+                                <td>EnrichLead built with Cursor, keys exposed, shut down March 2025</td>
+                                <td><a href="https://vibegraveyard.ai/story/enrichlead-vibe-coded-saas-shutdown/"
+                                        target="_blank" rel="noopener">Vibe Graveyard</a>, <a
+                                        href="https://www.indiehackers.com/post/vibe-coding-has-a-security-problem-vLxyPTrTlZVwDo76oqvr"
+                                        target="_blank" rel="noopener">Indie Hackers</a></td>
+                            </tr>
+                            <tr>
+                                <td>02</td>
+                                <td>23.8M secrets leaked in 2024; 70% of 2022 leaks still active</td>
+                                <td><a href="https://blog.gitguardian.com/the-state-of-secrets-sprawl-2025/"
+                                        target="_blank" rel="noopener">GitGuardian</a></td>
+                            </tr>
+                            <tr>
+                                <td>02</td>
+                                <td>~29M in 2025; AI-assisted commits leak ~2× the baseline</td>
+                                <td><a href="https://www.techradar.com/pro/security/over-29-million-secrets-were-leaked-on-github-in-2025-and-ai-really-isnt-helping"
+                                        target="_blank" rel="noopener">TechRadar</a></td>
+                            </tr>
+                            <tr>
+                                <td>03</td>
+                                <td>170 of 1,645 Lovable apps exposed, CVE-2025-48757</td>
+                                <td><a href="https://superblocks.com/blog/lovable-vulnerabilities" target="_blank"
+                                        rel="noopener">Superblocks</a>, <a
+                                        href="https://rapidevelopers.com/lovable-issues/lovable-security-guide"
+                                        target="_blank" rel="noopener">RapidDev guide</a></td>
+                            </tr>
+                            <tr>
+                                <td>03</td>
+                                <td>18,697 records incl. UC Berkeley / UC Davis users, Feb 2026</td>
+                                <td><a href="https://bastion.tech/blog/lovable-april-2026-data-breach" target="_blank"
+                                        rel="noopener">Bastion</a></td>
+                            </tr>
+                            <tr>
+                                <td>04A</td>
+                                <td>postmark-mcp: 15 clean versions, then 1.0.16 BCC'd every email; ~1,500 weekly
+                                    downloads; found by Koi Security, Sept 2025</td>
+                                <td><a href="https://www.csoonline.com/article/4064009/trust-on-mcp-takes-first-in-the-wild-hit-via-squatted-postmark-connector.html"
+                                        target="_blank" rel="noopener">CSO Online</a>, <a
+                                        href="https://thehackernews.com/2025/09/first-malicious-mcp-server-found.html"
+                                        target="_blank" rel="noopener">The Hacker News</a></td>
+                            </tr>
+                            <tr>
+                                <td>04B</td>
+                                <td>Equifax: Struts CVE-2017-5638 patch released March 2017, not applied, 147M people
+                                </td>
+                                <td><a href="https://digitalguardian.com/blog/equifax-hacked-six-month-old-struts-vulnerability"
+                                        target="_blank" rel="noopener">Digital Guardian</a>, <a
+                                        href="https://bad.technology/articles/equifax-breach-exposes-social-security-numbers-of-147-million-americans.html"
+                                        target="_blank" rel="noopener">Bad Technology</a></td>
+                            </tr>
+                            <tr>
+                                <td>04C</td>
+                                <td>Replit agent wiped 1,206 execs / ~1,196 companies during code freeze; data recovered
+                                </td>
+                                <td><a href="https://thenewstack.io/?p=22830453" target="_blank" rel="noopener">The New
+                                        Stack</a>, <a href="https://heise.de/-10499597" target="_blank"
+                                        rel="noopener">heise</a></td>
+                            </tr>
+                            <tr>
+                                <td>05</td>
+                                <td>Tea: ~72,000 images, ~13,000 selfies/IDs; code pre-dates vibe coding</td>
+                                <td><a href="https://simonwillison.net/2025/Jul/26/official-statement-from-tea/"
+                                        target="_blank" rel="noopener">Simon Willison</a>, <a
+                                        href="https://therecord.media/tea-app-data-breach-stolen-ids-leaked"
+                                        target="_blank" rel="noopener">The Record</a></td>
+                            </tr>
+                            <tr>
+                                <td>05</td>
+                                <td>PDPA fines up to RM1M from 1 April 2025; breach notification</td>
+                                <td><a href="https://legal500.com/developments/thought-leadership/countdown-to-compliance-personal-data-protection-amendment-act-2024-in-force-starting-1-january-2025"
+                                        target="_blank" rel="noopener">Legal 500 / Tay &amp; Partners</a>, <a
+                                        href="https://www.rajahtannasia.com/?p=154128" target="_blank"
+                                        rel="noopener">Rajah &amp; Tann</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </article>
+                <aside class="notes">
+                    <p>Every number in the talk comes from these pages. Leave this up for Q&amp;A.</p>
+                </aside>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        /* ===========================================
+           CASES
+           Folder-tab labels, divider-tab colours and the first slide of each case.
+           =========================================== */
+        const CASES = {
+            cover: { tab: 'Case files' },
+            '01': { tab: 'Case 01 — A working app is not a safe app', rail: true, color: '#e9b8a8', sub: 'APP' },
+            index: { tab: 'Case index', rail: true, label: 'IDX', color: '#efe6cf', sub: 'INDEX' },
+            '02': { tab: 'Case 02 — Secrets leak fast', rail: true, color: '#b9d0e6', sub: 'SECRETS' },
+            '03': { tab: 'Case 03 — Your database is open by default', rail: true, color: '#c4dbb4', sub: 'DATABASE' },
+            '04': { tab: 'Case 04 — What the AI installs or runs', rail: true, color: '#efd48a', sub: 'PACKAGES' },
+            '05': { tab: 'Case 05 — Privacy & the checklist', rail: true, color: '#d8c4e6', sub: 'PRIVACY' },
+            closed: { tab: 'Case closed' },
+            sources: { tab: 'Sources' },
+        };
+        const RAIL_ORDER = ['index', '01', '02', '03', '04', '05'];
+
+        const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const fmt = (v, dec, sep) => sep
+            ? Math.round(v).toLocaleString('en-US')
+            : v.toFixed(dec);
+
+        /* ===========================================
+           SLIDE HOOKS
+           init(slide, deck) runs once. step(slide, n, deck) runs on every step change.
+           Each one drives an exhibit that doubles as the offline backup of a live demo.
+           =========================================== */
+        const HOOKS = {
+
+            /* --- Exhibit A: type "sk-" into the DevTools search --- */
+            devtools: {
+                step(slide, n) {
+                    const q = slide.querySelector('#dtq');
+                    clearTimeout(q._t);
+                    if (n < 1) { q.textContent = ''; return; }
+                    if (q.textContent === 'sk-') return;
+                    q.textContent = '';
+                    const chars = [...'sk-'];
+                    const type = () => {
+                        q.textContent += chars.shift();
+                        if (chars.length) q._t = setTimeout(type, reduceMotion ? 0 : 180);
+                    };
+                    q._t = setTimeout(type, reduceMotion ? 0 : 150);
+                },
+            },
+
+            /* --- Case 03: 1,645 apps, 170 of them red (seeded so the pattern never changes) --- */
+            dots: {
+                init(slide) {
+                    const box = slide.querySelector('#dots');
+                    box.innerHTML = '';
+                    let seed = 2510;
+                    const rand = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
+                    const red = new Set();
+                    while (red.size < 170) red.add(Math.floor(rand() * 1645));
+                    const frag = document.createDocumentFragment();
+                    for (let k = 0; k < 1645; k++) {
+                        const d = document.createElement('i');
+                        if (red.has(k)) { d.className = 'x'; d.style.setProperty('--d', (rand() * 1.1).toFixed(2) + 's'); }
+                        frag.appendChild(d);
+                    }
+                    box.appendChild(frag);
+                },
+                step(slide, n) { slide.querySelector('#dots').classList.toggle('lit', n >= 1); },
+            },
+
+            /* --- Exhibit B: Supabase RLS, four states --- */
+            rls: {
+                rows: [
+                    ['Aiman Hakimi', 'A2200137', 'aiman@campus.example', 'Computer Science'],
+                    ['Nurul Izzah', 'A2200274', 'nurul@campus.example', 'Data Science'],
+                    ['Tan Wei Jie', 'A2200411', 'tan@campus.example', 'Software Engineering'],
+                    ['Priya Raman', 'A2200548', 'priya@campus.example', 'Cybersecurity'],
+                    ['Hafiz Rahman', 'A2200685', 'hafiz@campus.example', 'Information Systems'],
+                    ['Lim Mei Ling', 'A2200822', 'lim@campus.example', 'Computer Science'],
+                ],
+                states: [
+                    {
+                        sql: '-- students table created with raw SQL. RLS: OFF', out: 'all',
+                        cap: 'Every student, every row. Names, matric numbers, emails, phone numbers.', stamp: 'EXPOSED', ok: false
+                    },
+                    {
+                        sql: 'ALTER TABLE public.students\n  ENABLE ROW LEVEL SECURITY;', out: 'none',
+                        cap: '“Same code, same key, nothing comes back.”', stamp: 'LOCKED', ok: true
+                    },
+                    {
+                        sql: 'CREATE POLICY "own rows only" ON public.students\n  FOR SELECT USING (auth.uid() = user_id);', out: 'own',
+                        cap: 'Logged in as Aiman: one row. Their own.', stamp: 'OWN ROWS', ok: true
+                    },
+                    {
+                        sql: 'CREATE POLICY "allow all" ON public.students\n  FOR SELECT USING (true);', out: 'all',
+                        cap: 'USING (true) means everyone can read everything again.', stamp: 'FAKE FIX', ok: false
+                    },
+                ],
+                init(slide, deck) {
+                    slide.querySelectorAll('#rlsTabs button').forEach(b =>
+                        b.addEventListener('click', () => { deck.setStep(+b.dataset.s); b.blur(); }));
+                },
+                step(slide, n) {
+                    const st = this.states[n];
+                    slide.querySelector('#rlsSql').textContent = st.sql;
+                    const td = r => '<tr><td>' + r.join('</td><td>') + '</td></tr>';
+                    const head = '<thead><tr><td>full_name</td><td>matric_no</td><td>email</td><td>course</td></tr></thead>';
+                    let html;
+                    if (st.out === 'none') {
+                        html = '<div class="pl ok">data: []</div><div class="pl dim">// 0 rows</div>';
+                    } else if (st.out === 'own') {
+                        html = '<div class="pl">data: 1 row</div><table>' + head + '<tbody class="you">' + td(this.rows[0]) + '</tbody></table>';
+                    } else {
+                        html = '<div class="pl bad">data: 40 rows</div><table>' + head + '<tbody>' + this.rows.map(td).join('') +
+                            '</tbody></table><div class="pl dim">… 34 more rows</div>';
+                    }
+                    slide.querySelector('#rlsOut').innerHTML = html;
+                    slide.querySelector('#rlsCap').textContent = st.cap;
+                    slide.querySelectorAll('#rlsTabs button').forEach(b => b.classList.toggle('on', +b.dataset.s === n));
+                    const stamp = slide.querySelector('#rlsStamp');
+                    stamp.classList.remove('on');
+                    stamp.textContent = st.stamp;
+                    stamp.classList.toggle('green', st.ok);
+                    requestAnimationFrame(() => requestAnimationFrame(() => stamp.classList.add('on')));
+                },
+            },
+
+            /* --- Case 04C: prod row counters drop to zero --- */
+            agent: {
+                step(slide, n) {
+                    const db = slide.querySelector('#agentDb');
+                    db.querySelectorAll('b[data-from]').forEach(b => {
+                        cancelAnimationFrame(b._raf); clearTimeout(b._t); clearTimeout(b._fin);
+                        const from = +b.dataset.from;
+                        if (n < 1) { b.textContent = from.toLocaleString('en-US'); db.classList.remove('wiped'); return; }
+                        if (b.textContent === '0') return;
+                        b._t = setTimeout(() => {
+                            db.classList.add('wiped');
+                            animate(1100, p => { b.textContent = Math.round(from * (1 - p)).toLocaleString('en-US'); }, b);
+                        }, reduceMotion ? 0 : 900);
+                    });
+                },
+            },
+
+            /* --- Case 05: pull one mistake out and the story shrinks --- */
+            mistakes: {
+                heads: ['72,000 private photos leaked to 4chan', 'A much smaller story', 'Smaller still', 'No story'],
+                sizes: [100, 74, 56, 44],
+                caps: ['All three mistakes in place.', 'Remove any one of those and the story is much smaller.', 'Two pulled out.', 'Nothing sensitive, nothing kept, nothing open.'],
+                init(slide, deck) {
+                    slide.querySelectorAll('.mis').forEach(b => b.addEventListener('click', () => {
+                        if (deck.editing) return;
+                        b.classList.toggle('out'); b.blur(); this.render(slide);
+                    }));
+                },
+                render(slide) {
+                    const out = slide.querySelectorAll('.mis.out').length;
+                    const head = slide.querySelector('#misHead');
+                    head.textContent = this.heads[out];
+                    head.style.fontSize = this.sizes[out] + 'px';
+                    slide.querySelector('#misCap').textContent = this.caps[out];
+                },
+                step(slide) {
+                    slide.querySelectorAll('.mis').forEach(b => b.classList.remove('out'));
+                    this.render(slide);
+                },
+            },
+
+            /* --- Case 05: redact the sign-up fields you don't need --- */
+            form: {
+                init(slide, deck) {
+                    slide.querySelectorAll('.field').forEach(f => f.addEventListener('click', () => {
+                        if (!deck.editing) f.classList.toggle('cut');
+                    }));
+                },
+                step(slide, n) {
+                    slide.querySelectorAll('.field').forEach(f => f.classList.toggle('cut', n >= 1 && !f.classList.contains('keep')));
+                },
+            },
+
+            /* --- Clearance checklist: Space ticks one at a time, clicks toggle --- */
+            checklist: {
+                init(slide, deck) {
+                    slide.querySelectorAll('.ck').forEach(c => c.addEventListener('click', () => {
+                        if (deck.editing) return;
+                        c.classList.toggle('done'); this.sync(slide);
+                    }));
+                },
+                sync(slide) {
+                    const all = [...slide.querySelectorAll('.ck')];
+                    slide.querySelector('#checksStamp').classList.toggle('on', all.every(c => c.classList.contains('done')));
+                },
+                step(slide, n) {
+                    slide.querySelectorAll('.ck').forEach((c, k) => c.classList.toggle('done', k < n));
+                    this.sync(slide);
+                },
+            },
+        };
+
+        /* small easing helper used by counters; the timeout guarantees the final value even if frames are throttled */
+        function animate(ms, draw, owner) {
+            clearTimeout(owner._fin);
+            if (reduceMotion) { draw(1); return; }
+            owner._fin = setTimeout(() => { cancelAnimationFrame(owner._raf); draw(1); }, ms + 80);
+            const t0 = performance.now();
+            const tick = now => {
+                const p = Math.min(1, (now - t0) / ms);
+                draw(1 - Math.pow(1 - p, 3));
+                if (p < 1) owner._raf = requestAnimationFrame(tick);
+            };
+            owner._raf = requestAnimationFrame(tick);
+        }
+
+        /* ===========================================
+           SLIDE PRESENTATION CONTROLLER
+           Stage scaling, steps, keyboard / wheel / swipe navigation, folder chrome,
+           presenter window and inline editing.
+           =========================================== */
+        class SlidePresentation {
+            constructor() {
+                this.stage = document.getElementById('deckStage');
+                this.slides = [...document.querySelectorAll('.slide')];
+                this.max = this.slides.map(s => this.countSteps(s));
+                this.i = 0;
+                this.step = 0;
+                this.editing = false;
+
+                this.setupStageScale();
+                this.buildRail();
+                this.slides.forEach(s => HOOKS[s.dataset.hook]?.init?.(s, this));
+                this.setupKeyboardNav();
+                this.setupPointerNav();
+                this.setupCopyButtons();
+                this.editor = new InlineEditor(this);
+
+                const [p, st] = (location.hash.slice(1) || '1').split('.');
+                const idx = Math.max(0, Math.min((parseInt(p, 10) || 1) - 1, this.slides.length - 1));
+                this.go(idx, Math.min(parseInt(st, 10) || 0, this.max[idx]));
+                setTimeout(() => document.getElementById('hint').classList.add('gone'), 6000);
+            }
+
+            /* --- stage scaling: one transform, letterboxed --- */
+            setupStageScale() {
+                const scale = () => {
+                    const f = Math.min(innerWidth / 1920, innerHeight / 1080);
+                    this.stage.style.transform = `translate(${(innerWidth - 1920 * f) / 2}px, ${(innerHeight - 1080 * f) / 2}px) scale(${f})`;
+                };
+                scale();
+                addEventListener('resize', scale);
+            }
+
+            countSteps(s) {
+                let m = parseInt(s.dataset.steps, 10) || 0;
+                s.querySelectorAll('[data-step],[data-lift],[data-strike],[data-mark]').forEach(el => {
+                    for (const k of ['step', 'lift', 'strike', 'mark']) if (el.dataset[k]) m = Math.max(m, +el.dataset[k]);
+                });
+                return m;
+            }
+
+            /* --- divider tabs on the right edge --- */
+            buildRail() {
+                const rail = document.getElementById('rail');
+                RAIL_ORDER.forEach(key => {
+                    const c = CASES[key];
+                    const b = document.createElement('button');
+                    b.type = 'button';
+                    b.dataset.case = key;
+                    b.style.setProperty('--c', c.color);
+                    b.innerHTML = (c.label || key) + '<small>' + c.sub + '</small>';
+                    b.setAttribute('aria-label', c.tab);
+                    b.addEventListener('click', () => { this.jumpTo(key); b.blur(); });
+                    rail.appendChild(b);
+                });
+                // index rows and case-04 sub-rows jump too
+                this.stage.querySelectorAll('[data-goto]').forEach(el => el.addEventListener('click', () => {
+                    if (!this.editing) this.jumpTo(el.dataset.goto);
+                }));
+            }
+
+            jumpTo(key) {
+                const k = this.slides.findIndex(s => s.dataset.id === key || s.dataset.case === key);
+                if (k >= 0) this.go(k, 0);
+            }
+
+            /* --- navigation --- */
+            go(index, step = 0) {
+                const prev = this.slides[this.i];
+                this.i = Math.max(0, Math.min(index, this.slides.length - 1));
+                this.step = step === 'max' ? this.max[this.i] : step;
+                if (prev && prev !== this.slides[this.i]) prev.querySelectorAll('[data-count]').forEach(el => { el._done = false; });
+                this.slides.forEach((s, k) => {
+                    s.classList.toggle('active', k === this.i);
+                    s.classList.toggle('visible', k === this.i);
+                    s.setAttribute('aria-hidden', k === this.i ? 'false' : 'true');
+                });
+                this.apply();
+            }
+            next() { this.step < this.max[this.i] ? this.setStep(this.step + 1) : this.i < this.slides.length - 1 && this.go(this.i + 1, 0); }
+            prev() { this.step > 0 ? this.setStep(this.step - 1) : this.i > 0 && this.go(this.i - 1, 'max'); }
+            setStep(n) { this.step = Math.max(0, Math.min(n, this.max[this.i])); this.apply(); }
+
+            /* --- reveal everything up to the current step --- */
+            apply() {
+                const s = this.slides[this.i], n = this.step;
+                s.querySelectorAll('[data-step]').forEach(el => el.classList.toggle('on', n >= +el.dataset.step));
+                s.querySelectorAll('[data-lift]').forEach(el => el.classList.toggle('lifted', n >= +el.dataset.lift));
+                s.querySelectorAll('[data-strike]').forEach(el => el.classList.toggle('struck', n >= +el.dataset.strike));
+                s.querySelectorAll('[data-mark]').forEach(el => el.classList.toggle('marked', n >= +el.dataset.mark));
+                HOOKS[s.dataset.hook]?.step?.(s, n, this);
+                this.runCounters(s);
+                this.updateChrome();
+                this.renderNotes();
+                try { history.replaceState(null, '', '#' + (this.i + 1) + (n ? '.' + n : '')); } catch (e) { /* file:// in some browsers */ }
+            }
+
+            runCounters(s) {
+                s.querySelectorAll('[data-count]').forEach(el => {
+                    if (el.closest('[data-step]:not(.on)')) { el._done = false; return; }
+                    if (el._done) return;
+                    el._done = true;
+                    const to = parseFloat(el.dataset.count), dec = +el.dataset.dec || 0, sep = !!el.dataset.sep, suf = el.dataset.suffix || '';
+                    cancelAnimationFrame(el._raf);
+                    animate(1300, p => { el.textContent = fmt(to * p, dec, sep) + suf; }, el);
+                });
+            }
+
+            updateChrome() {
+                const s = this.slides[this.i], c = CASES[s.dataset.case] || {};
+                document.getElementById('caseTab').textContent = c.tab || '';
+                document.querySelectorAll('#rail button').forEach(b => b.classList.toggle('on', b.dataset.case === s.dataset.case));
+                const pad = v => String(v).padStart(2, '0');
+                document.getElementById('folio').textContent = `HackDev · PAGE ${pad(this.i + 1)} / ${pad(this.slides.length)}`;
+                document.getElementById('pips').innerHTML = Array.from({ length: this.max[this.i] },
+                    (_, k) => `<i class="${k < this.step ? 'on' : ''}"></i>`).join('');
+            }
+
+            /* --- keyboard --- */
+            setupKeyboardNav() {
+                this.onKey = e => {
+                    if (e.key === 'Escape' && this.editing) { this.editor.toggle(false); return; }
+                    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); this.editor.saveFile(); return; }
+                    const t = e.target;
+                    if (this.editing || (t.closest && t.closest('input, textarea, [contenteditable="true"]'))) return;
+                    if (e.ctrlKey || e.metaKey || e.altKey) return;
+                    const k = e.key;
+                    if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(k)) { e.preventDefault(); this.next(); }
+                    else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(k)) { e.preventDefault(); this.prev(); }
+                    else if (k === 'Home') this.go(0);
+                    else if (k === 'End') this.go(this.slides.length - 1);
+                    else if (k === 'f' || k === 'F') this.fullscreen();
+                    else if (k === 'p' || k === 'P') this.openNotes();
+                    else if (k === 'e' || k === 'E') this.editor.toggle();
+                    else if (k === '0') this.jumpTo('index');
+                    else if (/^[1-5]$/.test(k)) this.jumpTo('0' + k);
+                };
+                document.addEventListener('keydown', this.onKey);
+            }
+
+            /* --- wheel + swipe (no click-to-advance: a click to focus the window must never skip a slide) --- */
+            setupPointerNav() {
+                let last = 0;
+                addEventListener('wheel', e => {
+                    if (this.editing || Math.abs(e.deltaY) < 24) return;
+                    const now = Date.now();
+                    if (now - last < 700) return;
+                    last = now;
+                    e.deltaY > 0 ? this.next() : this.prev();
+                }, { passive: true });
+                let x0 = null, y0 = null;
+                addEventListener('touchstart', e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+                addEventListener('touchend', e => {
+                    if (x0 === null || this.editing) return;
+                    const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+                    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) dx < 0 ? this.next() : this.prev();
+                    x0 = null;
+                }, { passive: true });
+                // keep Space from re-pressing whatever button was clicked last
+                document.addEventListener('click', e => { const b = e.target.closest('button, input'); if (b) setTimeout(() => b.blur(), 0); });
+            }
+
+            setupCopyButtons() {
+                document.querySelectorAll('[data-copy]').forEach(btn => btn.addEventListener('click', async () => {
+                    const text = document.querySelector(btn.dataset.copy).textContent;
+                    try { await navigator.clipboard.writeText(text); }
+                    catch (e) {
+                        const ta = Object.assign(document.createElement('textarea'), { value: text });
+                        document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+                    }
+                    btn.textContent = 'COPIED ✓';
+                    setTimeout(() => { btn.textContent = 'COPY PROMPT'; }, 1800);
+                }));
+            }
+
+            fullscreen() {
+                if (document.fullscreenElement) document.exitFullscreen();
+                else document.documentElement.requestFullscreen?.();
+            }
+
+            /* ===========================================
+               PRESENTER WINDOW (P)
+               Script lines, part clock, a running timer and what's next.
+               Keys pressed in that window drive the deck too.
+               =========================================== */
+            openNotes() {
+                if (this.nw && !this.nw.closed) { this.nw.focus(); return; }
+                const w = window.open('', 'vcs-presenter', 'width=820,height=940');
+                if (!w) return;
+                w.document.open();
+                w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Presenter · Vibe Coding Safely</title>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+ body{margin:0;background:#fbf7ee;color:#1d1b18;font:400 21px/1.5 'Courier Prime',monospace}
+ header{position:sticky;top:0;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 22px;background:#1d1b18;color:#fbf7ee}
+ #t{font:700 40px/1 'Courier Prime',monospace;letter-spacing:.04em} #t.late{color:#ff8a7a}
+ header button{font:700 14px 'Courier Prime',monospace;letter-spacing:.12em;padding:8px 12px;border:2px solid #fbf7ee;background:none;color:#fbf7ee;cursor:pointer}
+ main{padding:22px 26px 40px} .meta{display:flex;justify-content:space-between;font-weight:700;letter-spacing:.14em;font-size:15px;color:#8a8172;text-transform:uppercase}
+ h1{font:400 44px/1.05 'DM Serif Display',serif;margin:10px 0 6px} .clock{color:#c62a1f;font-weight:700}
+ #b p,#b li{margin:0 0 14px} #b code{background:#efe7d6;padding:0 4px} #b b{color:#c62a1f}
+ .next{margin-top:26px;padding-top:14px;border-top:3px double #1d1b18;font-size:18px;color:#4a453d}
+</style></head><body>
+<header><span id="t">00:00</span><span><button id="go">START</button> <button id="rs">RESET</button></span></header>
+<main><div class="meta"><span id="pos"></span><span class="clock" id="clk"></span></div><h1 id="ti"></h1><div id="b"></div><p class="next">Next: <b id="nx"></b></p></main>
+<script>
+ let t0=null,acc=0;const el=document.getElementById('t');
+ const tick=()=>{const s=Math.floor((acc+(t0?Date.now()-t0:0))/1000);el.textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');el.classList.toggle('late',s>=900)};
+ setInterval(tick,250);
+ document.getElementById('go').onclick=e=>{if(t0){acc+=Date.now()-t0;t0=null;e.target.textContent='START'}else{t0=Date.now();e.target.textContent='PAUSE'}e.target.blur()};
+ document.getElementById('rs').onclick=e=>{acc=0;t0=t0?Date.now():null;tick();e.target.blur()};
+<\/script></body></html>`);
+                w.document.close();
+                w.document.addEventListener('keydown', this.onKey);
+                this.nw = w;
+                this.renderNotes();
+            }
+
+            renderNotes() {
+                const w = this.nw;
+                if (!w || w.closed) return;
+                const $ = id => w.document.getElementById(id);
+                if (!$('ti')) return;
+                const s = this.slides[this.i], nx = this.slides[this.i + 1];
+                $('pos').textContent = `Slide ${this.i + 1} / ${this.slides.length}` + (this.max[this.i] ? ` · step ${this.step} / ${this.max[this.i]}` : '');
+                $('clk').textContent = s.dataset.clock || '';
+                $('ti').textContent = s.dataset.title || '';
+                $('b').innerHTML = s.querySelector('.notes')?.innerHTML || '<p>(no notes)</p>';
+                $('nx').textContent = nx ? nx.dataset.title : 'End of deck';
+            }
+        }
+
+        /* ===========================================
+           INLINE EDITOR
+           E or the top-left corner toggles edit mode. Edits autosave to this browser
+           (localStorage); Ctrl+S downloads an edited copy of the whole file.
+           =========================================== */
+        class InlineEditor {
+            constructor(deck) {
+                this.deck = deck;
+                this.key = 'vcs-deck-edits-v1';
+                this.sel = '.sheet h1, .sheet h2, .sheet h3, .sheet p, .sheet li, .sheet dt, .sheet dd, .sheet figcaption, .sheet blockquote, .sheet .txt, .sheet pre';
+                this.toggleBtn = document.getElementById('editToggle');
+                this.orig = this.nodes().map(el => el.innerHTML);
+                this.restore();
+                this.bindUi();
+            }
+            nodes() {
+                return [...document.querySelectorAll(this.sel)].filter(el =>
+                    !el.closest('.no-edit, .notes') && !el.querySelector('[data-count]') && !el.parentElement.closest(this.sel));
+            }
+            /* each saved edit remembers a hash of the text it replaced, so edits never land on the wrong line after the file changes */
+            hash(s) { let h = 0; for (let k = 0; k < s.length; k++) h = (h * 31 + s.charCodeAt(k)) | 0; return h; }
+            load() { try { return JSON.parse(localStorage.getItem(this.key) || '{}'); } catch (e) { return {}; } }
+            store(map) { try { localStorage.setItem(this.key, JSON.stringify(map)); } catch (e) { /* storage blocked */ } }
+            restore() {
+                const map = this.load();
+                this.nodes().forEach((el, k) => { if (map[k] && map[k].o === this.hash(el.innerHTML)) el.innerHTML = map[k].h; });
+            }
+            snapshot() {
+                const map = {};
+                this.nodes().forEach((el, k) => { if (el.innerHTML !== this.orig[k]) map[k] = { o: this.hash(this.orig[k]), h: el.innerHTML }; });
+                this.store(map);
+            }
+            toggle(force) {
+                const on = force === undefined ? !this.deck.editing : force;
+                this.deck.editing = on;
+                document.body.classList.toggle('editing', on);
+                this.toggleBtn.classList.toggle('active', on);
+                if (!on) this.toggleBtn.classList.remove('show');
+                this.nodes().forEach(el => { if (on) el.setAttribute('contenteditable', 'true'); else el.removeAttribute('contenteditable'); });
+                if (on && !this.bound) {
+                    this.bound = true;
+                    let t;
+                    document.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => this.snapshot(), 400); });
+                }
+            }
+            saveFile() {
+                const was = this.deck.editing;
+                this.toggle(false);
+                const clone = document.documentElement.cloneNode(true);
+                clone.querySelector('#deckStage').removeAttribute('style');
+                clone.querySelectorAll('.slide').forEach(s => s.classList.remove('active', 'visible'));
+                const html = '<!DOCTYPE html>\n' + clone.outerHTML;
+                const a = Object.assign(document.createElement('a'), {
+                    href: URL.createObjectURL(new Blob([html], { type: 'text/html' })), download: 'deck.html',
+                });
+                document.body.appendChild(a); a.click(); a.remove();
+                if (was) this.toggle(true);
+            }
+            bindUi() {
+                const hot = document.querySelector('.edit-hotzone');
+                let hide = null;
+                const show = () => { clearTimeout(hide); this.toggleBtn.classList.add('show'); };
+                const later = () => { hide = setTimeout(() => { if (!this.deck.editing) this.toggleBtn.classList.remove('show'); }, 400); };
+                hot.addEventListener('mouseenter', show);
+                hot.addEventListener('mouseleave', later);
+                this.toggleBtn.addEventListener('mouseenter', show);
+                this.toggleBtn.addEventListener('mouseleave', later);
+                hot.addEventListener('click', () => this.toggle());
+                this.toggleBtn.addEventListener('click', () => this.toggle());
+                document.querySelector('.edit-bar').addEventListener('click', e => {
+                    const act = e.target.dataset.act;
+                    if (act === 'save') this.saveFile();
+                    if (act === 'done') this.toggle(false);
+                    if (act === 'discard') { try { localStorage.removeItem(this.key); } catch (err) { /* ignore */ } location.reload(); }
+                });
+            }
+        }
+
+        const deck = new SlidePresentation();
+    </script>
+</body>
+
+</html>

@@ -15,7 +15,7 @@ One small website per topic in the talk. Each one looks like a real vibe-coded a
 | 1 | LeadSnap | http://localhost:5101 |
 | 2 | StudyBuddy | http://localhost:5102 (`/fixed` for the fixed version) |
 | 3 | CampusConnect | http://localhost:5103 |
-| 4A | Slopsquat | http://localhost:5100/04a-slopsquat/ |
+| 4A | MCP plug-in | http://localhost:5100/04a-mcp-plugin/ |
 | 4B | KedaiKita | http://localhost:5104 |
 | 4C | Agent console | http://localhost:5100/04c-agent-console/ |
 | 5 | KopiCheck | http://localhost:5100/05-kopicheck/ |
@@ -49,7 +49,7 @@ hackdev-01/
         02-lock.sql         ENABLE ROW LEVEL SECURITY
         03-policy.sql       own rows only
         04-bad-policy.sql   USING (true), the fake fix
-    04a-slopsquat/        Part 4A: hallucinated packages (static HTML)
+    04a-mcp-plugin/       Part 4A: a plug-in for your AI that turns bad (static HTML)
     04b-stale-deps/       Part 4B: npm audit + Dependabot (tiny Vite app + GitHub repo)
     04c-agent-console/    Part 4C: agent with too much power (static HTML + JS)
     05-kopicheck/         Part 5: privacy and data minimisation (static HTML)
@@ -142,22 +142,20 @@ The leaky page shows two lessons at once. The key does live in `.env`, but the `
 
 ---
 
-### 04a · Slopsquat: "Packages that don't exist" (9:00–10:00)
+### 04a · MCP plug-in: "Tools you plug into your AI" (9:00–10:00)
 
-**Real-life version:** `huggingface-cli`, a package the AI made up. Someone registered the name and it got 30k+ downloads.
+**Real-life version:** `postmark-mcp` on npm, Sept 2025. It posed as Postmark's email connector. 15 versions worked fine, then 1.0.16 added one line that Bcc'd every email to the attacker (~1,500 downloads a week, found by Koi Security).
 
-**What it is:** two static pages, no live demo, because the slot is one minute.
+**What it is:** a scripted simulation of an AI assistant ("Quill") with an email MCP server ("SendLark") plugged in. No real AI, nothing is sent. Space steps through it.
 
-1. **A fake AI chat answer** that confidently says `pip install huggingface-cli`.
-2. **A fake package-registry page** for that name, with the red flags highlighted: *created 6 days ago · 12 downloads · no repository link · has an install script*. Put the real package's page next to it for comparison.
+- **Left:** the chat. "Email Aiman his password reset link", then the invoice and a login code.
+- **Right:** the MCP config (`npx -y sendlark-mcp`, unpinned, unknown publisher, full-account key), Sent mail, and the **attacker's inbox**.
+- **Steps:** the first email goes out clean → `sendlark-mcp 1.0.16` is published and the unpinned config updates itself → the next two emails look normal in Sent mail, but copies land in the attacker's inbox → the raw headers show the hidden `Bcc:` line (also toggled with **H**).
+- **Toggle to "Safe setup"** (or press **M**) and replay: `@sendlark/mcp` from the vendor's docs, pinned at 1.4.2 (a 1.4.3 update waits for you), and a send-only key. The attacker's inbox stays at 0.
 
-This makes "spend 10 seconds on the npm or PyPI page" concrete. The audience learns what to look for.
+The three rules on the deck's remedy slide become three things you can see: publisher, pinned version, key scope.
 
-**Hard rule:** don't publish any package to npm or PyPI, not even an empty one. Everything is a mock.
-
-**Stretch, optional:** a "10-second check" box. Type a package name and it pulls the creation date and weekly downloads from `registry.npmjs.org` and `api.npmjs.org`. Only build it if the rest is finished, because it needs network on stage.
-
-**Effort:** S
+**Effort:** S. It's one HTML file.
 
 ---
 
@@ -248,8 +246,8 @@ The demos that are **on screen in the script** come first, so the talk still wor
 | **Mon 19** | Create the Supabase project. Start **03 CampusConnect**: seed SQL, demo users, UI | M |
 | **Tue 20** | Finish **03 CampusConnect** and rehearse its 5 steps. Build **02 StudyBuddy** | M + S |
 | **Wed 21** | **04b Stale deps** (rehearse with the git reset). **01 LeadSnap**, using the same Supabase project | S + M |
-| **Thu 22** | **04c Agent console**, **05 KopiCheck**, **04a Slopsquat** | S + S + S |
-| **Fri 23** | Full run-through of every demo, with backup screenshots into `backups/`. Fix anything broken. Hub page if there's time | — |
+| **Thu 22** | **04c Agent console**, **05 KopiCheck** | S + S |
+| **Fri 23** | **04a MCP plug-in** (added). Full run-through of every demo, with backup screenshots into `backups/`. Fix anything broken. Hub page if there's time | — |
 | **Sat 24** | Day-before checklist (below), then 2 timed rehearsals of the full talk | — |
 | **Sun 25** | Talk | — |
 
