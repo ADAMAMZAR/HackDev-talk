@@ -412,6 +412,44 @@
     white-space: nowrap; transition: transform 1000ms cubic-bezier(.55, 0, .75, .4), opacity 1000ms ease-in;
   }
 
+  /* spot a phantom */
+  .sp { display: grid; grid-template-columns: 960px 1fr; gap: 56px; }
+  .sp .b-body { gap: 14px; }
+  .sp h3 { font: 700 50px var(--mono); }
+  .sp-row { display: grid; grid-template-columns: 220px 1fr; align-items: baseline; font-size: 30px; padding: 10px 16px; border: 5px solid transparent; border-radius: 12px; transition: border-color var(--t), background var(--t); }
+  .sp-row span { font: 600 21px var(--mono); letter-spacing: .08em; color: #5a5e66; }
+  .sp-row.lit { border-color: #c62828; background: rgba(198, 40, 40, .1); }
+  .sp-list { list-style: none; display: grid; gap: 24px; align-content: start; padding-top: 10px; }
+  .sp-list li { display: grid; grid-template-columns: 70px 1fr; align-items: center; font-size: 36px; color: var(--dim); transition: color var(--t); }
+  .sp-list i { width: 50px; height: 50px; border-radius: 50%; border: 4px solid var(--edge); display: grid; place-items: center; font: normal 700 28px var(--sans); color: transparent; transition: background var(--t), border-color var(--t), color var(--t); }
+  .sp-list li.lit { color: var(--fg); }
+  .sp-list li.lit i { background: var(--red); border-color: var(--red); color: #fff; }
+  .sp-rule { margin-top: 34px; border: 4px dashed var(--accent); border-radius: 16px; padding: 20px 28px; font: 700 40px/1.2 var(--display); color: var(--accent); }
+
+  /* best practices: three layers */
+  .layers { display: grid; grid-template-columns: 1fr 1.35fr 1fr; gap: 26px; }
+  .layer { background: var(--panel); border-radius: 20px; padding: 24px 26px; border-top: 10px solid var(--accent); display: grid; gap: 14px; align-content: start; }
+  .layer .kind { font: 700 20px var(--mono); letter-spacing: .12em; color: var(--accent); }
+  .layer h3 { font: 700 40px/1.05 var(--display); }
+  .layer ul { list-style: none; display: grid; gap: 16px; }
+  .layer li { font-size: 26px; line-height: 1.28; }
+  .layer li::before { content: "→ "; color: var(--accent); font-weight: 700; }
+  .layer pre { font: 500 21px/1.4 var(--mono); background: #08090b; border-radius: 10px; padding: 10px 14px; margin-top: 8px; white-space: pre; color: #dcd8cf; }
+  .layer pre .c { color: var(--dim); }
+  .gtag { font: 700 18px var(--mono); color: var(--ink); background: var(--accent); padding: 1px 8px; border-radius: 5px; margin-left: 8px; white-space: nowrap; }
+  .notenough { margin-top: 22px; font-size: 28px; color: var(--dim); border-left: 8px solid var(--red); padding: 6px 20px; }
+  .notenough b { color: var(--red); }
+
+  /* already installed one? */
+  .resp { list-style: none; }
+  .resp li { display: grid; grid-template-columns: 110px 1fr; gap: 6px 20px; padding: 22px 0; border-top: 4px solid var(--edge); }
+  .resp .n { font: 700 80px/1 var(--display); color: var(--accent); grid-row: span 2; }
+  .resp .t { font: 700 46px var(--display); }
+  .resp p { font-size: 30px; color: var(--dim); }
+  .resp p b { color: var(--fg); }
+  .handout { margin-top: 10px; font-size: 32px; color: var(--dim); }
+  .handout code { color: var(--accent); }
+
   /* 11 · doesn't save you */
   .nope { display: grid; grid-template-columns: 90px 1fr; gap: 10px 30px; padding: 26px 0; border-top: 4px solid var(--edge); }
   .nope .x { font: 700 76px/1 var(--display); color: var(--red); grid-row: span 2; }
@@ -521,10 +559,10 @@
     <h2>Tonight's plan</h2>
     <ol class="plan">
       <li><span class="n">01</span><span class="t">Real or phantom?</span><span class="m">3 MIN</span></li>
-      <li><span class="n">02</span><span class="t">How the attack works</span><span class="m">5 MIN</span></li>
-      <li><span class="n">03</span><span class="t">Watch an attacker do it</span><span class="m">5 MIN</span></li>
-      <li><span class="n">04</span><span class="t">How your pipeline stops it</span><span class="m">7 MIN</span></li>
-      <li><span class="n">05</span><span class="t">What to do on Monday</span><span class="m">2 MIN</span></li>
+      <li><span class="n">02</span><span class="t">How the attack works</span><span class="m">4 MIN</span></li>
+      <li><span class="n">03</span><span class="t">Watch an attacker do it</span><span class="m">4 MIN</span></li>
+      <li><span class="n">04</span><span class="t">How your pipeline stops it</span><span class="m">6 MIN</span></li>
+      <li><span class="n">05</span><span class="t">How to protect yourself</span><span class="m">5 MIN</span></li>
     </ol>
     <p class="playalong">Play along: when two package names appear, type <b>REAL</b> or <b>PHANTOM</b> in the chat.</p>
   </section>
@@ -641,10 +679,6 @@
       <p>Charlie Eriksen (Aikido) found this never-registered name in AI-generated agent skill files. It had spread to <b>237 repositories</b>. After he claimed it, AI agents kept trying to install it.</p>
     </div>
     <div class="inc" data-step="3">
-      <div class="h"><code>unused-imports</code><span>npm</span></div>
-      <p>A malicious npm package matching the slopsquatting pattern. Still <b>~233 weekly downloads</b> in early 2026, despite an npm security hold.</p>
-    </div>
-    <div class="inc" data-step="4">
       <div class="h"><code>AI on the other side</code><span>July 2026</span></div>
       <p>Anthropic disclosed that in a misconfigured security evaluation with accidental internet access, a Claude model registered a phantom name from a setup document on the real PyPI. It ran on <b>15 real systems</b> in about an hour before PyPI removed it.</p>
     </div>
@@ -711,29 +745,93 @@
     </div>
   </section>
 
-  <!-- 11 · What doesn't save you -->
-  <section class="slide" data-label="04 · YOUR PIPELINE">
-    <h2>What doesn't save you</h2>
-    <div class="nope" data-step="1">
-      <span class="x">✗</span><div class="t">CVE scanners, such as <code>pip-audit</code></div>
-      <div><p>A brand-new malicious package has no advisory yet.</p><div class="tie">↺ gate 5 let the trick card and react-codeshift through</div></div>
-    </div>
-    <div class="nope" data-step="2">
-      <span class="x">✗</span><div class="t">Signed attestations</div>
-      <div><p>They prove <b>who built</b> a package, not that <b>you wanted</b> it. An attacker can sign their own package.</p><div class="tie">↺ the trick card had a valid one</div></div>
-    </div>
-    <div class="nope" data-step="3">
-      <span class="x">✗</span><div class="t">Download counts</div>
-      <div><p>Easy to fake. In the first hour, a legit and a malicious new package look the same.</p></div>
+  <!-- 15 · Spot a phantom -->
+  <section class="slide" data-label="05 · HOW TO PROTECT YOURSELF">
+    <h2>Spot a phantom in 10 seconds</h2>
+    <div class="sp">
+      <div class="browser">
+        <div class="b-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">https://registry.example/package/react-codeshift</span></div>
+        <div class="b-body">
+          <div class="reg-brand">registry<span>.example</span><small>MOCK REGISTRY</small></div>
+          <h3>react-codeshift</h3>
+          <div class="sp-row" data-hl="1"><span>PUBLISHED</span><b>2 days ago</b></div>
+          <div class="sp-row" data-hl="2"><span>VERSIONS</span><b>1 (v1.0.0)</b></div>
+          <div class="sp-row" data-hl="3"><span>SOURCE CODE</span><b>no link</b></div>
+          <div class="sp-row" data-hl="4"><span>PUBLISHER</span><b>fresh-account-4821, no other packages</b></div>
+          <div class="sp-row"><span>ABOUT</span><b>Migrate React class components to hooks.</b></div>
+        </div>
+      </div>
+      <div>
+        <ul class="sp-list">
+          <li data-hl="1"><i>✗</i>Brand new</li>
+          <li data-hl="2"><i>✗</i>Only one release</li>
+          <li data-hl="3"><i>✗</i>No link to its source code</li>
+          <li data-hl="4"><i>✗</i>Unknown publisher</li>
+          <li data-hl="5"><i>✗</i>Not in the tool's official docs</li>
+        </ul>
+        <p class="sp-rule" data-step="6">Copy install commands from the official docs, not from the AI.</p>
+      </div>
     </div>
   </section>
 
+  <!-- 16 · Best practices: three layers -->
+  <section class="slide" data-label="05 · HOW TO PROTECT YOURSELF">
+    <h2>Best practices, in three layers</h2>
+    <div class="layers">
+      <div class="layer" data-step="1">
+        <span class="kind">PREVENT</span><h3>You, using AI</h3>
+        <ul>
+          <li>Look the name up on the registry before installing.</li>
+          <li>Copy install commands from official docs.</li>
+          <li>Give your AI tool a rule:<pre><span class="c"># AGENTS.md</span>
+Only use packages already
+in the project. Ask before
+adding a new one.</pre></li>
+        </ul>
+      </div>
+      <div class="layer" data-step="2">
+        <span class="kind">PREVENT + CONTAIN</span><h3>Your project and pipeline</h3>
+        <ul>
+          <li>Install only what the lockfile approves<span class="gtag">GATE 1</span><pre>npm ci
+composer install  <span class="c"># uses composer.lock</span>
+pip install --require-hashes -r requirements.txt</pre></li>
+          <li>Hold back brand-new releases for a week<span class="gtag">GATE 3</span><pre>min-release-age=7  <span class="c"># .npmrc, in days</span>
+<span class="c"># composer.json, under "config":</span>
+"policy": {"cooldown": {"period": "7 days"}}</pre></li>
+          <li>Don't let install scripts run by default<span class="gtag">GATE 4</span><pre>ignore-scripts=true  <span class="c"># .npmrc</span>
+"allow-plugins": {…} <span class="c"># Composer: only listed run</span></pre></li>
+        </ul>
+      </div>
+      <div class="layer" data-step="3">
+        <span class="kind">CONTAIN</span><h3>Your AI agents</h3>
+        <ul>
+          <li>Require approval before any install command.</li>
+          <li>Run agents in a sandbox or container.</li>
+          <li>No real passwords or keys where agents or installs run.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="notenough" data-step="4"><b>Not enough on its own:</b> CVE scanners (a new fake has no report yet) · signatures (prove who built it, not that you wanted it) · download counts (easy to fake)</p>
+  </section>
+
+  <!-- 17 · Already installed one? -->
+  <section class="slide" data-label="05 · HOW TO PROTECT YOURSELF">
+    <h2>Already installed one?</h2>
+    <ol class="resp">
+      <li data-step="1"><span class="n">1</span><span class="t">Remove it</span><p>Uninstall it and restore your lockfile from before it was added.</p></li>
+      <li data-step="2"><span class="n">2</span><span class="t">Change every secret</span><p>Assume <b>every password, key and token</b> that machine or pipeline could reach is stolen. Replace them.</p></li>
+      <li data-step="3"><span class="n">3</span><span class="t">Check what else changed</span><p>Lockfile changes, recent builds, new files, unexpected network traffic.</p></li>
+      <li data-step="4"><span class="n">4</span><span class="t">Report it</span><p>npm and PyPI: the "Report malware" button on the package page. Packagist: its contact page.</p></li>
+    </ol>
+  </section>
+
   <!-- 12 · Takeaways -->
-  <section class="slide" data-label="05 · WHAT TO DO ON MONDAY">
+  <section class="slide" data-label="05 · HOW TO PROTECT YOURSELF">
     <h2>Three things to keep</h2>
     <div class="take" data-step="1"><span class="n">1</span><p>Treat AI-suggested package names as untrusted input.</p></div>
     <div class="take" data-step="2"><span class="n">2</span><p>Pin dependencies with hashes, so unknown names fail by default.</p></div>
     <div class="take" data-step="3"><span class="n">3</span><p>Never let agents or scanners install packages where real credentials live.</p></div>
+    <p class="handout" data-step="3">Full checklist: <code>github.com/ADAMAMZAR/HackDev-talk</code> → <code>Shananth/docs/checklist.md</code></p>
   </section>
 
   <!-- 17 · Sources -->
@@ -795,18 +893,20 @@ const NOTES = [
   ["I'm Shananth, software engineer at Coexrt AI.", "You don't need to code. I'll explain every term as we go.", "Every demo is a simulation. Nothing real gets installed."],
   ["Space reveals each point.", "This week PHP fixed two critical bugs that let attackers run code on a web server, no login needed.", "Attackers tried it 4 days before the fix. Millions of attempts the night it came out.", "About 70% of the web runs on PHP. AI helped find these bugs."],
   ["Space reveals each point.", "Picture a developer in a rush, asking an AI how to patch.", "The real fix is upgrading PHP. There's no package to install.", "So any package the AI suggests is made up. This one is made up for the talk.", "Attackers register those made-up names. That's slopsquatting."],
-  ["Five parts, about 22 minutes.", "Ask the chat to play along: type REAL or PHANTOM when two names appear."],
+  ["Five parts, about 22 minutes. The last part is how to protect yourself.", "Ask the chat to play along: type REAL or PHANTOM when two names appear."],
   ["Space: show a pair. Read both names. Give the chat 5 seconds.", "Space: reveal. Read the one-line reason.", "Space: next pair. After 3 pairs, Space shows the summary.", "Point: the fakes sound right. That's the whole attack."],
   ["Typosquatting bets on you mistyping a real name, like 'reqeusts'.", "Space: slopsquatting bets on the AI confidently inventing a name.", "The term comes from Seth Larson, Python Software Foundation."],
   ["Same question, asked 5 times. Space or click 'Ask again'.", "Watch the counter. The made-up name keeps coming back: 4 out of 5.", "Point: it's not random. It repeats, so attackers can predict it."],
   ["Space reveals each number.", "19.7%: about 1 in 5 suggested packages didn't exist (576,000 samples, 16 AI models).", "205,474 different made-up names.", "43% came back in every one of 10 retries. Predictable means plannable.", "2026: newer models mess up less, but all five invented the same 127 fake names."],
   ["Space 1: search the name. Nobody owns it.", "Space 2: publish it. A free account and one command.", "Space 3: installs arrive. Yellow ones are AI agents installing on their own.", "Point: one free account and a few minutes."],
-  ["Space reveals each story.", "huggingface-cli: a researcher claimed a name AI kept suggesting. 30,000+ downloads; Alibaba put it in their instructions.", "react-codeshift: the name from our demo. Spread to 237 projects. AI agents kept installing it.", "unused-imports: a real malicious package, still ~233 downloads a week in early 2026.", "July 2026: a Claude model in a broken test setup registered a fake name on the real Python registry. It ran on 15 real systems."],
+  ["Space reveals each story.", "huggingface-cli: a researcher claimed a name AI kept suggesting. 30,000+ downloads; Alibaba put it in their instructions.", "react-codeshift: the name from our demo. Spread to 237 projects. AI agents kept installing it.", "July 2026: a Claude model in a broken test setup registered a fake name on the real Python registry. It ran on 15 real systems."],
   ["With a chat, a person reads the name before installing.", "Space: with an AI agent, nobody looks. It just installs.", "Space: installing can run code immediately, before anyone uses the package."],
   ["For non-developers: a CI/CD pipeline is an assembly line for code.", "Every change is built, tested and shipped, with automatic checks on the way.", "Space: the question is whether any check asks the right question."],
   ["Start on Unprotected. Space runs each card. Bad ones steal the secrets.", "Click Typical: only a malware scan. New fakes still get through. That's the uh-oh moment.", "Click Hardened: everything bad stops at gate 1.", "Gate 1 in plain words: a list of packages a person already approved, with fingerprints.", "Optional: click gate 1 to switch it off. Later gates still catch them."],
-  ["Space reveals each one.", "Scanners only know packages someone already reported.", "A signature proves who built it, not that you wanted it.", "Download counts are easy to fake."],
-  ["Space reveals each one.", "1. Treat package names from AI like a link from a stranger.", "2. Pin your packages with fingerprints, so unknown names fail.", "3. Keep AI agents away from real passwords and keys."],
+  ["Space highlights each red flag on the page.", "Brand new, one release, no source code, unknown publisher.", "Last check: is the name in the tool's official docs?", "Space: the rule. Copy install commands from official docs, not from AI."],
+  ["Space reveals each column.", "You: look the name up, copy commands from docs, give your AI a rule.", "Project: lockfile installs (gate 1), wait a week for new releases (gate 3), no install scripts by default (gate 4).", "Agents: approval before installs, sandbox, no real keys.", "Space: bottom line. Scanners, signatures and download counts aren't enough alone."],
+  ["Space reveals each step.", "1. Remove it, restore the lockfile.", "2. Assume every password and key it could reach is stolen. Replace them all.", "3. Check what else changed.", "4. Report it to the registry."],
+  ["Space reveals each one.", "1. Treat package names from AI like a link from a stranger.", "2. Pin your packages with fingerprints, so unknown names fail.", "3. Keep AI agents away from real passwords and keys.", "Point them to the checklist link on screen."],
   ["Sources are in the deck and in the repo. Move on."],
   ["Let the meme land for a second.", "Space: Thank you. Open the floor for questions."],
 ];
@@ -977,12 +1077,16 @@ function revealModule() {
   return {
     init(el) {
       this.items = [...el.querySelectorAll("[data-step]")];
-      this.max = Math.max(0, ...this.items.map(e => +e.dataset.step));
+      this.hl = [...el.querySelectorAll("[data-hl]")]; // visible from the start, highlighted on their step
+      this.max = Math.max(0, ...this.items.map(e => +e.dataset.step), ...this.hl.map(e => +e.dataset.hl));
     },
     reset() { this.n = 0; this.render(); },
     finish() { this.n = this.max; this.render(); },
     step() { if (this.n >= this.max) return false; this.n++; this.render(); return true; },
-    render() { this.items.forEach(e => e.classList.toggle("shown", +e.dataset.step <= this.n)); },
+    render() {
+      this.items.forEach(e => e.classList.toggle("shown", +e.dataset.step <= this.n));
+      this.hl.forEach(e => e.classList.toggle("lit", +e.dataset.hl <= this.n));
+    },
   };
 }
 

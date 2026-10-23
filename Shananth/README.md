@@ -12,6 +12,7 @@ drives every demo on screen.
 |------|------------|
 | `deck.html` | The slides and all four demos. One file, no install, no internet needed. |
 | `docs/presenter-script.md` | Prep checklist, timing, what to say on each slide, and likely questions. |
+| `docs/checklist.md` | One-page handout: how to prevent, contain and respond, with real commands. |
 | `docs/sources.md` | Where each fact on the slides comes from, and how well I could verify it. |
 
 ## Open the slides
@@ -43,6 +44,7 @@ All demos are scripted and simulated. There is no real AI and no real registry.
    gates to switch them on or off. The result comes from each card's details and the gate
    rules, so any mix of gates works. `ai-helper-utils-pro` and the card details are
    illustrative.
+5. **Spot a phantom** (slide 15): Space highlights each red flag on a mock registry page.
 
 Expected simulator results:
 
