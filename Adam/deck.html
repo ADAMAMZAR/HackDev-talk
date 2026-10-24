@@ -2170,6 +2170,9 @@
                 <aside class="notes">
                     <p><b>Before going live:</b> double-click <code>start-demos.bat</code> so every demo is running.
                         Open this notes window with P, then share only the deck window.</p>
+                    <p>Every "▶ Live demo" link opens a new tab. When you're done, press <b>Ctrl+W</b> to close it and
+                        land back on the deck. In every demo, the <b>Demo</b> pill (bottom right) or the <b>`</b> key
+                        opens the click-only controls.</p>
                     <p>Five parts in 15 minutes. Each one follows Incident, then Why, then Prevent.</p>
                     <p>Learn the idea and say it your own way. Reading word-for-word kills the room.</p>
                 </aside>
@@ -2475,9 +2478,10 @@
                         <i>StudyBuddy /fixed</i></a>
                 </article>
                 <aside class="notes">
-                    <p><b>[ON SCREEN]</b> Show <code>.env</code>, <code>.gitignore</code> and
-                        <code>app/api/chat/route.js</code> in StudyBuddy. Then open <code>/fixed</code>, search
-                        <code>sk-</code> again, and find nothing.</p>
+                    <p><b>[ON SCREEN]</b> This slide already shows <code>.env</code>, <code>.gitignore</code> and
+                        <code>route.js</code>, so you don't need to open the editor. Then click the link to open
+                        <code>/fixed</code>, ask a question (it still works), F12 → Ctrl+Shift+F → <code>sk-</code>
+                        → Enter: nothing found.</p>
                     <p>[Space] Point out the trap: "Variables starting with NEXT_PUBLIC_ or VITE_ are shipped to the
                         browser. A .env file alone isn't safe. The key also has to be used only on the server."</p>
                     <p>The leaky StudyBuddy page shows this exact trap: its key lives in .env but uses the NEXT_PUBLIC_
@@ -2635,9 +2639,11 @@
                         <i>CampusConnect :5103</i></a>
                 </article>
                 <aside class="notes">
-                    <p><b>[ON SCREEN]</b> Live in CampusConnect: console query returns every student. Run
-                        <code>02-lock.sql</code>, re-run: <code>[]</code>. Run <code>03-policy.sql</code>: one row. Show
-                        <code>04-bad-policy.sql</code>, don't run it. Then Security Advisor.</p>
+                    <p><b>[ON SCREEN]</b> Live in CampusConnect: open the <b>Demo</b> panel. The chips should read
+                        <b>RLS OFF · no policies</b> (if not, click Reset demo). 1. <b>Run as attacker</b>: 40 rows.
+                        2. <b>Run SQL</b> (lock): chip turns RLS ON. 3. <b>Run as attacker</b> again: <code>[]</code>.
+                        4. <b>Run SQL</b> (real rule), then <b>Sign in as Aina</b>: only her card. Skip the fake-fix
+                        button unless you're ahead. Finish with <b>Security Advisor ↗</b> in the panel footer.</p>
                     <p>Backup: Space walks the same four states here (or click the buttons).</p>
                     <p>1. "Show the open door." Every student, every row.</p>
                     <p>2. "Turn the lock on." <code>ALTER TABLE public.students ENABLE ROW LEVEL SECURITY;</code> "Same
@@ -2865,8 +2871,9 @@
                         was trained, so it may pin a version that's known to be vulnerable. Second, even a perfect app
                         goes stale. A library that's safe today gets a new CVE next month, and nobody goes back to
                         check."</p>
-                    <p><b>[ON SCREEN]</b> Show package.json, run <code>npm audit</code> in the KedaiKita folder. [Space]
-                        here for the backup.</p>
+                    <p><b>[ON SCREEN]</b> In KedaiKita, open the <b>Demo</b> terminal. Its header shows the
+                        package.json versions (should be axios 0.21.1; if not, click Reset first). Click
+                        <b>npm audit</b> (about 5 s). No internet? [Space] here for the backup.</p>
                     <p>Let the red warnings sit on screen for a few seconds. "Each line here is a published
                         vulnerability. It took one second to find."</p>
                     <p>[Space] In KedaiKita, click <b>Update packages</b> (it runs
@@ -2880,8 +2887,8 @@
                         show you why." (His talk lists pip-audit under "what doesn't save you", so say this line.)</p>
                     <p>Mention: Python users run pip-audit. On GitHub, turn on Dependabot so updates come to you
                         automatically.</p>
-                    <p>Reset between rehearsals: <code>git checkout -- package.json package-lock.json</code> then
-                        <code>npm ci</code>.</p>
+                    <p>Reset between rehearsals: click <b>Reset</b> in the KedaiKita terminal (not
+                        <code>npm ci</code>, which deletes the running Vite).</p>
                 </aside>
             </section>
 
@@ -3115,8 +3122,10 @@ Rank them by severity and show the fix for each.</pre>
                             :5101</i></a>
                 </article>
                 <aside class="notes">
-                    <p><b>[ON SCREEN]</b> Paste LeadSnap's <code>src/App.jsx</code> into any AI with this prompt (COPY
-                        PROMPT puts it on the clipboard).</p>
+                    <p><b>[ON SCREEN]</b> Don't use COPY PROMPT on this slide: it copies the prompt without the code.
+                        Click the link to open LeadSnap, open the <b>Demo</b> panel, click <b>Copy prompt + code</b>
+                        (prompt plus all of <code>App.jsx</code>). Switch to the AI tab you opened earlier, Ctrl+V,
+                        Enter.</p>
                     <p>"Watch. It finds the hardcoded key and the open table, the same things we just fixed by hand."
                     </p>
                     <p>[Space] "The AI that wrote the bug can find the bug, but only if you ask."</p>

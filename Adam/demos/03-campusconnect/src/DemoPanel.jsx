@@ -95,6 +95,7 @@ export default function DemoPanel() {
       <div className="dp-body">
         <section className="dp-step">
           <div className="dp-title"><i>1</i>Read every student, no login</div>
+          <p className="dp-note">The app only asks for your row: <code>.eq('user_id', user.id)</code>. The attacker skips the app:</p>
           <pre>{ATTACK_CODE}</pre>
           <button type="button" className="dp-run danger" onClick={attack} disabled={!!busy}>
             {busy === 'attack' ? 'Running…' : 'Run as attacker'}
@@ -135,10 +136,12 @@ export default function DemoPanel() {
       </div>
 
       <footer className="dp-foot">
-        <button type="button" className="dp-run ghost" onClick={() => control('reset')} disabled={!!busy}>
+        {/* Reset also signs out, so step 1 starts on the sign-in page ("I don't even have an account"). */}
+        <button type="button" className="dp-run ghost" onClick={() => { supabase.auth.signOut(); control('reset') }} disabled={!!busy}>
           {busy === 'reset' ? 'Resetting…' : 'Reset demo'}
         </button>
         {user && <button type="button" className="dp-run ghost" onClick={() => supabase.auth.signOut()}>Sign out</button>}
+        <a className="dp-run ghost" href={`https://supabase.com/dashboard/project/${new URL(SUPABASE_URL).hostname.split('.')[0]}/advisors/security`} target="_blank" rel="noopener">Security Advisor ↗</a>
       </footer>
     </aside>
   )

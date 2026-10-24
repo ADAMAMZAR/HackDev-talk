@@ -41,6 +41,9 @@
 .dp-run.danger { background: #ff5c5c; color: #fff; }
 .dp-run.ghost { background: none; color: #e8e8e3; border: 1px solid #3a3e48; }
 .dp-run:disabled { opacity: .5; cursor: progress; }
+a.dp-run { text-decoration: none; }
+.dp-note { margin: 0 0 8px; color: #8b8f99; font-size: 13px; }
+.dp-note code { color: #c9d1d9; }
 .dp-run:focus-visible, .dp-pill:focus-visible, .dp-x:focus-visible { outline: 2px solid #ffb000; outline-offset: 2px; }
 
 .dp-result { margin-top: 10px; padding: 10px; background: #0d0e11; border-radius: 8px; font: 12px ui-monospace, monospace; }

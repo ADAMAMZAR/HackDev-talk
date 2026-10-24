@@ -25,10 +25,12 @@ Click the **Demo** pill (bottom right), or press **`** (the backtick key), to op
 | 4 | **Run SQL** under "Add a real rule", then **Sign in as Aina** | Aina's ID card appears, and only hers |
 | 5 *(optional)* | **Run SQL** under "The fake fix", then **Run as attacker** | **40 rows again**: `USING (true)` undid the lock. Then click **Reset demo** |
 
-For the "hiding a button is not a lock" line, open `src/App.jsx` and point at `.eq('user_id', user.id) // only show my own profile`. The privacy lives in the browser, and the attacker never uses the browser UI.
+For the "hiding a button is not a lock" line, point at the grey note above step 1 in the panel: the app's own query has `.eq('user_id', user.id)`. The privacy lives in the browser, and the attacker never uses the browser UI. No need to open `src/App.jsx`.
+
+To finish, click **Security Advisor ↗** in the panel footer. It opens the Supabase dashboard page (you must already be logged in to Supabase in this browser).
 
 The attacker button also prints the rows with `console.table`, so if DevTools is open the audience sees them there too. The SQL files in `supabase/` still work if you'd rather use the SQL Editor.
 
 ## Reset between rehearsals
 
-Click **Reset demo** in the panel. It turns RLS off and removes all policies. The data itself never changes, so you don't need to run `01-seed.sql` again.
+Click **Reset demo** in the panel. It turns RLS off, removes all policies and signs you out. The data itself never changes, so you don't need to run `01-seed.sql` again.
