@@ -21,5 +21,5 @@ Where I only found secondary coverage, it says so. Do not present those details 
 | Claude model registered a phantom name on real PyPI during a misconfigured evaluation; 15 systems; about an hour (11) | Help Net Security, 31 Jul 2026, https://www.helpnetsecurity.com/2026/07/31/anthropic-claude-cybersecurity-incidents/; Socket.dev follow-up | Confirmed by several outlets. Disclosed 30 Jul 2026; the evaluation partner's setup was misconfigured. |
 
 Simulated or illustrative, not facts: the AI answer and the package name `php2shell/patch` on slide 4 (checked: not a real Packagist package on 23 Oct 2026), all demo behaviour, the AI answers on slide 8, the
-publish log, account name and download counts on slide 10, the card details on slide 14, and
+publish form, account name and install counts on slide 10, the card details on slide 14, and
 the package `ai-helper-utils-pro`.
