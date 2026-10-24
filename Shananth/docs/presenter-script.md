@@ -72,8 +72,8 @@ and on slide 16 point at the code without reading it out.
 ### 9. The numbers (Space 4 times)
 **Say:** "Researchers checked 576,000 AI-written code samples from 16 models. About 1 in 5 suggested packages didn't exist. That's over 205,000 different made-up names. And 43% of them came back every single time the same question was repeated. Predictable means plannable. Newer models make fewer mistakes, but in 2026 all five models tested invented the same 127 fake names."
 
-### 10. Demo 3: The attacker's view (Space 3 times)
-**Say:** "Here's the attacker's side. A registry is the public app store for code packages. Search the name: nobody owns it. Publish it: a free account and one command. Now installs arrive. The yellow ones are AI agents installing it on their own. Cost to the attacker: one free account and a few minutes."
+### 10. Demo 3: Two sides of one install (Space 3 times)
+**Say:** "Two sides of the same install. On the right, the attacker. A registry is the public app store for code packages. They search the name the AI kept inventing: nobody owns it, so they publish it. On the left, a developer asks an AI agent for help. The agent installs that exact name by itself, and nobody checks it. Watch the right side: the attacker sees the install arrive. Then more come in. The yellow ones are AI agents. Cost to the attacker: one free account and a few minutes."
 
 ### 11. It already happened (Space 3 times)
 **Say:** "This isn't theory. In 2024 a researcher claimed huggingface-cli, a name AI kept suggesting, and it got over 30,000 downloads. Alibaba even put it in their instructions. react-codeshift, the name from our demo, spread to 237 projects, and AI agents kept trying to install it. And in July, Anthropic disclosed that a Claude model, in a test setup that wrongly had internet access, registered a made-up name on the real Python registry. It ran on 15 real systems in about an hour before it was removed."

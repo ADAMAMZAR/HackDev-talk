@@ -229,44 +229,45 @@
   .reg-brand { display: flex; align-items: baseline; font: 700 46px var(--display); }
   .reg-brand span { color: #8a5a00; }
   .reg-brand small { margin-left: 20px; font: 600 20px var(--mono); color: #5a5e66; letter-spacing: .1em; border: 3px solid #5a5e66; border-radius: 6px; padding: 2px 10px; }
-  .search { display: flex; gap: 18px; }
-  .search .box { flex: 1; height: 92px; display: flex; align-items: center; border: 4px solid #16181b; border-radius: 14px; padding: 0 26px; font: 500 40px var(--mono); background: #fff; }
-  .search .box .ph-text { color: #8b8f96; }
-  .search .btn { background: #16181b; border-color: #16181b; color: #fff; }
-  .result { font-size: 34px; min-height: 300px; }
-  .result .nf { font: 700 50px var(--display); color: #b3261e; margin-bottom: 8px; }
-  .result .btn { margin-top: 28px; background: #16181b; border-color: #16181b; color: #fff; }
-  .result .btn.pressed { transform: scale(.95); background: #8a5a00; border-color: #8a5a00; }
-  .pkg h3 { font: 700 54px var(--mono); }
-  .pkg .meta { font-size: 28px; color: #4a4e55; margin: 6px 0 18px; }
-  .pkg .desc { font-size: 32px; }
-  .pkg .dl { margin-top: 26px; display: flex; align-items: baseline; gap: 24px; }
-  .pkg .dl b { font: 700 120px/1 var(--display); font-variation-settings: "wdth" 80; }
-  .pkg .dl span { font: 600 26px var(--mono); color: #4a4e55; }
+  .search-box { height: 84px; display: flex; align-items: center; border: 4px solid #16181b; border-radius: 14px; padding: 0 24px; font: 500 38px var(--mono); background: #fff; }
+  .search-box .ph-text { color: #8b8f96; }
+  .avail { font: 700 40px var(--display); color: #1d7a3e; margin: 18px 0 12px; }
+  .pub-form { display: grid; gap: 12px; }
+  .pub-form label { display: grid; gap: 4px; font: 600 20px var(--mono); color: #5a5e66; letter-spacing: .08em; }
+  .pub-form label span { font: 500 30px var(--sans); letter-spacing: 0; color: #16181b; background: #fff; border: 3px solid #c9c4b8; border-radius: 10px; padding: 8px 16px; }
+  .pub-form .btn { justify-self: start; margin-top: 6px; background: #16181b; border-color: #16181b; color: #fff; }
+  .pub-form .btn.pressed { transform: scale(.95); background: #8a5a00; border-color: #8a5a00; }
+  .pkg h3 { font: 700 50px var(--mono); }
+  .pkg .meta { font-size: 26px; color: #4a4e55; margin: 4px 0 12px; }
+  .pkg .dl { display: flex; align-items: baseline; gap: 20px; }
+  .pkg .dl b { display: inline-block; font: 700 110px/1 var(--display); font-variation-settings: "wdth" 80; }
+  .pkg .dl span { font: 600 24px var(--mono); color: #4a4e55; }
+  .inst { list-style: none; display: grid; gap: 10px; margin-top: 16px; }
+  .inst li { background: #fff; border-radius: 10px; padding: 8px 16px; border-left: 8px solid #c9c4b8; font: 700 28px var(--display); animation: popIn 450ms var(--ease); }
+  .inst li small { font: 600 19px var(--mono); color: #5a5e66; margin-left: 12px; letter-spacing: .06em; }
+  .inst li.ai { background: #fff1cc; border-left-color: #c98a00; }
+  .inst li.ai small { color: #8a5a00; }
   .fade-in { animation: fadeIn var(--t) var(--ease); }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 
-  .at-right { display: grid; grid-template-rows: 300px 1fr; gap: 26px; min-height: 0; }
-  .term { background: #050607; border: 4px solid var(--edge); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; }
-  .term .t-bar { padding: 12px 20px; border-bottom: 4px solid var(--edge); font: 600 22px var(--mono); color: var(--dim); }
-  .term pre { flex: 1; padding: 16px 22px; font: 500 25px/1.42 var(--mono); white-space: pre-wrap; color: #cfcbc2; }
-  .term .pr { color: var(--accent); }
-  .term .ok { color: var(--green); font-weight: 700; }
-  .feed { background: var(--panel); border-radius: 18px; padding: 18px 22px; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
-  .f-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-  .f-head b { font: 700 32px var(--display); }
-  .f-head .btn { font-size: 24px; padding: 8px 20px; border-width: 3px; }
-  .feed ul { list-style: none; display: grid; gap: 10px; }
-  .feed li { background: var(--panel-2); border-radius: 12px; padding: 10px 18px; border-left: 8px solid var(--edge); animation: popIn 450ms var(--ease); }
-  .feed li .who { font: 700 28px var(--display); }
-  .feed li .who small { font: 500 20px var(--mono); color: var(--dim); margin-left: 12px; }
-  .feed li code { display: block; font-size: 21px; color: var(--dim); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .feed li.ai { background: var(--accent-bg); border-left-color: var(--accent); }
-  .feed li.ai .who { color: var(--accent); }
-  .feed li.ai .who small { color: var(--accent); }
+  .at { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; height: 730px; }
+  .side { display: grid; grid-template-rows: auto 1fr; gap: 14px; min-height: 0; transition: opacity var(--t); }
+  .side.idle { opacity: .4; }
+  .side-h { display: flex; align-items: center; gap: 14px; font: 700 34px var(--display); }
+  .side-h i { width: 20px; height: 20px; border-radius: 50%; background: var(--fg); }
+  .side.attack .side-h i { background: var(--red); }
+  .side-h .note { margin-left: auto; }
+  .side > .chat, .side > .browser { min-height: 0; transition: box-shadow var(--t); }
+  .side.live > .chat, .side.live > .browser { box-shadow: 0 0 0 5px var(--accent); }
+  .at .ai-code { min-height: 130px; }
+  .at-code .pr { color: var(--accent); }
+  .at-code .ok { color: var(--green); font-weight: 700; }
+  .at-warn { font: 700 34px var(--display); color: var(--red); min-height: 44px; margin-top: 16px; }
   @keyframes popIn { from { opacity: 0; transform: translateY(-18px) scale(.98); } to { opacity: 1; transform: none; } }
-  .at-caption { position: absolute; left: 0; right: 0; bottom: -6px; font: 700 50px var(--display); color: var(--accent); opacity: 0; transition: opacity var(--t); }
+  .at-foot { position: absolute; left: 0; right: 0; bottom: -4px; display: flex; align-items: center; justify-content: space-between; gap: 30px; }
+  .at-caption { font: 700 46px var(--display); color: var(--accent); opacity: 0; transition: opacity var(--t); }
   .at-caption.in { opacity: 1; }
+  .at-foot .btn { font-size: 26px; padding: 10px 22px; white-space: nowrap; }
 
   /* 7 · incidents */
   .inc { display: grid; grid-template-columns: 420px 1fr; gap: 40px; padding: 18px 0; border-top: 4px solid var(--edge); align-items: start; }
@@ -645,26 +646,29 @@
     </div>
   </section>
 
-  <!-- 6 · Demo 3: The Attacker's View -->
+  <!-- 10 · Demo 3: Two sides of one install -->
   <section class="slide" data-module="attacker" data-label="03 · WATCH AN ATTACKER · DEMO 3">
     <div class="at">
-      <div class="browser">
-        <div class="b-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">https://registry.example/search</span></div>
-        <div class="b-body">
-          <div class="reg-brand">registry<span>.example</span><small>MOCK REGISTRY</small></div>
-          <div class="search"><div class="box"><span class="q"></span></div><button class="btn at-search">Search</button></div>
-          <div class="result"></div>
+      <div class="side dev">
+        <div class="side-h"><i></i>The developer</div>
+        <div class="chat">
+          <div class="chat-bar"><span>AI coding agent</span><span class="note">SIMULATED</span></div>
+          <div class="msg-user"></div>
+          <div class="msg-ai"><div class="ai-intro"></div><pre class="ai-code at-code"></pre><p class="at-warn"></p></div>
         </div>
       </div>
-      <div class="at-right">
-        <div class="term"><div class="t-bar">attacker@laptop · simulated</div><pre class="t-out"></pre></div>
-        <div class="feed">
-          <div class="f-head"><b>Installs</b><span class="note">SIMULATED</span><button class="btn ghost at-live" disabled>Go live ▸</button></div>
-          <ul></ul>
+      <div class="side attack">
+        <div class="side-h"><i></i>The attacker<span class="note">SIMULATED</span></div>
+        <div class="browser">
+          <div class="b-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">https://registry.example</span></div>
+          <div class="b-body">
+            <div class="reg-brand">registry<span>.example</span><small>MOCK REGISTRY</small></div>
+            <div class="at-view"></div>
+          </div>
         </div>
       </div>
     </div>
-    <p class="at-caption">Cost to the attacker: one free account and a few minutes.</p>
+    <div class="at-foot"><p class="at-caption">Cost to the attacker: one free account and a few minutes.</p><button class="btn ghost at-next"></button></div>
   </section>
 
   <!-- 7 · It already happened -->
@@ -898,7 +902,7 @@ const NOTES = [
   ["Typosquatting bets on you mistyping a real name, like 'reqeusts'.", "Space: slopsquatting bets on the AI confidently inventing a name.", "The term comes from Seth Larson, Python Software Foundation."],
   ["Same question, asked 5 times. Space or click 'Ask again'.", "Watch the counter. The made-up name keeps coming back: 4 out of 5.", "Point: it's not random. It repeats, so attackers can predict it."],
   ["Space reveals each number.", "19.7%: about 1 in 5 suggested packages didn't exist (576,000 samples, 16 AI models).", "205,474 different made-up names.", "43% came back in every one of 10 retries. Predictable means plannable.", "2026: newer models mess up less, but all five invented the same 127 fake names."],
-  ["Space 1: search the name. Nobody owns it.", "Space 2: publish it. A free account and one command.", "Space 3: installs arrive. Yellow ones are AI agents installing on their own.", "Point: one free account and a few minutes."],
+  ["Two sides: the developer on the left, the attacker on the right.", "Space 1: the attacker searches the name from Demo 2. Nobody owns it, so they publish it.", "Space 2: a developer asks an AI agent for help. It installs the name by itself. Watch the right side: the attacker sees that install.", "Space 3: more installs arrive. Yellow ones are AI agents.", "Point: one free account and a few minutes."],
   ["Space reveals each story.", "huggingface-cli: a researcher claimed a name AI kept suggesting. 30,000+ downloads; Alibaba put it in their instructions.", "react-codeshift: the name from our demo. Spread to 237 projects. AI agents kept installing it.", "July 2026: a Claude model in a broken test setup registered a fake name on the real Python registry. It ran on 15 real systems."],
   ["With a chat, a person reads the name before installing.", "Space: with an AI agent, nobody looks. It just installs.", "Space: installing can run code immediately, before anyone uses the package."],
   ["For non-developers: a CI/CD pipeline is an assembly line for code.", "Every change is built, tested and shipped, with automatic checks on the way.", "Space: the question is whether any check asks the right question."],
@@ -966,26 +970,18 @@ spawnSync("npx", ["react-codeshift", "--hooks", ...files], {
 }` },
 ];
 
-const PUBLISH_LOG = [
-  ["pr", "$ npm adduser"],
-  ["", "Logged in as fresh-account-4821"],
-  ["pr", "$ npm publish"],
-  ["", "npm notice package: react-codeshift@1.0.0"],
-  ["", "npm notice total files: 3"],
-  ["ok", "+ react-codeshift@1.0.0"],
-];
-// [who, command, downloads added]. Entries starting with "AI agent" are highlighted.
+// Demo 3, left side: what the developer's AI agent says and does.
+const VICTIM = {
+  ask: "Migrate my React class components to hooks.",
+  intro: "I'll install the codemod and run it:",
+  cmd: "npm install " + PHANTOM,
+  out: "added 1 package",
+  warn: "Ran by itself. No one checked the name.",
+};
+// Demo 3, right side: installs that arrive after the developer's. [who, installs added]
 const INSTALLERS = [
-  ["dev laptop", "npm install react-codeshift", 3],
-  ["AI agent (auto-install)", "npx react-codeshift --hooks src/", 5],
-  ["CI runner", "npm install", 2],
-  ["AI agent (auto-install)", "npx react-codeshift -t class-to-hooks", 8],
-  ["dev laptop", "npx react-codeshift ./src", 4],
-  ["AI agent (auto-install)", "npm install react-codeshift", 9],
-  ["CI runner", "npm install", 6],
-  ["AI agent (auto-install)", "npx react-codeshift --hooks", 12],
-  ["dev laptop", "npm i -D react-codeshift", 7],
-  ["AI agent (auto-install)", "npx react-codeshift src/", 15],
+  ["dev laptop", 3], ["AI agent", 5], ["CI runner", 2], ["AI agent", 8], ["dev laptop", 4],
+  ["AI agent", 9], ["CI runner", 6], ["AI agent", 12], ["dev laptop", 7], ["AI agent", 15],
 ];
 
 // Pipeline gates. check(card) returns { pass, why }. Evaluated in order; the first block stops the run.
@@ -1203,80 +1199,103 @@ const roulette = {
   },
 };
 
-/* ===================== Demo 3: The Attacker's View ===================== */
+/* ===================== Demo 3: Two sides of one install ===================== */
 
 const attacker = {
   T: timers(),
   init(el) {
-    this.q = $(el, ".q");
-    this.result = $(el, ".result");
-    this.term = $(el, ".t-out");
-    this.feed = $(el, ".feed ul");
+    this.dev = $(el, ".side.dev");
+    this.att = $(el, ".side.attack");
+    this.view = $(el, ".at-view");
+    this.intro = $(el, ".at .ai-intro");
+    this.code = $(el, ".at-code");
+    this.warn = $(el, ".at-warn");
     this.caption = $(el, ".at-caption");
-    this.searchBtn = $(el, ".at-search");
-    this.liveBtn = $(el, ".at-live");
-    this.searchBtn.addEventListener("click", () => { if (this.phase === 0) this.step(); });
-    this.liveBtn.addEventListener("click", () => { if (this.phase === 2) this.step(); });
-    this.result.addEventListener("click", e => { if (e.target.closest(".at-publish") && this.phase === 1) this.step(); });
+    this.next = $(el, ".at-next");
+    $(el, ".at .msg-user").textContent = VICTIM.ask;
+    this.next.addEventListener("click", () => this.step());
   },
   reset() {
     this.T.clear();
-    this.phase = 0; this.busy = false; this.downloads = 0;
-    this.q.innerHTML = '<span class="ph-text">Search packages</span>';
-    this.result.innerHTML = "";
-    this.term.innerHTML = '<span class="pr">$</span> <span class="caret"></span>';
-    this.feed.innerHTML = "";
+    this.phase = 0; this.busy = false; this.installs = 0;
+    this.view.innerHTML = '<div class="search-box"><span class="ph-text">Search packages</span></div>';
+    this.intro.textContent = ""; this.code.textContent = ""; this.warn.textContent = "";
     this.caption.classList.remove("in");
-    this.searchBtn.disabled = false; this.liveBtn.disabled = true;
+    this.focus("attack"); this.label();
   },
   step() {
     if (this.busy) return true;
     if (this.phase >= 3) return false;
     this.phase++;
-    this.busy = true;
-    [null, this.search, this.publish, this.live][this.phase].call(this).then(() => { this.busy = false; });
+    this.busy = true; this.label();
+    [null, this.claim, this.victim, this.flood][this.phase].call(this).then(() => { this.busy = false; this.label(); });
     return true;
   },
-  async search() {
-    this.searchBtn.disabled = true;
-    this.q.textContent = "";
-    for (const ch of PHANTOM) { this.q.textContent += ch; await this.T.sleep(85); }
-    await this.T.sleep(250);
-    this.result.innerHTML = '<p class="dim fade-in">Searching…</p>';
-    await this.T.sleep(600);
-    this.result.innerHTML = '<div class="fade-in"><div class="nf">Package not found.</div><p>This name is available.</p>' +
-      '<button class="btn at-publish">Publish package</button></div>';
+  // Highlight the side that is acting and dim the other. "both": highlight the attacker, dim neither.
+  focus(side) {
+    this.att.classList.toggle("live", side !== "dev"); this.att.classList.toggle("idle", side === "dev");
+    this.dev.classList.toggle("live", side === "dev"); this.dev.classList.toggle("idle", side === "attack");
   },
-  async publish() {
-    const b = $(this.result, ".at-publish");
-    if (b) { b.classList.add("pressed"); b.disabled = true; }
-    this.term.innerHTML = "";
-    for (const [cls, line] of PUBLISH_LOG) {
-      await this.T.sleep(cls === "pr" ? 450 : 300);
-      this.term.innerHTML += '<span class="' + cls + '">' + esc(line) + "</span>\n";
-    }
-    Store.attackerRegistered = true;
+  label() {
+    this.next.textContent = ["Claim the name ▸", "Developer asks AI ▸", "Watch installs ▸", "Done"][this.phase];
+    this.next.disabled = this.busy || this.phase >= 3;
+  },
+  async type(node, text) {
+    for (let i = 1; i <= text.length; i++) { node.textContent = text.slice(0, i); await this.T.sleep(i % 2 ? 0 : 40); }
+  },
+  async claim() {
+    const box = $(this.view, ".search-box");
+    box.textContent = "";
+    for (const ch of PHANTOM) { box.textContent += ch; await this.T.sleep(80); }
     await this.T.sleep(400);
-    this.result.innerHTML = '<div class="pkg fade-in"><h3>' + PHANTOM + '</h3>' +
+    this.view.insertAdjacentHTML("beforeend", '<div class="fade-in"><div class="avail">✓ Nobody owns this name.</div><div class="pub-form">' +
+      '<label>PACKAGE NAME<span>' + PHANTOM + '</span></label>' +
+      '<label>DESCRIPTION<span>Migrate React class components to hooks.</span></label>' +
+      '<span class="btn">Publish</span></div></div>');
+    await this.T.sleep(1400);
+    $(this.view, ".pub-form .btn").classList.add("pressed");
+    await this.T.sleep(500);
+    Store.attackerRegistered = true;
+    this.view.innerHTML = '<div class="pkg fade-in"><h3>' + PHANTOM + '</h3>' +
       '<div class="meta">v1.0.0 · published just now by fresh-account-4821</div>' +
-      '<div class="desc">Migrate React class components to hooks automatically.</div>' +
-      '<div class="dl"><b class="dl-n">0</b><span>DOWNLOADS (SIMULATED)</span></div></div>';
-    this.liveBtn.disabled = false;
+      '<div class="dl"><b class="dl-n">0</b><span>INSTALLS</span></div><ul class="inst"></ul></div>';
   },
-  async live() {
-    this.liveBtn.disabled = true;
-    const n = $(this.result, ".dl-n");
+  async victim() {
+    this.focus("dev");
+    await this.T.sleep(500);
+    await this.type(this.intro, VICTIM.intro);
+    await this.type(this.code, "$ " + VICTIM.cmd);
+    this.code.innerHTML = '<span class="pr">$</span> npm install <span class="ph hit">' + PHANTOM + "</span>";
+    await this.T.sleep(600);
+    this.code.insertAdjacentHTML("beforeend", '\n<span class="ok">' + VICTIM.out + "</span>");
+    await this.T.sleep(500);
+    this.warn.textContent = VICTIM.warn;
+    await this.T.sleep(1200);
+    this.focus("both");
+    await this.T.sleep(400);
+    this.addInstall("AI agent", "THE DEVELOPER ON THE LEFT");
+    this.count(1);
+  },
+  async flood() {
     for (let i = 0; i < INSTALLERS.length; i++) {
-      const [who, cmd, add] = INSTALLERS[i];
-      const ai = who.startsWith("AI agent");
-      const li = document.createElement("li");
-      if (ai) li.className = "ai";
-      li.innerHTML = '<div class="who">' + esc(who) + (ai ? "<small>NO HUMAN REVIEW</small>" : "") + "</div><code>" + esc(cmd) + "</code>";
-      this.feed.prepend(li);
-      while (this.feed.children.length > 4) this.feed.lastElementChild.remove();
-      for (let k = 0; k < add; k++) { this.downloads++; if (n) n.textContent = this.downloads; await this.T.sleep(Math.round(700 / add)); }
+      const [who, add] = INSTALLERS[i];
+      this.addInstall(who, who.startsWith("AI") ? "NO HUMAN REVIEW" : "");
+      for (let k = 0; k < add; k++) { this.count(1); await this.T.sleep(Math.round(700 / add)); }
       if (i === 3) this.caption.classList.add("in");
     }
+  },
+  addInstall(who, tag) {
+    const list = $(this.view, ".inst");
+    const li = document.createElement("li");
+    if (who.startsWith("AI")) li.className = "ai";
+    li.innerHTML = esc(who) + (tag ? "<small>" + tag + "</small>" : "");
+    list.prepend(li);
+    while (list.children.length > 3) list.lastElementChild.remove();
+  },
+  count(add) {
+    this.installs += add;
+    $(this.view, ".dl-n").textContent = this.installs;
+    $(this.view, ".dl span").textContent = this.installs === 1 ? "INSTALL" : "INSTALLS";
   },
 };
 

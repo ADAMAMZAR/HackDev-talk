@@ -38,8 +38,8 @@ All demos are scripted and simulated. There is no real AI and no real registry.
 1. **Real or phantom?** (slide 6): pairs of package names, one real and one fake.
 2. **Hallucination roulette** (slide 8): the same question asked five times. Four answers
    suggest `react-codeshift`.
-3. **The attacker's view** (slide 10): search a mock registry, publish the free name, watch
-   installs arrive.
+3. **Two sides of one install** (slide 10): the attacker claims the free name on a mock
+   registry, a developer's AI agent installs it, and installs pile up on the attacker's side.
 4. **Pipeline simulator** (slide 14): five gates, five package cards, three presets. Click
    gates to switch them on or off. The result comes from each card's details and the gate
    rules, so any mix of gates works. `ai-helper-utils-pro` and the card details are
