@@ -250,7 +250,30 @@
   .fade-in { animation: fadeIn var(--t) var(--ease); }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 
-  .at { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; height: 730px; }
+  .life { list-style: none; display: flex; gap: 10px; margin-bottom: 16px; counter-reset: life; }
+  .life li { flex: 1; display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-radius: 12px; background: var(--panel); border: 3px solid var(--edge); font: 600 22px var(--sans); color: var(--dim); white-space: nowrap; counter-increment: life; transition: color var(--t), background var(--t), border-color var(--t); }
+  .life li::before { content: counter(life); flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--edge); color: var(--fg); font: 700 20px var(--display); transition: background var(--t), color var(--t); }
+  .life li.done { color: var(--fg); }
+  .life li.done::before { background: var(--accent); color: var(--ink); }
+  .life li.now { color: var(--fg); border-color: var(--accent); background: var(--accent-bg); }
+  .life li.now::before { background: var(--accent); color: var(--ink); }
+  .life li.harm.now { border-color: var(--red); background: var(--red-bg); }
+  .life li.harm.now::before { background: var(--red); color: #fff; }
+  .at { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; height: 680px; }
+  .at .b-body { padding: 30px 40px; gap: 22px; }
+  .at .pkg .dl b { font-size: 96px; }
+  .inbox { display: grid; gap: 12px; }
+  .ib-h { display: flex; align-items: baseline; gap: 16px; font: 700 40px var(--display); color: #b3261e; }
+  .ib-h small { font: 600 18px var(--mono); letter-spacing: .1em; color: #5a5e66; border: 3px solid #5a5e66; border-radius: 6px; padding: 2px 10px; }
+  .ib-from { font-size: 26px; color: #4a4e55; }
+  .ib-from b { color: #16181b; }
+  .ib-keys { list-style: none; display: grid; gap: 8px; }
+  .ib-keys li { display: grid; grid-template-columns: 290px 1fr; background: #fff; border-left: 8px solid #b3261e; border-radius: 10px; padding: 7px 16px; font: 600 24px var(--mono); color: #16181b; animation: popIn 450ms var(--ease); }
+  .ib-keys li span + span { color: #b3261e; }
+  .ib-so { font: 700 30px/1.2 var(--display); color: #16181b; opacity: 0; transition: opacity var(--t); }
+  .ib-so.in { opacity: 1; }
+  .ib-count { font-size: 26px; color: #4a4e55; min-height: 36px; }
+  .ib-count b { font: 700 34px var(--display); color: #b3261e; }
   .side { display: grid; grid-template-rows: auto 1fr; gap: 14px; min-height: 0; transition: opacity var(--t); }
   .side.idle { opacity: .4; }
   .side-h { display: flex; align-items: center; gap: 14px; font: 700 34px var(--display); }
@@ -561,8 +584,8 @@
     <ol class="plan">
       <li><span class="n">01</span><span class="t">Real or phantom?</span><span class="m">3 MIN</span></li>
       <li><span class="n">02</span><span class="t">How the attack works</span><span class="m">4 MIN</span></li>
-      <li><span class="n">03</span><span class="t">Watch an attacker do it</span><span class="m">4 MIN</span></li>
-      <li><span class="n">04</span><span class="t">How your pipeline stops it</span><span class="m">6 MIN</span></li>
+      <li><span class="n">03</span><span class="t">Watch an attacker do it</span><span class="m">5 MIN</span></li>
+      <li><span class="n">04</span><span class="t">How your pipeline stops it</span><span class="m">5 MIN</span></li>
       <li><span class="n">05</span><span class="t">How to protect yourself</span><span class="m">5 MIN</span></li>
     </ol>
     <p class="playalong">Play along: when two package names appear, type <b>REAL</b> or <b>PHANTOM</b> in the chat.</p>
@@ -648,6 +671,13 @@
 
   <!-- 10 · Demo 3: Two sides of one install -->
   <section class="slide" data-module="attacker" data-label="03 · WATCH AN ATTACKER · DEMO 3">
+    <ol class="life">
+      <li>AI invents a name</li>
+      <li>Attacker claims it</li>
+      <li>AI agent installs it</li>
+      <li class="harm">Hidden code runs</li>
+      <li class="harm">Attacker gets keys</li>
+    </ol>
     <div class="at">
       <div class="side dev">
         <div class="side-h"><i></i>The developer</div>
@@ -660,7 +690,7 @@
       <div class="side attack">
         <div class="side-h"><i></i>The attacker<span class="note">SIMULATED</span></div>
         <div class="browser">
-          <div class="b-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">https://registry.example</span></div>
+          <div class="b-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url at-url">https://registry.example</span></div>
           <div class="b-body">
             <div class="reg-brand">registry<span>.example</span><small>MOCK REGISTRY</small></div>
             <div class="at-view"></div>
@@ -902,7 +932,7 @@ const NOTES = [
   ["Typosquatting bets on you mistyping a real name, like 'reqeusts'.", "Space: slopsquatting bets on the AI confidently inventing a name.", "The term comes from Seth Larson, Python Software Foundation."],
   ["Same question, asked 5 times. Space or click 'Ask again'.", "Watch the counter. The made-up name keeps coming back: 4 out of 5.", "Point: it's not random. It repeats, so attackers can predict it."],
   ["Space reveals each number.", "19.7%: about 1 in 5 suggested packages didn't exist (576,000 samples, 16 AI models).", "205,474 different made-up names.", "43% came back in every one of 10 retries. Predictable means plannable.", "2026: newer models mess up less, but all five invented the same 127 fake names."],
-  ["Two sides: the developer on the left, the attacker on the right.", "Space 1: the attacker searches the name from Demo 2. Nobody owns it, so they publish it.", "Space 2: a developer asks an AI agent for help. It installs the name by itself. Watch the right side: the attacker sees that install.", "Space 3: more installs arrive. Yellow ones are AI agents.", "Point: one free account and a few minutes."],
+  ["The bar on top is the whole story. Stage 1 is Demo 2: the AI keeps inventing react-codeshift.", "Space 1: the attacker claims the name. Nobody owns it, so they publish it.", "Space 2: a developer's AI agent installs it by itself. The attacker sees the install.", "Space 3: hidden code runs during the install and sends the developer's keys to the attacker. With them, the attacker can log in as you.", "Space 4: it spreads. Every machine that installs it sends its keys.", "Point: one free account and a few minutes."],
   ["Space reveals each story.", "huggingface-cli: a researcher claimed a name AI kept suggesting. 30,000+ downloads; Alibaba put it in their instructions.", "react-codeshift: the name from our demo. Spread to 237 projects. AI agents kept installing it.", "July 2026: a Claude model in a broken test setup registered a fake name on the real Python registry. It ran on 15 real systems."],
   ["With a chat, a person reads the name before installing.", "Space: with an AI agent, nobody looks. It just installs.", "Space: installing can run code immediately, before anyone uses the package."],
   ["For non-developers: a CI/CD pipeline is an assembly line for code.", "Every change is built, tested and shipped, with automatic checks on the way.", "Space: the question is whether any check asks the right question."],
@@ -978,7 +1008,15 @@ const VICTIM = {
   out: "added 1 package",
   warn: "Ran by itself. No one checked the name.",
 };
-// Demo 3, right side: installs that arrive after the developer's. [who, installs added]
+// Demo 3, step 3: what the hidden install code sends the attacker. Masked, made-up values.
+const LOOT = [
+  ["CLOUD_ACCESS_KEY", "AKIA••••••••"],
+  ["GITHUB_TOKEN", "ghp_••••••••"],
+  [".env file", "DB_PASSWORD=••••••"],
+  ["SSH key", "~/.ssh/id_ed25519"],
+];
+const LOOT_MEANS = "With these, the attacker can log in as you: change your code, read your database, run up your cloud bill.";
+// Demo 3, step 4: more machines that install it and report in. [who, machines added]
 const INSTALLERS = [
   ["dev laptop", 3], ["AI agent", 5], ["CI runner", 2], ["AI agent", 8], ["dev laptop", 4],
   ["AI agent", 9], ["CI runner", 6], ["AI agent", 12], ["dev laptop", 7], ["AI agent", 15],
@@ -1212,24 +1250,33 @@ const attacker = {
     this.warn = $(el, ".at-warn");
     this.caption = $(el, ".at-caption");
     this.next = $(el, ".at-next");
+    this.url = $(el, ".at-url");
+    this.brand = $(el, ".at .reg-brand");
+    this.stages = [...el.querySelectorAll(".life li")];
     $(el, ".at .msg-user").textContent = VICTIM.ask;
     this.next.addEventListener("click", () => this.step());
   },
   reset() {
     this.T.clear();
-    this.phase = 0; this.busy = false; this.installs = 0;
+    this.phase = 0; this.busy = false; this.installs = 0; this.machines = 0;
+    this.url.textContent = "https://registry.example";
+    this.brand.style.display = "";
     this.view.innerHTML = '<div class="search-box"><span class="ph-text">Search packages</span></div>';
     this.intro.textContent = ""; this.code.textContent = ""; this.warn.textContent = "";
     this.caption.classList.remove("in");
-    this.focus("attack"); this.label();
+    this.focus("attack"); this.life(1); this.label();
   },
   step() {
     if (this.busy) return true;
-    if (this.phase >= 3) return false;
+    if (this.phase >= 4) return false;
     this.phase++;
     this.busy = true; this.label();
-    [null, this.claim, this.victim, this.flood][this.phase].call(this).then(() => { this.busy = false; this.label(); });
+    [null, this.claim, this.victim, this.payoff, this.flood][this.phase].call(this).then(() => { this.busy = false; this.label(); });
     return true;
+  },
+  // Light the lifecycle bar: stages before n are done, stage n is happening now.
+  life(n) {
+    this.stages.forEach((li, i) => { li.classList.toggle("done", i + 1 < n); li.classList.toggle("now", i + 1 === n); });
   },
   // Highlight the side that is acting and dim the other. "both": highlight the attacker, dim neither.
   focus(side) {
@@ -1237,13 +1284,14 @@ const attacker = {
     this.dev.classList.toggle("live", side === "dev"); this.dev.classList.toggle("idle", side === "attack");
   },
   label() {
-    this.next.textContent = ["Claim the name ▸", "Developer asks AI ▸", "Watch installs ▸", "Done"][this.phase];
-    this.next.disabled = this.busy || this.phase >= 3;
+    this.next.textContent = ["Claim the name ▸", "Developer asks AI ▸", "What does the attacker get? ▸", "Watch it spread ▸", "Done"][this.phase];
+    this.next.disabled = this.busy || this.phase >= 4;
   },
   async type(node, text) {
     for (let i = 1; i <= text.length; i++) { node.textContent = text.slice(0, i); await this.T.sleep(i % 2 ? 0 : 40); }
   },
   async claim() {
+    this.life(2);
     const box = $(this.view, ".search-box");
     box.textContent = "";
     for (const ch of PHANTOM) { box.textContent += ch; await this.T.sleep(80); }
@@ -1261,6 +1309,7 @@ const attacker = {
       '<div class="dl"><b class="dl-n">0</b><span>INSTALLS</span></div><ul class="inst"></ul></div>';
   },
   async victim() {
+    this.life(3);
     this.focus("dev");
     await this.T.sleep(500);
     await this.type(this.intro, VICTIM.intro);
@@ -1276,11 +1325,40 @@ const attacker = {
     this.addInstall("AI agent", "THE DEVELOPER ON THE LEFT");
     this.count(1);
   },
+  async payoff() {
+    this.life(4);
+    this.focus("dev");
+    await this.T.sleep(400);
+    this.code.insertAdjacentHTML("beforeend", '\n<span class="dim">running install script…</span>');
+    await this.T.sleep(1500);
+    this.life(5);
+    this.focus("both");
+    this.url.textContent = "https://attacker.example/inbox";
+    this.brand.style.display = "none";
+    this.view.innerHTML = '<div class="inbox fade-in"><div class="ib-h">Attacker\'s inbox<small>SIMULATED</small></div>' +
+      '<div class="ib-from">From: <b>dev laptop</b>, the developer on the left · just now</div>' +
+      '<ul class="ib-keys"></ul><p class="ib-so"></p><div class="ib-count"></div></div>';
+    const keys = $(this.view, ".ib-keys");
+    for (const [what, value] of LOOT) {
+      await this.T.sleep(500);
+      keys.insertAdjacentHTML("beforeend", "<li><span>" + esc(what) + "</span><span>" + esc(value) + "</span></li>");
+    }
+    await this.T.sleep(700);
+    const so = $(this.view, ".ib-so");
+    so.textContent = LOOT_MEANS;
+    so.classList.add("in");
+    this.machines = 1;
+  },
   async flood() {
+    const out = $(this.view, ".ib-count");
     for (let i = 0; i < INSTALLERS.length; i++) {
       const [who, add] = INSTALLERS[i];
-      this.addInstall(who, who.startsWith("AI") ? "NO HUMAN REVIEW" : "");
-      for (let k = 0; k < add; k++) { this.count(1); await this.T.sleep(Math.round(700 / add)); }
+      const latest = esc(who) + (who.startsWith("AI") ? " (no human review)" : "");
+      for (let k = 0; k < add; k++) {
+        this.machines++;
+        out.innerHTML = "<b>" + this.machines + "</b> machines sent their keys · latest: " + latest;
+        await this.T.sleep(Math.round(700 / add));
+      }
       if (i === 3) this.caption.classList.add("in");
     }
   },

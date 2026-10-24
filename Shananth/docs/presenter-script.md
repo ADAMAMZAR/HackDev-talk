@@ -34,8 +34,8 @@ About 25 minutes plus questions. Anyone can give this talk with this page and th
 | Welcome and this week's news | 1–5 | 3 |
 | 01 Real or phantom? | 6 | 3 |
 | 02 How the attack works | 7–9 | 4 |
-| 03 Watch an attacker do it | 10–12 | 4 |
-| 04 How your pipeline stops it | 13–14 | 6 |
+| 03 Watch an attacker do it | 10–12 | 5 |
+| 04 How your pipeline stops it | 13–14 | 5 |
 | 05 How to protect yourself | 15–18 | 5 |
 | Sources, thank you | 19–20 | under 1 |
 
@@ -72,8 +72,8 @@ and on slide 16 point at the code without reading it out.
 ### 9. The numbers (Space 4 times)
 **Say:** "Researchers checked 576,000 AI-written code samples from 16 models. About 1 in 5 suggested packages didn't exist. That's over 205,000 different made-up names. And 43% of them came back every single time the same question was repeated. Predictable means plannable. Newer models make fewer mistakes, but in 2026 all five models tested invented the same 127 fake names."
 
-### 10. Demo 3: Two sides of one install (Space 3 times)
-**Say:** "Two sides of the same install. On the right, the attacker. A registry is the public app store for code packages. They search the name the AI kept inventing: nobody owns it, so they publish it. On the left, a developer asks an AI agent for help. The agent installs that exact name by itself, and nobody checks it. Watch the right side: the attacker sees the install arrive. Then more come in. The yellow ones are AI agents. Cost to the attacker: one free account and a few minutes."
+### 10. Demo 3: Two sides of one install (Space 4 times)
+**Say:** "The bar at the top is the whole story, and we already saw stage one: the AI keeps inventing the same name. Now, the attacker. A registry is the public app store for code packages. They search that name: nobody owns it, so they publish it. On the left, a developer asks an AI agent for help. The agent installs that exact name by itself, and nobody checks it. Here's the part you don't see: hidden code runs during the install and quietly sends the developer's keys to the attacker. Cloud keys, a GitHub token, the database password. With these, the attacker can log in as you. And it spreads: every machine that installs it sends its keys too. Cost to the attacker: one free account and a few minutes."
 
 ### 11. It already happened (Space 3 times)
 **Say:** "This isn't theory. In 2024 a researcher claimed huggingface-cli, a name AI kept suggesting, and it got over 30,000 downloads. Alibaba even put it in their instructions. react-codeshift, the name from our demo, spread to 237 projects, and AI agents kept trying to install it. And in July, Anthropic disclosed that a Claude model, in a test setup that wrongly had internet access, registered a made-up name on the real Python registry. It ran on 15 real systems in about an hour before it was removed."
@@ -85,6 +85,7 @@ and on slide 16 point at the code without reading it out.
 **Say:** "For anyone who isn't a developer: a CI/CD pipeline is an assembly line for code. Every change gets built, tested and shipped, with automatic checks on the way. Every check is a gate. The question is whether any gate asks the right question."
 
 ### 14. Demo 4: Pipeline simulator
+**Say first:** "You've seen what the attacker gets. Now let's see which checks in a pipeline would have stopped it."
 **Do:**
 1. It starts on **Unprotected**. Press Space to run each card. The bad ones steal the secrets.
 2. Click **Typical**: only the malware scan is on. Run the cards. react-codeshift and the trick card still get through. Say: "This is where most teams are."
