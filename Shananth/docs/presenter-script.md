@@ -388,9 +388,9 @@ Wait about 5 seconds. Read out a few answers from the chat.
 "Every fact tonight comes from these sources. They're all in the repo too, with notes on how well each one could be checked. I'll leave this up for a moment."
 
 ### 20. Meme, then thank you (Space once)
-*On screen: Nobody: / The AI at 3am: npm install react-codeshift / The attacker, 2 days earlier: a ghost box in sunglasses saying "I've been expecting you."*
+*On screen: "Your AI is hallucinating packages? Just scream this at it." over the exorcist meme: "The power of code compels you!" Underneath: "(It won't work. The lockfile will.)"*
 
-"And I'll leave you with this. Nobody: ... The AI, at 3am: npm install react-codeshift. The attacker, two days earlier: I've been expecting you."
+"And I'll leave you with this. Your AI is hallucinating packages? Just scream this at it: THE POWER OF CODE COMPELS YOU! ... It won't work. The lockfile will."
 
 **DO**  
 Pause and let it land.
