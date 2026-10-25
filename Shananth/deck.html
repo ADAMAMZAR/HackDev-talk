@@ -491,16 +491,9 @@
   .sources code { color: var(--fg); font-size: 24px; }
 
   /* meme + thank you */
-  .meme { position: relative; height: 100%; display: grid; align-content: center; gap: 40px; }
-  .m-row { display: flex; align-items: center; gap: 30px; }
-  .m-who { font: 700 56px var(--display); }
-  .m-cmd { font: 500 44px var(--mono); background: #08090b; border: 4px solid var(--edge); border-radius: 14px; padding: 14px 26px; }
-  .m-ghost { position: absolute; right: 20px; bottom: 10px; width: 400px; animation: float 5s ease-in-out infinite; }
-  .bubble {
-    position: absolute; right: 30px; bottom: calc(100% + 24px); background: var(--fg); color: var(--ink); font: 700 42px var(--display);
-    padding: 20px 30px; border-radius: 26px; white-space: nowrap;
-  }
-  .bubble::after { content: ""; position: absolute; right: 150px; bottom: -40px; border: 20px solid transparent; border-top: 22px solid var(--fg); }
+  .meme { height: 100%; display: grid; align-content: center; justify-items: center; gap: 28px; text-align: center; }
+  .meme h2 { font-size: 64px; margin: 0; }
+  .meme img { height: 620px; border-radius: 14px; border: 4px solid var(--edge); }
   .thanks {
     position: absolute; inset: -110px -96px -90px -96px; background: rgba(11, 12, 14, .92);
     display: grid; place-content: center; text-align: center;
@@ -509,7 +502,7 @@
   .thanks .q { font: 700 76px var(--display); color: var(--accent); margin-top: 20px; }
 
   @media (prefers-reduced-motion: reduce) {
-    .station, .station .chk, .token-run, .caret, .ghost-box, .m-ghost, .gate.checking, .prod.owned { animation: none; }
+    .station, .station .chk, .token-run, .caret, .ghost-box, .gate.checking, .prod.owned { animation: none; }
     .station .chk { opacity: 1; }
     .token-run { display: none; }
     .secret { transition-duration: 250ms; }
@@ -886,26 +879,9 @@ pip install --require-hashes -r requirements.txt</pre></li>
   <!-- 18 · Meme, then thank you -->
   <section class="slide" data-label="">
     <div class="meme">
-      <div class="m-row"><span class="m-who dim">Nobody:</span></div>
-      <div class="m-row"><span class="m-who">The AI at 3am:</span><code class="m-cmd">npm install <span class="ph hit">react-codeshift</span></code></div>
-      <div class="m-row"><span class="m-who">The attacker, 2 days earlier:</span></div>
-      <div class="m-ghost">
-        <div class="bubble">I've been expecting you.</div>
-        <svg viewBox="0 0 400 460" aria-hidden="true">
-          <g fill="none" stroke="#ffbf3c" stroke-width="7" stroke-dasharray="20 14" stroke-linejoin="round">
-            <path d="M200 30 L370 120 L200 210 L30 120 Z"/>
-            <path d="M30 120 V300 L200 390 V210"/>
-            <path d="M370 120 V300 L200 390"/>
-          </g>
-          <g stroke="#ffbf3c" stroke-width="6">
-            <rect x="96" y="232" width="92" height="52" rx="16" fill="#050607"/>
-            <rect x="212" y="232" width="92" height="52" rx="16" fill="#050607"/>
-            <path d="M188 250 H212" fill="none"/>
-          </g>
-          <path d="M150 330 Q200 352 250 330" fill="none" stroke="#ffbf3c" stroke-width="7" stroke-linecap="round"/>
-          <ellipse cx="200" cy="440" rx="150" ry="14" fill="rgba(255,191,60,.12)"/>
-        </svg>
-      </div>
+      <h2>Your AI is hallucinating packages?<br><span class="accent">Just scream this at it.</span></h2>
+      <img src="assets/power-of-code.png" alt="A bearded man in red light yelling upward: The power of code compels you!">
+      <p class="dim">(It won't work. The lockfile will.)</p>
     </div>
     <div class="thanks" data-step="1"><h1>Thank you</h1><p class="q">Questions?</p></div>
   </section>
@@ -1033,7 +1009,7 @@ const NOTES = [
    "[SPACE] Two: pin your packages with fingerprints, using a lockfile with hashes. Then any name nobody approved fails automatically.",
    "[SPACE] Three: never let AI agents or automatic tools install packages where real passwords and keys live. The full checklist, with every command and setting, is at the link on screen."],
   ["Every fact tonight comes from these sources. They're all in the repo too, with notes on how well each one could be checked. I'll leave this up for a moment."],
-  ["And I'll leave you with this. Nobody: ... The AI, at 3am: npm install react-codeshift. The attacker, two days earlier: I've been expecting you.",
+  ["And I'll leave you with this. Your AI is hallucinating packages? Just scream this at it: THE POWER OF CODE COMPELS YOU! ... It won't work. The lockfile will.",
    "[DO] Pause and let it land.",
    "[SPACE] Thank you so much for listening. I'm happy to take any questions."],
 ];
