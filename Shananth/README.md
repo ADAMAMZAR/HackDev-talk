@@ -27,7 +27,7 @@ Open `deck.html` in Chrome or Edge, click the page once, then press `F` for full
 | `R` | Reset the current demo |
 | `F` | Fullscreen |
 | `Home` / `End` | First / last slide |
-| `P` | Presenter notes (short points per slide) in a separate window. Keys typed there also drive the deck. |
+| `P` | Presenter notes (the full script for each slide) in a separate window. Keys typed there also drive the deck. |
 
 Every demo button can also be clicked with the mouse.
 
