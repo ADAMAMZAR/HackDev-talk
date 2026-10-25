@@ -7,7 +7,7 @@
     <title>Vibe Coding Safely</title>
     <!--
   Vibe Coding Safely: a 15-minute talk for the HackDev Webinar, 25 Oct 2026. Speaker: Adam Amzar.
-  One HTML file. Open it in Chrome or Edge.
+  One HTML file, plus enrich-lead.png (slide 3), which must stay in the same folder. Open it in Chrome or Edge.
 
   Keys
     Right / Down / PageDown / Space   next step on this slide, then the next slide
@@ -1018,48 +1018,74 @@
             border-radius: 20px 20px 0 0;
         }
 
-        /* --- fact list (case 01) --- */
-        .facts {
-            margin-top: 30px;
-            border-top: 2px solid var(--ink);
+        /* --- Leo's two X posts (case 01), both cropped from enrich-lead.png (1208×1442) --- */
+        .posts {
+            position: relative;
+            height: 700px;
         }
 
-        .facts div {
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            gap: 20px;
-            padding: 16px 0;
-            border-bottom: 1px dashed var(--rule);
+        .post {
+            position: absolute;
+            padding: 0;
+            border: 14px solid #fff;
         }
 
-        .facts dt {
-            font: 700 18px/1.6 var(--f-type);
-            letter-spacing: .2em;
-            text-transform: uppercase;
-            color: var(--faint);
+        .post img {
+            display: block;
+            width: 100%;
+            object-fit: cover;
         }
 
-        .facts dd {
-            font: 400 30px/1.3 var(--f-type);
+        /* post 1: image rows 0–568 */
+        .post.p1 {
+            left: 0;
+            top: 0;
+            width: 860px;
         }
 
-        .xlist {
-            list-style: none;
-            margin-top: 30px;
-            display: grid;
-            gap: 22px;
+        .post.p1 img {
+            aspect-ratio: 1208 / 568;
+            object-position: top;
         }
 
-        .xlist li {
-            display: grid;
-            grid-template-columns: 54px 1fr;
-            font: 400 32px/1.35 var(--f-type);
+        /* post 2: image rows 584–1442 */
+        .post.p2 {
+            right: -30px;
+            top: 160px;
+            width: 820px;
+            z-index: 2;
         }
 
-        .xlist li::before {
-            content: "✕";
-            font: 700 38px/1.1 var(--f-type);
-            color: var(--red);
+        .post.p2 img {
+            aspect-ratio: 1208 / 858;
+            object-position: bottom;
+        }
+
+        /* black bar over the swear word in post 2, in % of the cropped image */
+        .post .bleep {
+            position: absolute;
+            left: 61%;
+            top: 43.9%;
+            width: 5.2%;
+            height: 4.4%;
+            background: var(--ink);
+        }
+
+        .posts .subject {
+            position: absolute;
+            left: 920px;
+            top: 0;
+        }
+
+        .posts .subject h3 {
+            margin-bottom: 10px;
+        }
+
+        .posts .pen {
+            position: absolute;
+            left: 30px;
+            top: 470px;
+            margin: 0;
         }
 
         /* --- the one question --- */
@@ -2203,50 +2229,30 @@
             <section class="slide" data-case="01" data-title="EnrichLead, March 2025" data-clock="0:00–2:00">
                 <article class="sheet" style="--tilt:-.3deg">
                     <div class="form-head"><span>Incident report · Case 01</span><span>Filed March 2025</span></div>
-                    <div class="cols-2">
-                        <div>
-                            <p class="label">Subject</p>
-                            <h2>EnrichLead</h2>
-                            <dl class="facts">
-                                <div>
-                                    <dt>What</dt>
-                                    <dd>A sales-lead SaaS</dd>
-                                </div>
-                                <div>
-                                    <dt>Founder</dt>
-                                    <dd>Leo Acevedo</dd>
-                                </div>
-                                <div>
-                                    <dt>Built with</dt>
-                                    <dd>Cursor</dd>
-                                </div>
-                                <div>
-                                    <dt>Hand-written code</dt>
-                                    <dd>Zero, he posted, proudly</dd>
-                                </div>
-                                <div>
-                                    <dt>Customers</dt>
-                                    <dd>People paid for it</dd>
-                                </div>
-                            </dl>
+                    <div class="posts">
+                        <div class="subject">
+                            <p class="label">Leo Acevedo's app</p>
+                            <h3>EnrichLead</h3>
+                            <p class="typed">A sales-lead SaaS</p>
                         </div>
-                        <div data-step="1">
-                            <p class="label red">Days later</p>
-                            <h2>Under attack.</h2>
-                            <ul class="xlist">
-                                <li>Paywall bypassed. People used the app for free.</li>
-                                <li>API keys maxed out, on his bill.</li>
-                                <li>Junk written into his database.</li>
-                            </ul>
-                        </div>
+                        <figure class="shot post p1" style="--r:-1.4deg">
+                            <img src="enrich-lead.png"
+                                alt="Post by leo (@leojr94_) on X, 15 Mar 2025: my saas was built with Cursor, zero hand written code. AI is no longer just an assistant, it's also the builder. P.S. Yes, people pay for it.">
+                        </figure>
+                        <figure class="shot post p2" data-step="1" style="--r:1.2deg">
+                            <img src="enrich-lead.png"
+                                alt="Post by leo (@leojr94_) on X, 17 Mar 2025: guys, i'm under attack. Maxed out usage on api keys, people bypassing the subscription, creating random [redacted] on db. I'm not technical. For now, I will stop sharing what I do publicly on X.">
+                            <i class="bleep"></i>
+                        </figure>
+                        <p class="pen" data-step="1">two days later →</p>
                     </div>
-                    <div class="stamp" data-step="2" style="right:150px; bottom:90px; --rot:-11deg">SHUT DOWN</div>
+                    <div class="stamp" data-step="2" style="left:170px; bottom:70px; --rot:-11deg">SHUT DOWN</div>
                 </article>
                 <aside class="notes">
                     <p>"In March 2025 a founder named Leo Acevedo did exactly that. He built a sales-lead SaaS called
                         EnrichLead using Cursor, and posted proudly that it had zero hand-written code. People paid for
                         it."</p>
-                    <p>[Space] "Days later he posted again: he was under attack. People bypassed his subscriptions and
+                    <p>[Space] "Two days later he posted again: he was under attack. People bypassed his subscriptions and
                         used the app for free. His API keys were maxed out on his bill. Junk was being written into his
                         database."</p>
                     <p>[Space] "He shut the whole thing down."</p>
@@ -3213,7 +3219,8 @@ Rank them by severity and show the fix for each.</pre>
                         <tbody>
                             <tr>
                                 <td>01</td>
-                                <td>EnrichLead built with Cursor, keys exposed, shut down March 2025</td>
+                                <td>EnrichLead built with Cursor, keys exposed, shut down March 2025. Slide 3: Leo's own
+                                    posts on X (@leojr94_), 15 and 17 Mar 2025</td>
                                 <td><a href="https://vibegraveyard.ai/story/enrichlead-vibe-coded-saas-shutdown/"
                                         target="_blank" rel="noopener">Vibe Graveyard</a>, <a
                                         href="https://www.indiehackers.com/post/vibe-coding-has-a-security-problem-vLxyPTrTlZVwDo76oqvr"
