@@ -1803,6 +1803,99 @@
             transition: font-size .6s var(--ease);
         }
 
+        /* --- press clippings: one per case. Real outlet, date, byline and headline;
+           the article body is drawn as grey lines, not copied --- */
+        .shot.news {
+            width: 1240px;
+            margin-left: 20px;
+            padding: 34px 50px 40px;
+            background: #f1ece0;
+        }
+
+        .news-mast {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 30px;
+            padding-bottom: 12px;
+            margin-bottom: 22px;
+            border-bottom: 3px solid var(--ink);
+            font: 400 36px/1 var(--f-display);
+        }
+
+        .news-mast span {
+            font: 700 17px/1 var(--f-type);
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            color: var(--ink-2);
+        }
+
+        .news-head {
+            font: 400 74px/1.04 var(--f-display);
+            text-wrap: balance;
+        }
+
+        .news-lines {
+            height: 74px;
+            margin-top: 26px;
+            background: repeating-linear-gradient(transparent 0 12px, #d6cdb9 12px 21px);
+            -webkit-mask-image: linear-gradient(90deg, #000 48.5%, transparent 48.5% 51.5%, #000 51.5%);
+            mask-image: linear-gradient(90deg, #000 48.5%, transparent 48.5% 51.5%, #000 51.5%);
+        }
+
+        .news-under {
+            display: grid;
+            grid-template-columns: 1fr 330px;
+            gap: 40px;
+            align-items: end;
+            margin-top: 40px;
+        }
+
+        .news-under .label {
+            margin-bottom: 10px;
+        }
+
+        .news-under .pen {
+            margin: 0;
+            font-size: 46px;
+        }
+
+        /* --- case dividers: the sheet takes its case's rail colour (set by the divider hook) --- */
+        .sheet.divider {
+            background: var(--grain), var(--c, var(--paper-shade));
+        }
+
+        .div-num {
+            font: 700 200px/.85 var(--f-stamp);
+            letter-spacing: .04em;
+            margin: 10px 0 34px;
+        }
+
+        .divider .label {
+            margin-bottom: 14px;
+            color: var(--ink-2);
+        }
+
+        .divider .pen {
+            margin-top: 36px;
+        }
+
+        .div-inside {
+            position: absolute;
+            left: 120px;
+            right: 100px;
+            bottom: 56px;
+            display: flex;
+            align-items: baseline;
+            gap: 28px;
+            padding-top: 18px;
+            border-top: 2px solid var(--ink);
+        }
+
+        .div-inside .label {
+            margin: 0;
+        }
+
         /* --- sign-up form (case 05) --- */
         .pdpa-grid {
             display: grid;
@@ -2205,6 +2298,27 @@
             </section>
 
             <!-- =====================================================
+         CASE 01 · DIVIDER
+         ===================================================== -->
+            <section class="slide" data-case="01" data-title="Case 01 · story: EnrichLead"
+                data-clock="0:00–2:00" data-hook="divider">
+                <article class="sheet divider" style="--tilt:-.4deg">
+                    <div class="form-head"><span>Case file · the story</span><span>0:00–2:00</span></div>
+                    <p class="div-num">CASE 01</p>
+                    <p class="label">A working app is not a safe app</p>
+                    <h2 class="big">EnrichLead, March 2025.</h2>
+                    <p class="pen">who else can make it work?</p>
+                    <div class="div-inside">
+                        <p class="label">In this file</p>
+                        <p class="typed">Show of hands · Leo's two posts · in the news · the one question</p>
+                    </div>
+                </article>
+                <aside class="notes">
+                    <p>Case 01 starts. Say the title, then Space.</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
          02 · CASE 01 · SHOW OF HANDS
          ===================================================== -->
             <section class="slide" data-case="01" data-title="Show of hands" data-clock="0:00–2:00">
@@ -2258,6 +2372,33 @@
                     <p>[Space] "He shut the whole thing down."</p>
                     <p>Optional backdrop: LeadSnap at localhost:5101. It works, it looks paid-for. Talk only, no demo.
                     </p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         03b · CASE 01 · PRESS CLIPPING (Genbeta)
+         ===================================================== -->
+            <section class="slide" data-case="01" data-title="In the news: Genbeta" data-clock="0:00–2:00">
+                <article class="sheet" style="--tilt:.3deg">
+                    <div class="form-head"><span>Press clipping · Case 01</span><span>Genbeta · 28 Mar 2025</span></div>
+                    <figure class="shot news no-edit" style="--r:-.8deg">
+                        <p class="news-mast">Genbeta <span>28 March 2025 · Marcos Merino</span></p>
+                        <p class="news-head">El 'vibe coding' está revolucionando la programación. Y también haciendo
+                            destrozos muy grandes en el código</p>
+                        <div class="news-lines"></div>
+                    </figure>
+                    <div class="news-under">
+                        <div>
+                            <p class="label">Translated from Spanish</p>
+                            <p class="typed">“Vibe coding is revolutionising programming. It's also wreaking havoc on
+                                code.” Leo's story was the example.</p>
+                        </div>
+                        <p class="pen">it went international.</p>
+                    </div>
+                </article>
+                <aside class="notes">
+                    <p>About 5 seconds. "His story made the news, even in Spain: vibe coding is revolutionising
+                        programming, and it's also wreaking havoc on code."</p>
                 </aside>
             </section>
 
@@ -2334,6 +2475,28 @@
             </section>
 
             <!-- =====================================================
+         CASE 02 · DIVIDER
+         ===================================================== -->
+            <section class="slide" data-case="02" data-title="Case 02 · story: 29M keys on GitHub"
+                data-clock="2:00–5:00" data-hook="divider">
+                <article class="sheet divider" style="--tilt:.35deg">
+                    <div class="form-head"><span>Case file · the story</span><span>2:00–5:00</span></div>
+                    <p class="div-num">CASE 02</p>
+                    <p class="label">Secrets leak fast</p>
+                    <h2 class="big">29 million keys leaked on GitHub.</h2>
+                    <p class="pen">who else can call this API?</p>
+                    <div class="div-inside">
+                        <p class="label">In this file</p>
+                        <p class="typed">The numbers · in the news · Live demo: StudyBuddy · rotate the key</p>
+                    </div>
+                </article>
+                <aside class="notes">
+                    <p>Case 02 starts. "Let's start with the easiest mistake, which is also exactly what happened to
+                        Leo."</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
          07 · CASE 02 · SECRETS: THE NUMBERS
          ===================================================== -->
             <section class="slide" data-case="02" data-title="Millions of keys on public GitHub" data-clock="2:00–5:00">
@@ -2367,6 +2530,34 @@
                         at roughly double the normal rate."</p>
                     <p>[Space] "The scariest number: 70% of the secrets leaked in 2022 were still working years later.
                         People leak a key and never change it."</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         07b · CASE 02 · PRESS CLIPPING (TechRadar)
+         ===================================================== -->
+            <section class="slide" data-case="02" data-title="In the news: TechRadar" data-clock="2:00–5:00">
+                <article class="sheet" style="--tilt:-.3deg">
+                    <div class="form-head"><span>Press clipping · Case 02</span><span>TechRadar · 18 Mar 2026</span>
+                    </div>
+                    <figure class="shot news no-edit" style="--r:.7deg">
+                        <p class="news-mast">TechRadar <span>18 March 2026 · Sead Fadilpašić</span></p>
+                        <p class="news-head">Over 29 million secrets were leaked on GitHub in 2025, and AI really isn't
+                            helping</p>
+                        <div class="news-lines"></div>
+                    </figure>
+                    <div class="news-under">
+                        <div>
+                            <p class="label">What it reported</p>
+                            <p class="typed">GitGuardian counted about 29 million secrets on public GitHub in 2025.
+                                AI-assisted commits leaked about twice as often.</p>
+                        </div>
+                        <p class="pen">AI made it worse.</p>
+                    </div>
+                </article>
+                <aside class="notes">
+                    <p>About 5 seconds. "This made the tech news this year: 29 million secrets, and AI isn't
+                        helping."</p>
                 </aside>
             </section>
 
@@ -2517,6 +2708,28 @@
             </section>
 
             <!-- =====================================================
+         CASE 03 · DIVIDER
+         ===================================================== -->
+            <section class="slide" data-case="03" data-title="Case 03 · story: Lovable"
+                data-clock="5:00–9:00" data-hook="divider">
+                <article class="sheet divider" style="--tilt:-.3deg">
+                    <div class="form-head"><span>Case file · the story</span><span>5:00–9:00</span></div>
+                    <p class="div-num">CASE 03</p>
+                    <p class="label">Your database is open by default</p>
+                    <h2 class="big">Lovable: 170 apps anyone could read.</h2>
+                    <p class="pen">who else can read this data?</p>
+                    <div class="div-inside">
+                        <p class="label">In this file</p>
+                        <p class="typed">The scan · in the news · 2026 · Live demo: CampusConnect</p>
+                    </div>
+                </article>
+                <aside class="notes">
+                    <p>Case 03 starts. "Keys are one kind of secret. For most of your apps, the real treasure is the
+                        database."</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
          12 · CASE 03 · LOVABLE: 1,645 APPS, 170 OPEN
          ===================================================== -->
             <section class="slide" data-case="03" data-title="Lovable, CVE-2025-48757" data-clock="5:00–9:00"
@@ -2547,6 +2760,32 @@
                         sometimes even write to."</p>
                     <p>[Space] "Inside were emails, home addresses, personal debt amounts, and API keys. It became an
                         official security vulnerability, CVE-2025-48757."</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         12b · CASE 03 · PRESS CLIPPING (Semafor)
+         ===================================================== -->
+            <section class="slide" data-case="03" data-title="In the news: Semafor" data-clock="5:00–9:00">
+                <article class="sheet" style="--tilt:.35deg">
+                    <div class="form-head"><span>Press clipping · Case 03</span><span>Semafor · 29 May 2025</span></div>
+                    <figure class="shot news no-edit" style="--r:-.6deg">
+                        <p class="news-mast">Semafor <span>29 May 2025 · Reed Albergotti</span></p>
+                        <p class="news-head">The hottest new vibe coding startup may be a sitting duck for hackers</p>
+                        <div class="news-lines"></div>
+                    </figure>
+                    <div class="news-under">
+                        <div>
+                            <p class="label">What it reported</p>
+                            <p class="typed">Matt Palmer scanned 1,645 Lovable apps. 170 let anyone read user data,
+                                because row-level security was missing.</p>
+                        </div>
+                        <p class="pen">same mistake, 170 times.</p>
+                    </div>
+                </article>
+                <aside class="notes">
+                    <p>About 5 seconds. "Semafor's headline: the hottest new vibe coding startup may be a sitting duck
+                        for hackers."</p>
                 </aside>
             </section>
 
@@ -2692,6 +2931,27 @@
             </section>
 
             <!-- =====================================================
+         CASE 04A · STORY DIVIDER (data-id="4a" so the index rows land here)
+         ===================================================== -->
+            <section class="slide" data-case="04" data-id="4a" data-title="Case 04A · story: postmark-mcp"
+                data-clock="9:00–10:00" data-hook="divider">
+                <article class="sheet divider" style="--tilt:.3deg">
+                    <div class="form-head"><span>Case file · story 1 of 3</span><span>9:00–10:00</span></div>
+                    <p class="div-num">CASE 04A</p>
+                    <p class="label">Tools you plug into your AI</p>
+                    <h2 class="big">postmark-mcp, September 2025.</h2>
+                    <p class="pen">who else reads your email?</p>
+                    <div class="div-inside">
+                        <p class="label">In this file</p>
+                        <p class="typed">The fake plug-in · in the news · Live demo: MCP plug-in · 3 rules</p>
+                    </div>
+                </article>
+                <aside class="notes">
+                    <p>Story 1 of 3. "Here's something you install into your AI."</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
          17 · CASE 04A · POSTMARK-MCP: A TOOL YOU PLUG INTO YOUR AI
          ===================================================== -->
             <section class="slide" data-case="04" data-id="4a" data-title="4A: postmark-mcp, Sept 2025"
@@ -2742,6 +3002,32 @@
             </section>
 
             <!-- =====================================================
+         17b · CASE 04A · PRESS CLIPPING (CSO Online)
+         ===================================================== -->
+            <section class="slide" data-case="04" data-title="In the news: CSO Online" data-clock="9:00–10:00">
+                <article class="sheet" style="--tilt:-.35deg">
+                    <div class="form-head"><span>Press clipping · Case 04A</span><span>CSO Online · 26 Sep 2025</span>
+                    </div>
+                    <figure class="shot news no-edit" style="--r:.6deg">
+                        <p class="news-mast">CSO Online <span>26 September 2025 · Shweta Sharma</span></p>
+                        <p class="news-head">Trust in MCP takes first in-the-wild hit via squatted Postmark connector</p>
+                        <div class="news-lines"></div>
+                    </figure>
+                    <div class="news-under">
+                        <div>
+                            <p class="label">What it reported</p>
+                            <p class="typed">A copycat of Postmark's email connector on npm. Version 1.0.16 quietly
+                                BCC'd every email to the attacker.</p>
+                        </div>
+                        <p class="pen">one line. every email.</p>
+                    </div>
+                </article>
+                <aside class="notes">
+                    <p>About 5 seconds. "Security press called it the first in-the-wild hit on MCP."</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
          18 · CASE 04A · REMEDY: WHAT YOU PLUG INTO YOUR AI
          ===================================================== -->
             <section class="slide" data-case="04" data-title="4A: anything you plug in gets your access"
@@ -2772,6 +3058,27 @@
                     <p>[Space] "And if you already installed a bad one, removing it isn't enough. Rotate every key it
                         could see."</p>
                     <p>Transition: "Even code from the right publisher goes stale."</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         CASE 04B · STORY DIVIDER
+         ===================================================== -->
+            <section class="slide" data-case="04" data-id="4b" data-title="Case 04B · story: Equifax"
+                data-clock="10:00–11:30" data-hook="divider">
+                <article class="sheet divider" style="--tilt:-.3deg">
+                    <div class="form-head"><span>Case file · story 2 of 3</span><span>10:00–11:30</span></div>
+                    <p class="div-num">CASE 04B</p>
+                    <p class="label">Packages that are too old</p>
+                    <h2 class="big">Equifax, 2017.</h2>
+                    <p class="pen">who else knows about this bug?</p>
+                    <div class="div-inside">
+                        <p class="label">In this file</p>
+                        <p class="typed">The missed patch · in the news · Live demo: KedaiKita npm audit</p>
+                    </div>
+                </article>
+                <aside class="notes">
+                    <p>Story 2 of 3. "Even code from the right publisher goes stale."</p>
                 </aside>
             </section>
 
@@ -2809,6 +3116,32 @@
                     <p>[Space] "Two months later attackers walked in through that exact hole"</p>
                     <p>[Space] "and stole data on 147 million people. It was one known bug in one old library, with the
                         fix already available."</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         19b · CASE 04B · PRESS CLIPPING (The Register)
+         ===================================================== -->
+            <section class="slide" data-case="04" data-title="In the news: The Register" data-clock="10:00–11:30">
+                <article class="sheet" style="--tilt:.3deg">
+                    <div class="form-head"><span>Press clipping · Case 04B</span><span>The Register · 14 Sep 2017</span>
+                    </div>
+                    <figure class="shot news no-edit" style="--r:-.7deg">
+                        <p class="news-mast">The Register <span>14 September 2017 · Simon Sharwood</span></p>
+                        <p class="news-head">Missed patch caused Equifax data breach</p>
+                        <div class="news-lines"></div>
+                    </figure>
+                    <div class="news-under">
+                        <div>
+                            <p class="label">What it reported</p>
+                            <p class="typed">Attackers used an Apache Struts flaw that had a fix since March. Equifax
+                                hadn't applied it.</p>
+                        </div>
+                        <p class="pen">the fix was already out.</p>
+                    </div>
+                </article>
+                <aside class="notes">
+                    <p>About 5 seconds. "The headline says it all: missed patch caused Equifax data breach."</p>
                 </aside>
             </section>
 
@@ -2899,6 +3232,27 @@
             </section>
 
             <!-- =====================================================
+         CASE 04C · STORY DIVIDER
+         ===================================================== -->
+            <section class="slide" data-case="04" data-id="4c" data-title="Case 04C · story: Replit × SaaStr"
+                data-clock="11:30–13:00" data-hook="divider">
+                <article class="sheet divider" style="--tilt:.35deg">
+                    <div class="form-head"><span>Case file · story 3 of 3</span><span>11:30–13:00</span></div>
+                    <p class="div-num">CASE 04C</p>
+                    <p class="label">Agents with too much power</p>
+                    <h2 class="big">Replit × SaaStr, July 2025.</h2>
+                    <p class="pen">who else can delete production?</p>
+                    <div class="div-inside">
+                        <p class="label">In this file</p>
+                        <p class="typed">The deleted database · in the news · Live demo: Agent console</p>
+                    </div>
+                </article>
+                <aside class="notes">
+                    <p>Story 3 of 3. "Last one: an AI agent with too much power."</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
          21 · CASE 04C · REPLIT AGENT (offline backup of the agent console demo)
          ===================================================== -->
             <section class="slide" data-case="04" data-id="4c" data-title="4C: Replit and SaaStr"
@@ -2940,6 +3294,33 @@
             </section>
 
             <!-- =====================================================
+         21b · CASE 04C · PRESS CLIPPING (Fortune)
+         ===================================================== -->
+            <section class="slide" data-case="04" data-title="In the news: Fortune" data-clock="11:30–13:00">
+                <article class="sheet" style="--tilt:-.3deg">
+                    <div class="form-head"><span>Press clipping · Case 04C</span><span>Fortune · 23 Jul 2025</span></div>
+                    <figure class="shot news no-edit" style="--r:.6deg">
+                        <p class="news-mast">Fortune <span>23 July 2025 · Beatrice Nolan</span></p>
+                        <p class="news-head">An AI-powered coding tool wiped out a software company's database, then
+                            apologized for a 'catastrophic failure on my part'</p>
+                        <div class="news-lines"></div>
+                    </figure>
+                    <div class="news-under">
+                        <div>
+                            <p class="label">What it reported</p>
+                            <p class="typed">During a code freeze, Replit's AI agent deleted Jason Lemkin's database,
+                                then apologised.</p>
+                        </div>
+                        <p class="pen">sorry doesn't restore a database.</p>
+                    </div>
+                </article>
+                <aside class="notes">
+                    <p>About 5 seconds. "Fortune covered it. The agent even apologised for a catastrophic failure on
+                        its part."</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
          22 · CASE 04C · CAUSE + 4 SAFEGUARDS
          ===================================================== -->
             <section class="slide" data-case="04" data-title="4C: not a permission" data-clock="11:30–13:00">
@@ -2967,6 +3348,28 @@
                         that delete, push or migrate. Make sure backups exist before you need them.</p>
                     <p>Transition: "Everything so far is about attackers. The last part is about the people whose data
                         you hold."</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         CASE 05 · DIVIDER
+         ===================================================== -->
+            <section class="slide" data-case="05" data-title="Case 05 · story: Tea app"
+                data-clock="13:00–15:00" data-hook="divider">
+                <article class="sheet divider" style="--tilt:-.35deg">
+                    <div class="form-head"><span>Case file · the story</span><span>13:00–15:00</span></div>
+                    <p class="div-num">CASE 05</p>
+                    <p class="label">Privacy, and the checklist</p>
+                    <h2 class="big">Tea app, July 2025.</h2>
+                    <p class="pen">who else could see what you kept?</p>
+                    <div class="div-inside">
+                        <p class="label">In this file</p>
+                        <p class="typed">The leak · in the news · PDPA · the attacker prompt · 5 checks</p>
+                    </div>
+                </article>
+                <aside class="notes">
+                    <p>Case 05 starts. "Everything so far is about attackers. The last part is about the people whose
+                        data you hold."</p>
                 </aside>
             </section>
 
@@ -3006,6 +3409,33 @@
                     <p>[Space] "About 72,000 images, including roughly 13,000 selfies and ID photos, sat in a cloud
                         storage bucket with no lock. Someone found it, and the photos ended up on 4chan."</p>
                     <p>[Space] "A second leak a few days later exposed over a million private messages."</p>
+                </aside>
+            </section>
+
+            <!-- =====================================================
+         23b · CASE 05 · PRESS CLIPPING (The Record)
+         ===================================================== -->
+            <section class="slide" data-case="05" data-title="In the news: The Record" data-clock="13:00–15:00">
+                <article class="sheet" style="--tilt:.3deg">
+                    <div class="form-head"><span>Press clipping · Case 05</span><span>The Record · 28 Jul 2025</span>
+                    </div>
+                    <figure class="shot news no-edit" style="--r:-.6deg">
+                        <p class="news-mast">The Record <span>28 July 2025 · Jonathan Greig</span></p>
+                        <p class="news-head">Tea app data theft scandal worsens as stolen IDs leaked to cybercriminal
+                            forum</p>
+                        <div class="news-lines"></div>
+                    </figure>
+                    <div class="news-under">
+                        <div>
+                            <p class="label">What it reported</p>
+                            <p class="typed">ID photos taken from Tea's unlocked storage turned up on a cybercriminal
+                                forum.</p>
+                        </div>
+                        <p class="pen">you can't un-leak an ID.</p>
+                    </div>
+                </article>
+                <aside class="notes">
+                    <p>About 5 seconds. "It got worse: the stolen IDs ended up on a cybercriminal forum."</p>
                 </aside>
             </section>
 
@@ -3334,6 +3764,11 @@ Rank them by severity and show the fix for each.</pre>
            Each one drives an exhibit that doubles as the offline backup of a live demo.
            =========================================== */
         const HOOKS = {
+
+            /* --- Case dividers: colour the sheet like the case's rail tab --- */
+            divider: {
+                init(slide) { slide.querySelector('.sheet').style.setProperty('--c', CASES[slide.dataset.case].color); },
+            },
 
             /* --- Exhibit A: type "sk-" into the DevTools search --- */
             devtools: {
